@@ -1,0 +1,216 @@
+/* Erivelto Santos · Corretor de Imóveis
+   Base = celular; o PC entra por cima com @media (min-width).
+   Cores da placa do escritório: azul-marinho e dourado. */
+@font-face{font-family:'Instrument Serif';src:url(../fonts/instrument-italic-latin-ext.woff2) format('woff2');font-style:italic;font-weight:400;font-display:swap;unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Instrument Serif';src:url(../fonts/instrument-italic-latin.woff2) format('woff2');font-style:italic;font-weight:400;font-display:swap;unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Instrument Serif';src:url(../fonts/instrument-normal-latin-ext.woff2) format('woff2');font-style:normal;font-weight:400;font-display:swap;unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Instrument Serif';src:url(../fonts/instrument-normal-latin.woff2) format('woff2');font-style:normal;font-weight:400;font-display:swap;unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:Geist;src:url(../fonts/geist.woff2) format('woff2');font-weight:300 700;font-display:swap}
+@font-face{font-family:'Geist Mono';src:url(../fonts/geist-mono.woff2) format('woff2');font-weight:400 500;font-display:swap}
+
+:root{
+  --noite:#0B1B38; --carvao:#112649; --linha:rgba(243,239,230,.15);
+  --tinta:#F3EFE6; --papel:#0B1B38; --grafite:#A9B4C8;
+  --luz:#D4AF5F; --destaque:#D4AF5F; --destaque-texto:#1A1405;
+  --raio:16px; --ease:cubic-bezier(.22,1,.36,1); --ease-out:cubic-bezier(.22,1,.36,1);
+  --pad:20px; --serif:'Instrument Serif',Georgia,'Times New Roman',serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+html{overscroll-behavior-y:none;overflow-anchor:none}
+body{background:var(--noite);color:var(--tinta);font-family:Geist,system-ui,sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:clip}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+.ic{width:1.15em;height:1.15em;fill:currentColor;flex:none}
+.pular{position:absolute;left:12px;top:-60px;z-index:100;background:var(--luz);color:var(--destaque-texto);padding:10px 14px;border-radius:10px}
+.pular:focus{top:12px}
+::selection{background:var(--luz);color:var(--destaque-texto)}
+
+/* ---- botões ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.55em;min-height:48px;padding:0 22px;border-radius:999px;border:1px solid transparent;font-weight:500;font-size:16px;text-decoration:none;white-space:nowrap;transition:transform .25s var(--ease),background-color .25s,border-color .25s}
+.btn:active{transform:scale(.97)}
+.btn--luz{background:var(--luz);color:var(--destaque-texto)}
+.btn--luz:hover{background:#E2C37E}
+.btn--vidro{background:rgba(11,27,56,.55);border-color:rgba(243,239,230,.4);color:var(--tinta)}
+.btn--vidro:hover{border-color:var(--tinta)}
+:focus-visible{outline:2px solid var(--luz);outline-offset:3px}
+
+/* ---- topo ---- */
+.topo{position:fixed;inset:0 0 auto;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px;padding:0 var(--pad);transition:background-color .35s}
+.topo.is-solido{background:rgba(11,27,56,.88);-webkit-backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 1px 0 var(--linha)}
+.marca{display:inline-flex;align-items:center;gap:12px;text-decoration:none}
+.marca__es{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;border:1.5px solid var(--luz);color:var(--luz);font-family:Georgia,'Times New Roman',serif;font-size:16px;font-weight:700;letter-spacing:-.02em}
+.marca__nome{font-family:Georgia,'Times New Roman',serif;font-size:17px;letter-spacing:.04em;text-transform:uppercase;color:var(--tinta)}
+.topo .marca__nome{display:none}
+.menu{display:none}
+.topo__cta{min-height:40px;padding:0 16px;font-size:14px}
+
+/* ---- hero com vídeo ---- */
+.hero{position:relative;background:#06101F}
+.hero__palco{position:relative;height:100svh;min-height:560px;overflow:hidden;isolation:isolate}
+.hero__poster,.hero__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero__video{opacity:0;transition:opacity 1s}
+.hero.is-tocando .hero__video{opacity:1}
+.hero__veu{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(6,16,31,.6) 0,rgba(6,16,31,.05) 26%,rgba(6,16,31,.1) 44%,rgba(6,16,31,.88) 100%)}
+.hero__texto{position:absolute;left:var(--pad);right:var(--pad);bottom:calc(40px + env(safe-area-inset-bottom));z-index:3}
+.hero__selo{font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--luz);margin-bottom:12px}
+.hero__titulo{font-size:clamp(52px,16vw,88px);line-height:.95;font-weight:600;letter-spacing:-.045em}
+.hero__titulo span{display:block}
+.hero__sub{margin-top:16px;max-width:30ch;font-size:18px;opacity:.9}
+.hero__acoes{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.hero__pausa{position:absolute;z-index:4;right:var(--pad);top:80px;width:44px;height:44px;border-radius:50%;border:1px solid rgba(243,239,230,.35);background:rgba(11,27,56,.55);display:grid;place-items:center}
+.hero__pausa:hover{border-color:var(--tinta)}
+.hero__pausa[hidden]{display:none}
+
+/* ---- imóveis ---- */
+section{scroll-margin-top:64px}
+.imoveis,.sobre,.caminho,.contato{padding:96px var(--pad)}
+.imoveis h2,.sobre h2,.caminho h2,.contato h2{font-size:clamp(34px,9vw,64px);line-height:1.02;font-weight:600;letter-spacing:-.04em;max-width:16ch}
+.imoveis__topo p{margin-top:20px;max-width:46ch;color:var(--grafite);font-size:18px}
+.cards{list-style:none;padding:0;margin-top:48px;display:grid;gap:14px}
+.card{position:relative;overflow:hidden;border-radius:var(--raio);background:var(--carvao);aspect-ratio:4/3}
+.card--b{aspect-ratio:4/5}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
+.card:hover img{transform:scale(1.04)}
+.card__info{position:absolute;left:0;right:0;bottom:0;padding:72px 18px 18px;background:linear-gradient(transparent,rgba(6,16,31,.92))}
+.card__tag{font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--luz)}
+.card h3{margin-top:4px;font-size:20px;font-weight:600;letter-spacing:-.02em;line-height:1.2}
+.card__bt{margin-top:10px;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0;border:0;background:none;color:var(--tinta);font-size:15px;font-weight:500;border-bottom:1px solid transparent}
+.card__bt:hover{color:var(--luz)}
+
+/* ---- sobre ---- */
+.sobre{background:var(--carvao);display:grid;gap:36px}
+.sobre__foto{width:min(260px,70%)}
+.sobre__foto img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:50%;border:2px solid var(--luz);padding:6px;background:var(--noite)}
+.sobre__texto p{margin-top:18px;max-width:46ch;color:var(--grafite);font-size:18px}
+.sobre__texto .sobre__nota{color:var(--luz);font-family:'Geist Mono',monospace;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.sobre__texto .btn{margin-top:26px}
+
+/* ---- caminho ---- */
+.etapas{list-style:none;padding:0;margin-top:48px;display:grid;gap:0}
+.etapas li{position:relative;padding:26px 0 26px 64px;border-top:1px solid var(--linha)}
+.etapa__n{position:absolute;left:0;top:22px;width:44px;height:44px;border-radius:50%;border:1px solid var(--luz);color:var(--luz);display:grid;place-items:center;font-family:'Geist Mono',monospace;font-size:15px}
+.etapas h3{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.etapas p{margin-top:6px;color:var(--grafite);max-width:40ch}
+
+/* ---- contato ---- */
+.contato{position:relative;overflow:hidden;background:var(--carvao)}
+.contato::before{content:"";position:absolute;inset:auto -20% -60% -20%;height:120%;background:radial-gradient(closest-side,rgba(212,175,95,.2),transparent);pointer-events:none}
+.contato__in{position:relative}
+.contato__cartao{margin-top:32px;padding:22px;border-radius:var(--raio);border:1px solid var(--linha);background:rgba(11,27,56,.6)}
+.contato__estado{display:flex;align-items:center;gap:10px;color:var(--grafite);font-size:15px}
+.pulso{width:10px;height:10px;border-radius:50%;background:var(--luz);box-shadow:0 0 0 0 rgba(212,175,95,.6);animation:pulso 2.4s infinite}
+@keyframes pulso{70%{box-shadow:0 0 0 10px rgba(212,175,95,0)}100%{box-shadow:0 0 0 0 rgba(212,175,95,0)}}
+.contato__acoes{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+
+.rodape{padding:36px var(--pad) calc(36px + env(safe-area-inset-bottom));border-top:1px solid var(--linha);display:grid;gap:14px}
+.rodape__aviso{color:var(--grafite);font-size:14px;max-width:60ch}
+.marca--rodape .marca__nome{font-size:13px}
+
+/* ---- janela de conversa (modal) ---- */
+.conversa{border:0;padding:0;background:none;color:var(--tinta);max-width:none;width:100%;max-height:100dvh;margin:auto 0 0;overflow-y:auto;overscroll-behavior:contain}
+.conversa::backdrop{background:rgba(4,10,22,.72);-webkit-backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.conversa[open]{animation:sobe .45s var(--ease)}
+@keyframes sobe{from{transform:translateY(40px);opacity:0}}
+.conversa__in{position:relative;display:grid;gap:14px;padding:28px var(--pad) calc(24px + env(safe-area-inset-bottom));background:var(--carvao);border-radius:24px 24px 0 0;border:1px solid var(--linha)}
+.conversa h2{font-size:26px;letter-spacing:-.03em;padding-right:44px}
+.conversa__sub{color:var(--grafite);font-size:15px;margin-top:-6px}
+.conversa__interesse{padding:10px 14px;border-radius:12px;background:rgba(212,175,95,.12);border:1px solid rgba(212,175,95,.4);font-size:14px}
+.conversa__interesse[hidden]{display:none}
+.conversa__x{position:absolute;right:12px;top:12px;width:44px;height:44px;border:0;background:none;display:grid;place-items:center}
+.campo{display:grid;gap:6px;font-size:14px;color:var(--grafite)}
+.campo input{width:100%;min-height:48px;padding:12px 14px;border-radius:12px;border:1px solid var(--linha);background:var(--noite);color:var(--tinta);font:inherit;font-size:16px}
+.campo__msg{color:#F3B08A;font-size:14px;line-height:1.35}
+.campo.is-erro input{border-color:#F3B08A}
+.opcoes{border:0;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opcoes legend{padding:0;margin-bottom:6px;font-size:14px;color:var(--grafite)}
+.opcoes label{position:relative;display:block}
+.opcoes input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:pointer}
+.opcoes span{display:flex;align-items:center;justify-content:center;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--linha);background:var(--noite);color:var(--tinta);font-size:16px;text-align:center;transition:border-color .18s,background-color .18s}
+.opcoes label:hover span{border-color:rgba(243,239,230,.4)}
+.opcoes input:checked+span{border-color:var(--luz);background:rgba(212,175,95,.16)}
+.opcoes input:focus-visible+span{outline:2px solid var(--luz);outline-offset:2px}
+
+/* ================= PC ================= */
+@media (min-width:900px){
+  :root{--pad:48px}
+  .topo{height:76px}
+  .topo .marca__nome{display:inline}
+  .menu{display:flex;gap:30px;font-size:15px}
+  .menu a{text-decoration:none;opacity:.8;transition:opacity .2s}
+  .menu a:hover{opacity:1}
+  .topo__cta{min-height:44px;padding:0 20px}
+  .hero__texto{bottom:90px;max-width:680px}
+  .hero__titulo{font-size:104px}
+  .hero__pausa{top:96px}
+  .imoveis,.sobre,.caminho{padding:160px var(--pad)}
+  .imoveis__topo{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:end}
+  .imoveis__topo p{margin-top:0}
+  .cards{grid-template-columns:repeat(12,1fr);grid-auto-rows:140px;gap:16px}
+  .card{aspect-ratio:auto!important}
+  .card--a{grid-column:1/8;grid-row:span 4}
+  .card--b{grid-column:8/13;grid-row:span 7}
+  .card--c{grid-column:1/5;grid-row:span 3}
+  .card--d{grid-column:5/8;grid-row:span 3}
+  .sobre{grid-template-columns:5fr 7fr;gap:80px;align-items:center}
+  .sobre__foto{width:100%;max-width:420px;justify-self:center}
+  .etapas{grid-template-columns:repeat(4,1fr);gap:28px}
+  .etapas li{padding:70px 0 0;border-top:0}
+  .etapas li::before{content:"";position:absolute;left:0;right:-28px;top:22px;height:1px;background:var(--linha)}
+  .etapas li:last-child::before{right:0}
+  .etapa__n{top:0;background:var(--noite)}
+  .contato{padding:200px var(--pad)}
+  .contato__in{display:grid;grid-template-columns:1fr 440px;gap:64px;align-items:end}
+  .contato__cartao{margin-top:0;padding:28px}
+  .rodape{grid-template-columns:auto 1fr;align-items:center;gap:40px}
+  .rodape__aviso{justify-self:end;text-align:right}
+  .conversa{width:480px;margin:auto;border-radius:24px}
+  .conversa__in{border-radius:24px;padding:36px}
+}
+@media (pointer:coarse){.btn--vidro{-webkit-backdrop-filter:none;-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(11,27,56,.65)}}
+@media (prefers-reduced-motion:reduce){.pulso{animation:none}}
+
+/* ================= refinamento v2 ================= */
+.hero__titulo,.imoveis h2,.sobre h2,.caminho h2,.contato h2,.card h3,.etapas h3,.conversa h2{font-family:var(--serif);font-weight:400;letter-spacing:-.005em}
+.hero__titulo{font-size:clamp(68px,21vw,116px);line-height:.9}
+.hero__titulo .it{font-style:italic;color:var(--luz)}
+.imoveis h2,.sobre h2,.caminho h2,.contato h2{font-size:clamp(42px,11.5vw,76px);line-height:.98;max-width:14ch}
+.card h3{font-size:26px;line-height:1.1}
+.etapas h3{font-size:28px}
+.conversa h2{font-size:32px}
+.hero__selo{display:flex;align-items:center;gap:12px}
+.hero__selo::before{content:"";width:32px;height:1px;background:var(--luz)}
+.hero__tags{list-style:none;padding:0;margin-top:22px;display:flex;gap:18px;font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:rgba(243,239,230,.75)}
+.hero__tags li+li::before{content:"";display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--luz);margin-right:18px;vertical-align:middle}
+.eyebrow{font-family:'Geist Mono',monospace;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--luz);margin-bottom:18px}
+.card{border:1px solid rgba(243,239,230,.1);box-shadow:0 24px 50px -28px rgba(0,0,0,.6)}
+.card__info{padding:96px 20px 20px;background:linear-gradient(transparent,rgba(6,16,31,.55) 40%,rgba(6,16,31,.94))}
+.card__bt{padding:0 0 2px;border-bottom:1px solid rgba(212,175,95,.5)}
+.card__bt .ic{transition:transform .3s var(--ease)}
+.card__bt:hover .ic{transform:translateX(4px)}
+.faixa{margin-top:28px;padding:26px;border-radius:var(--raio);border:1px solid rgba(212,175,95,.35);background:linear-gradient(135deg,rgba(212,175,95,.1),rgba(212,175,95,.02));display:grid;gap:16px;align-items:center}
+.faixa p{font-family:var(--serif);font-size:26px;line-height:1.15;max-width:28ch}
+.sobre{background:linear-gradient(180deg,var(--carvao),#0E2044);position:relative;overflow:hidden}
+.sobre::after{content:"ES";position:absolute;right:-.08em;bottom:-.28em;font-family:var(--serif);font-size:min(60vw,520px);line-height:1;color:transparent;-webkit-text-stroke:1px rgba(212,175,95,.16);pointer-events:none}
+.sobre__texto{position:relative;z-index:1}
+.sobre__texto p:not(.sobre__nota):not(.eyebrow){font-family:var(--serif);font-size:25px;line-height:1.3;color:var(--tinta);max-width:28ch}
+.sobre__foto img{box-shadow:0 0 0 10px rgba(212,175,95,.08),0 30px 60px -30px rgba(0,0,0,.7)}
+.etapa__n{font-family:var(--serif);font-size:20px}
+.rodape .marca__nome{color:var(--grafite)}
+/* botão de WhatsApp no canto: aparece depois do hero */
+.zap{position:fixed;z-index:45;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));width:54px;height:54px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;background:var(--luz);color:var(--destaque-texto);box-shadow:0 10px 28px -8px rgba(0,0,0,.6),0 0 0 6px rgba(212,175,95,.16);opacity:0;transform:scale(.6);pointer-events:none;transition:opacity .3s,transform .4s var(--ease),background-color .25s}
+.zap .ic{width:26px;height:26px}
+.zap.is-on{opacity:1;transform:none;pointer-events:auto}
+.zap:hover{background:#E2C37E}
+.zap:active{transform:scale(.94)}
+body{padding-bottom:0}
+@media (min-width:900px){
+  .zap{right:28px;bottom:28px;width:58px;height:58px}
+  .hero__titulo{font-size:clamp(120px,10vw,156px)}
+  .imoveis h2,.sobre h2,.caminho h2,.contato h2{font-size:84px}
+  .faixa{grid-template-columns:1fr auto;padding:34px 40px;margin-top:40px}
+  .faixa p{font-size:32px}
+  .sobre__texto p:not(.sobre__nota):not(.eyebrow){font-size:32px}
+}
+@media (prefers-reduced-motion:reduce){.zap{transition:none}}

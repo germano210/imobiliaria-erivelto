@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Erivelto Santos · Corretor de Imóveis</title>
+<meta name="description" content="Compra, venda e avaliação de imóveis com o corretor Erivelto Santos. Atendimento pessoal da primeira visita à entrega das chaves.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0B1B38">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" href="fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/instrument-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" as="image" href="img/hero-poster-m.webp" media="(orientation: portrait)" fetchpriority="high">
+<link rel="preload" as="image" href="img/hero-poster.webp" media="(orientation: landscape)" fetchpriority="high">
+<link rel="stylesheet" href="css/site.css?v=3">
+<link rel="stylesheet" href="css/arcane-ui.css?v=2">
+<link rel="stylesheet" href="css/arcane-motion.css?v=2">
+<link rel="stylesheet" href="css/prot.css?v=25">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-arrow-down" viewBox="0 0 256 256"><path d="M204.24,148.24l-72,72a6,6,0,0,1-8.48,0l-72-72a6,6,0,0,1,8.48-8.48L122,201.51V40a6,6,0,0,1,12,0V201.51l61.76-61.75a6,6,0,0,1,8.48,8.48Z"/></symbol>
+<symbol id="i-arrow-right" viewBox="0 0 256 256"><path d="M220.24,132.24l-72,72a6,6,0,0,1-8.48-8.48L201.51,134H40a6,6,0,0,1,0-12H201.51L139.76,60.24a6,6,0,0,1,8.48-8.48l72,72A6,6,0,0,1,220.24,132.24Z"/></symbol>
+<symbol id="i-x" viewBox="0 0 256 256"><path d="M204.24,195.76a6,6,0,1,1-8.48,8.48L128,136.49,60.24,204.24a6,6,0,0,1-8.48-8.48L119.51,128,51.76,60.24a6,6,0,0,1,8.48-8.48L128,119.51l67.76-67.75a6,6,0,0,1,8.48,8.48L136.49,128Z"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-pause" viewBox="0 0 256 256"><path d="M200,34H160a14,14,0,0,0-14,14V208a14,14,0,0,0,14,14h40a14,14,0,0,0,14-14V48A14,14,0,0,0,200,34Zm2,174a2,2,0,0,1-2,2H160a2,2,0,0,1-2-2V48a2,2,0,0,1,2-2h40a2,2,0,0,1,2,2ZM96,34H56A14,14,0,0,0,42,48V208a14,14,0,0,0,14,14H96a14,14,0,0,0,14-14V48A14,14,0,0,0,96,34Zm2,174a2,2,0,0,1-2,2H56a2,2,0,0,1-2-2V48a2,2,0,0,1,2-2H96a2,2,0,0,1,2,2Z"/></symbol>
+<symbol id="i-play" viewBox="0 0 256 256"><path d="M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z"/></symbol>
+</svg>
+<div class="carrega" id="carrega" role="status" aria-live="polite">
+  <img class="carrega__fundo" src="img/hero-poster.webp" alt="">
+  <div class="carrega__in">
+    <span class="marca__es carrega__es" aria-hidden="true">ES</span>
+    <p class="hero__selo">Corretor de imóveis</p>
+    <p class="carrega__nome"><span>Erivelto</span> <span class="it">Santos</span></p>
+    <div class="carrega__barra"><i id="carregaBarra"></i></div>
+    <p class="carrega__txt"><span id="carregaPct">0</span>% · preparando o passeio pela casa</p>
+  </div>
+</div>
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="topo" id="topo">
+  <a class="marca" href="#inicio" aria-label="Erivelto Santos, início"><span class="marca__es" aria-hidden="true">ES</span><span class="marca__nome">Erivelto Santos</span></a>
+  <nav class="menu" aria-label="Principal">
+    <a href="#imoveis">Imóveis</a><a href="#sobre">Quem atende</a><a href="#caminho">Como funciona</a><a href="#contato">Contato</a>
+  </nav>
+  <button class="btn btn--luz topo__cta" type="button" data-abrir-conversa>Falar comigo</button>
+</header>
+
+<main id="conteudo">
+<section class="hero" id="inicio" aria-label="Apresentação">
+  <div class="hero__palco">
+    <picture><source media="(orientation: portrait)" srcset="img/hero-poster-m.webp"><img class="hero__poster" src="img/hero-poster.webp" width="1600" height="900" alt="Fachada de casa moderna ao entardecer, com a porta de madeira aberta e a luz do hall acesa" fetchpriority="high"></picture>
+    <video class="hero__video" muted playsinline preload="auto" aria-hidden="true" tabindex="-1"></video>
+    <div class="hero__veu" aria-hidden="true"></div>
+    <div class="hero__texto">
+      <p class="hero__selo">Corretor de imóveis</p>
+      <h1 class="hero__titulo"><span>Erivelto</span> <span class="it">Santos</span></h1>
+      <p class="hero__sub">A casa certa, com alguém ao seu lado da primeira visita até a chave na mão.</p>
+      <div class="hero__acoes">
+        <a class="btn btn--luz" href="#imoveis">Ver imóveis <svg class="ic"><use href="#i-arrow-down"/></svg></a>
+        <button class="btn btn--vidro" type="button" data-abrir-conversa>Falar comigo</button>
+      </div>
+      <ul class="hero__tags" aria-label="Serviços"><li>Comprar</li><li>Vender</li><li>Avaliar</li></ul>
+    </div>
+    <button class="hero__pausa" type="button" aria-label="Pausar vídeo" aria-pressed="false" hidden><svg class="ic"><use href="#i-pause"/></svg></button>
+  </div>
+</section>
+
+<section class="imoveis vitrine" id="imoveis">
+  <div class="vitrine__topo">
+    <div><p class="eyebrow" data-reveal>01 · Imóveis</p>
+    <h2 data-split>Onde fica a sua próxima casa.</h2></div>
+    <form class="vitrine__busca" id="vBusca" autocomplete="off" role="search" data-reveal>
+      <svg class="ic" aria-hidden="true" viewBox="0 0 256 256"><path fill="currentColor" d="M228.24,219.76l-51.38-51.38a86.15,86.15,0,1,0-8.48,8.48l51.38,51.38a6,6,0,0,0,8.48-8.48ZM38,112a74,74,0,1,1,74,74A74.09,74.09,0,0,1,38,112Z"/></svg>
+      <input id="vQ" type="search" placeholder="Rua, praça, escola ou tipo" aria-label="Buscar no mapa" aria-autocomplete="list" aria-controls="vSug" aria-expanded="false">
+      <ul class="mapa__sug" id="vSug" role="listbox" hidden></ul>
+    </form>
+  </div>
+  <div class="vitrine__corpo" data-reveal="zoom">
+    <aside class="vitrine__lista" aria-label="Imóveis">
+      <ul class="vitrine__cards" id="vCards"></ul>
+    </aside>
+    <div class="vitrine__mapa" id="vMapa">
+      <div class="vitrine__barra">
+  <div class="vitrine__filtro" role="group" aria-label="Tipo de imóvel">
+        <button type="button" class="chip is-on" data-tipo="todos">Todos</button>
+        <button type="button" class="chip" data-tipo="casa">Casas</button>
+        <button type="button" class="chip" data-tipo="apto">Apartamentos</button>
+      </div>
+        <div class="vitrine__vant" id="vVant" role="group" aria-label="Vantagens perto"></div>
+      </div>
+      <p class="vitrine__trava" id="vTrava" hidden>Role até ver o mapa inteiro para mexer nele</p>
+      <svg class="vitrine__svg" id="vSvg" role="img" aria-label="Mapa do centro de Santo Antônio da Patrulha com os imóveis"></svg>
+      <div class="vitrine__pop" id="vPop" hidden></div>
+      <div class="mapa__ferr vitrine__ferr">
+        <button type="button" data-vz="1.5" aria-label="Aproximar">+</button>
+        <button type="button" data-vz="0.667" aria-label="Afastar">&minus;</button>
+        <button type="button" id="vCheio" aria-label="Mapa em tela cheia"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      </div>
+      <p class="vitrine__osm">Mapa © OpenStreetMap</p>
+      <button type="button" id="vInteresse" data-interesse="" hidden></button>
+    </div>
+  </div>
+</section>
+
+<section class="sobre sobre--v2" id="sobre">
+  <figure class="sobre__foto" data-reveal>
+    <img src="img/erivelto-r.webp" alt="Erivelto Santos, corretor de imóveis, de braços cruzados diante da placa do escritório" loading="lazy" width="560" height="700">
+    <figcaption class="selo"><span class="selo__es" aria-hidden="true">ES</span><span><b>CRECI-RS</b><small>nº a preencher</small></span></figcaption>
+  </figure>
+  <div class="sobre__texto">
+    <p class="eyebrow" data-reveal>02 · Quem atende</p>
+    <h2 data-split>Quem atende você.</h2>
+    <p data-reveal>Você fala direto com o Erivelto, da primeira conversa às chaves.</p>
+    <p data-reveal class="sobre__nota">Compra, venda e avaliação.</p>
+    <button class="btn btn--luz" type="button" data-abrir-conversa data-reveal>Falar com o Erivelto <svg class="ic"><use href="#i-arrow-right"/></svg></button>
+  </div>
+</section>
+
+<section class="caminho caminho--v2" id="caminho">
+  <p class="eyebrow" data-reveal>03 · Como funciona</p>
+  <h2 data-split>Do primeiro contato à chave na mão.</h2>
+  <ol class="etapas linha" id="linha">
+    <li><span class="etapa__n">1</span><h3>Conversa</h3><p>Você conta o que procura.</p></li>
+    <li><span class="etapa__n">2</span><h3>Visita</h3><p>No horário que for melhor para você.</p></li>
+    <li><span class="etapa__n">3</span><h3>Negociação</h3><p>Proposta e financiamento com clareza.</p></li>
+    <li><span class="etapa__n">4</span><h3>Escritura e chaves</h3><p>Papelada acompanhada até a entrega.</p></li>
+    <span class="linha__trilho" aria-hidden="true"><span class="linha__luz" id="linhaLuz"></span></span>
+  </ol>
+</section>
+
+<section class="contato contato--v2" id="contato">
+  <div class="contato__in" data-reveal>
+    <div>
+      <p class="eyebrow">04 · Contato</p>
+      <h2>Vamos achar a sua casa?</h2>
+      <p class="contato__estado"><span class="pulso" aria-hidden="true"></span>Resposta pelo WhatsApp</p>
+    </div>
+    <form class="contato__cartao contato__form" id="contatoForm" novalidate>
+      <label class="campo"><span>Nome</span><input name="nome" autocomplete="name" autocapitalize="words" maxlength="80" required><small class="campo__msg" role="alert" hidden>Diga seu nome.</small></label>
+      <label class="campo"><span>WhatsApp</span><input name="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="(51) 99999-9999" maxlength="16" required><small class="campo__msg" role="alert" hidden>Confere o número: DDD + 8 ou 9 dígitos.</small></label>
+      <fieldset class="opcoes"><legend>Você quer</legend>
+        <label><input type="radio" name="tipo" value="Comprar um imóvel" checked><span>Comprar</span></label>
+        <label><input type="radio" name="tipo" value="Vender um imóvel"><span>Vender</span></label>
+        <label><input type="radio" name="tipo" value="Avaliar um imóvel"><span>Avaliar</span></label>
+      </fieldset>
+      <div class="contato__acoes">
+        <button class="btn btn--luz" type="submit">Enviar <svg class="ic"><use href="#i-arrow-right"/></svg></button>
+        <button class="btn btn--vidro" type="button" data-whats>Só abrir o WhatsApp</button>
+      </div>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer class="rodape">
+  <p class="marca marca--rodape"><span class="marca__es" aria-hidden="true">ES</span><span class="marca__nome">Erivelto Santos · Corretor de Imóveis</span></p>
+</footer>
+
+<button class="zap" type="button" data-whats aria-label="Falar no WhatsApp" title="Falar no WhatsApp" aria-hidden="true" tabindex="-1"><svg class="ic"><use href="#i-chat"/></svg></button>
+
+<dialog class="casa2" id="casa" aria-labelledby="casa-t">
+  <div class="casa2__fotos" id="casaFotos" tabindex="0" aria-label="Fotos da casa"><div class="casa2__trilho" id="casaTrilho"></div></div>
+  <div class="casa2__topo">
+    <p class="casa2__cont" id="casaCont">1 / 9</p>
+    <button class="casa2__x" type="button" data-fechar-casa aria-label="Fechar"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button>
+  </div>
+  <button class="casa2__seta casa2__seta--a" type="button" data-f="-1" aria-label="Foto anterior"><svg class="ic" aria-hidden="true" style="transform:rotate(180deg)"><use href="#i-arrow-right"/></svg></button>
+  <button class="casa2__seta casa2__seta--p" type="button" data-f="1" aria-label="Próxima foto"><svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></button>
+  <div class="casa2__pontos" id="casaPontos" role="tablist" aria-label="Escolher foto"></div>
+  <section class="casa2__gaveta" id="casaGaveta" aria-labelledby="casa-t">
+    <button class="casa2__alca" type="button" id="casaAlca" aria-expanded="false"><span class="casa2__puxador" aria-hidden="true"></span>
+      <span class="casa2__resumo"><b class="casa2__preco">R$ 1.100.000</b><span id="casa-t" class="casa2__tit">Casa com piscina no Centro</span><small>2 dorm · 170 m² · garagem para 2</small></span>
+      <span class="casa2__mais">Detalhes <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></span>
+    </button>
+    <div class="casa2__det" id="casaDet">
+      <ul class="casa2__lista">
+        <li><b>2 dormitórios</b><span>1 suíte com closet e sacada</span></li>
+        <li><b>170 m²</b><span>área construída · 200 m² de terreno</span></li>
+        <li><b>Garagem fechada</b><span>para 2 carros</span></li>
+        <li><b>Piscina e área gourmet</b><span>com churrasqueira</span></li>
+        <li><b>Escritório</b><span>e sala integrada à cozinha planejada</span></li>
+      </ul>
+      <p class="casa2__desc">Área social integrada à cozinha com móveis planejados, área gourmet com churrasqueira, escritório e área externa com piscina.</p>
+      <h3 class="casa2__sub">Localização</h3>
+      <p class="casa2__end">R. Sezefredo da Costa Tôrres, 34 · Centro · Santo Antônio da Patrulha, RS</p>
+      <div class="casa2__mapa" id="casaMapa"></div>
+      <ul class="casa2__dist" id="casaDist"></ul>
+      <small class="casa2__nota">Distâncias em linha reta.</small>
+    </div>
+  </section>
+  <button class="btn btn--luz casa2__agendar" type="button" id="casaAgendar">Agendar visita <svg class="ic" aria-hidden="true"><use href="#i-arrow-right"/></svg></button>
+  <button type="button" id="casaInteresse" data-interesse="Casa com piscina · R. Sezefredo da Costa Tôrres, 34 · agendar visita" hidden></button>
+</dialog>
+<dialog class="conversa" id="conversa" aria-labelledby="conversa-t">
+  <form class="conversa__in" method="dialog" novalidate>
+    <button class="conversa__x" type="button" data-fechar aria-label="Fechar"><svg class="ic"><use href="#i-x"/></svg></button>
+    <h2 id="conversa-t">Falar com o Erivelto</h2>
+    <p class="conversa__sub">Deixe seu nome e WhatsApp. Ele responde o quanto antes.</p>
+    <label class="campo"><span>Nome</span><input name="nome" autocomplete="name" autocapitalize="words" minlength="2" maxlength="80" required aria-describedby="e-nome"><small class="campo__msg" id="e-nome" role="alert" hidden>Diga seu nome para ele saber com quem fala.</small></label>
+    <label class="campo"><span>WhatsApp</span><input name="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="(51) 99999-9999" maxlength="16" required aria-describedby="e-tel"><small class="campo__msg" id="e-tel" role="alert" hidden>Confere o número: DDD + 8 ou 9 dígitos.</small></label>
+    <fieldset class="opcoes"><legend>O que você procura</legend>
+      <label><input type="radio" name="tipo" value="Comprar um imóvel" checked><span>Comprar</span></label>
+      <label><input type="radio" name="tipo" value="Vender um imóvel"><span>Vender</span></label>
+      <label><input type="radio" name="tipo" value="Avaliar um imóvel"><span>Avaliar</span></label>
+      <label><input type="radio" name="tipo" value="Tirar dúvidas"><span>Dúvidas</span></label>
+    </fieldset>
+    <p class="conversa__interesse" hidden></p>
+    <button class="btn btn--luz" type="submit" value="enviar">Enviar</button>
+  </form>
+</dialog>
+
+<script src="js/arcane-ui.js?v=2" defer></script>
+<script src="js/site.js?v=24" defer></script>
+<script src="js/bairro.js" defer></script>
+<script src="js/vitrine.js?v=25" defer></script>
+<script src="js/prot.js?v=23" defer></script>
+<script src="js/casa.js?v=23" defer></script>
+</body>
+</html>
