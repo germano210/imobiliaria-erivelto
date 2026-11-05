@@ -1,0 +1,25 @@
+SITE DO ERIVELTO · RASCUNHO PARA TESTE NO DOMÍNIO (05/11/2026)
+
+O que é
+- Só o site da v12.10 (a mais nova do artefato), sem os cartões internos da TLH e sem os controles de teste.
+- Ainda NÃO é a versão de entrega: a entrega está em Prévia (cartão S140) e depende do John.
+
+Como subir
+- Suba a pasta inteira, mantendo as subpastas, com o index.html na raiz do domínio.
+- Hospedagem estática serve (não precisa de PHP nem de banco). Use HTTPS.
+- São 45 arquivos, cerca de 35 MB, quase tudo vídeo (pasta v21).
+
+Antes de abrir ao público
+1. O botão do WhatsApp manda para o número de TESTE do John: (51) 99797-6191.
+   O do Erivelto precisa ser confirmado pelo John antes da troca.
+2. Login, contatos e simulação ficam guardados só no aparelho de quem visita.
+   Nada disso chega ao Erivelto: para chegar, falta o servidor (cartão S140 e pergunta q66).
+3. No Login, a mensagem de erro ainda diz "no protótipo, qualquer número com 10 dígitos".
+4. O painel do Erivelto não está aqui: ele também precisa do servidor.
+5. A página tem "noindex" (o Google não indexa). Na versão final, tirar essa linha do index.html:
+   <meta name="robots" content="noindex,nofollow">
+6. Ainda em decisão com o John: S133 a S140 (loading, foto viva, pílulas, áreas, busca, entrega)
+   e a intro v21 ou v20 (I113). Este rascunho usa o que o artefato mostra hoje (intro v21).
+
+Testado: celular (412 px) e notebook (1366 px), do carregamento até "Ver mais fotos", sem erro
+e sem arquivo faltando.
