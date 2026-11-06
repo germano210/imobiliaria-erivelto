@@ -1,2 +1,34 @@
-/.env
-/.env.local
+# Documentacao e instrucoes locais, nao usadas para servir o site
+*.md
+*.mdx
+/LEIA-ME.txt
+
+# Segredos e configuracoes locais
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Sistema operacional e editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+.history/
+
+# Dependencias, builds e caches
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+playwright-report/
+test-results/
+
+# Temporarios e backups
+*.log
+*.tmp
+*.bak
+*.orig
+*~
