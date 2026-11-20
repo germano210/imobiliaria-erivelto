@@ -1,0 +1,71 @@
+/* Telas extras do modo servidor (login do painel, avisos, aceite do visitante). Usa as cores da própria página. */
+.pt-tela{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:16px;background:var(--bg,#F2F1EC);overflow:auto}
+.pt-cartao{width:100%;max-width:380px;display:grid;gap:10px;background:var(--surf,#fff);border:1px solid var(--line,#D9D6CC);border-radius:16px;padding:22px 18px;color:var(--ink,#121211);font:400 15px/1.45 var(--f-b,system-ui,sans-serif)}
+.pt-t{font:700 22px/1.15 var(--f-d,system-ui,sans-serif);margin:0 0 4px}
+.pt-p{margin:0;color:var(--mut,#66645D);font-size:14px}
+.pt-lb{font-size:13px;color:var(--mut,#66645D)}
+.pt-in{width:100%;min-height:48px;padding:0 12px;border:1px solid var(--line,#D9D6CC);border-radius:10px;background:var(--bg,#F2F1EC);color:var(--ink,#121211);font:inherit;font-size:16px}
+.pt-in:focus-visible,.pt-btn:focus-visible,.pt-link:focus-visible{outline:2px solid var(--acc,#FF4F1F);outline-offset:2px}
+.pt-btn{min-height:48px;padding:0 16px;border:1px solid var(--line,#D9D6CC);border-radius:10px;background:var(--surf,#fff);color:var(--ink,#121211);font:inherit;font-weight:600;cursor:pointer}
+.pt-btn.pri{background:var(--ink,#121211);color:var(--surf,#fff);border-color:var(--ink,#121211)}
+.pt-btn:disabled{opacity:.55;cursor:default}
+.pt-msg{min-height:1.4em;margin:0;color:#b3261e;font-size:14px}
+.pt-barra{display:flex;gap:4px;align-items:center;justify-content:flex-end;max-width:1180px;margin:-14px auto 8px;font:400 12px var(--f-b,system-ui,sans-serif);color:var(--mut,#66645D)}
+.pt-em{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pt-link{min-height:32px;padding:0 10px;border:0;border-radius:99px;background:none;color:var(--ink,#121211);font:inherit;font-weight:600;cursor:pointer;text-decoration:underline}
+.pt-aviso{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:2100;max-width:min(92vw,460px);padding:12px 16px;border-radius:12px;background:var(--ink,#121211);color:var(--surf,#fff);font:500 14px/1.35 var(--f-b,system-ui,sans-serif);box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.pt-aviso.erro{background:#b3261e;color:#fff}
+/* aceite do aviso de privacidade (Login do visitante) */
+.ak12{display:flex;align-items:flex-start;gap:10px;margin:2px 0 10px;font:400 13px/1.35 var(--f-b,system-ui,sans-serif);color:inherit;opacity:.9;cursor:pointer;text-align:left}
+.ak12 input{flex:none;width:22px;height:22px;margin:0;accent-color:currentColor;cursor:pointer}
+.ak12 a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.ue12x{display:block;margin-top:8px;font:500 13px/1.35 var(--f-b,system-ui,sans-serif);color:#ff8b7b}
+/* 12.35: aviso de foto pequena/escura/tremida e dicas de como tirar as fotos (painel) */
+.pt-fq{margin:0;padding-left:18px;display:grid;gap:4px}
+.pt-fqb{display:flex;gap:8px;flex-wrap:wrap}.pt-fqb .pt-btn{flex:1 1 140px}
+.pt-dicas{margin:0 0 12px;border:1px solid var(--line,#D9D6CC);border-radius:12px;background:var(--surf,#fff);color:var(--ink,#121211);font:400 14px/1.35 var(--f-b,system-ui,sans-serif)}
+.pt-dicas summary{min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 14px;cursor:pointer;list-style:none}
+.pt-dicas summary::-webkit-details-marker{display:none}
+.pt-dicas summary::after{content:"";width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg);margin-top:-4px;opacity:.6}
+.pt-dicas[open] summary::after{transform:rotate(-135deg);margin-top:4px}
+.pt-dicas summary:focus-visible{outline:2px solid var(--acc,#FF4F1F);outline-offset:2px;border-radius:12px}
+.pt-dicas ul{list-style:none;margin:0;padding:0 14px 12px;display:grid;gap:8px}
+.pt-dicas li{display:flex;gap:10px;align-items:flex-start}
+.pt-dicas li svg{flex:none;margin-top:-1px;color:var(--mut,#66645D)}
+/* 12.37: selo discreto 'ampliada' na miniatura (só no painel; o site público nunca mostra) */
+.ep1-n.am{top:auto;bottom:6px;left:auto;right:6px;background:#0000009e;font-weight:400}
+
+/* 12.38: menos botões e menos texto no painel: ação principal à vista, o resto em "⋯"; ajuda de 1 linha com "?". Tudo em peso 400 (nada de negrito novo). */
+.ep1-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ep1-hq{margin:-4px 0 0;font:400 13.5px/1.45 var(--f-b,system-ui,sans-serif);color:var(--mut,#66645D)}
+.ep1-hq summary{display:flex;align-items:center;gap:8px;min-height:32px;cursor:pointer;list-style:none}
+.ep1-hq summary::-webkit-details-marker{display:none}
+.ep1-hq summary i{font-style:normal;flex:none;width:22px;height:22px;border-radius:50%;border:1px solid var(--line,#D9D6CC);display:inline-grid;place-items:center;font-size:12px;font-weight:400;color:var(--mut,#66645D)}
+.ep1-hq[open] summary i{background:var(--surf2,#E9E7E0);color:var(--ink,#121211)}
+.ep1-hq summary:focus-visible{outline:2px solid var(--acc,#FF4F1F);outline-offset:2px;border-radius:8px}
+.ep1-hq p{margin:2px 0 6px;font-size:13px;line-height:1.45;max-width:none}
+.ep1-mn,.pt-mn{position:relative;flex:none}
+.ep1-mn>summary,.pt-mn>summary{list-style:none;min-height:52px;min-width:52px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line,#D9D6CC);border-radius:12px;background:var(--surf,#fff);cursor:pointer;font:400 20px/1 var(--f-b,system-ui,sans-serif);color:var(--ink,#121211)}
+.ep1-mn>summary::-webkit-details-marker,.pt-mn>summary::-webkit-details-marker{display:none}
+.ep1-mn[open]>summary,.pt-mn[open]>summary{border-color:var(--ink,#121211)}
+.ep1-mn>summary:focus-visible,.pt-mn>summary:focus-visible{outline:2px solid var(--acc,#FF4F1F);outline-offset:2px}
+.ep1-mm2,.pt-mm{position:absolute;right:0;bottom:calc(100% + 6px);z-index:7;min-width:210px;display:grid;gap:6px;padding:8px;border:1px solid var(--line,#D9D6CC);border-radius:12px;background:var(--surf,#fff);box-shadow:0 6px 24px rgba(0,0,0,.14)}
+.ep1-mm2 .ep1-b{width:100%;justify-content:flex-start;min-height:44px}
+.ep1-mm2 .ep1-pvt{border-style:solid;min-height:44px}
+.ep1-cb .ep1-mn>summary{min-height:44px;min-width:44px}
+.ep1-nav{flex-wrap:nowrap;align-items:stretch}
+.ep1-nav .ep1-b.pri{flex:1 1 auto;max-width:none;margin-left:0}
+.pt-barra{align-items:center}
+.pt-mn>summary{min-height:32px;min-width:32px;border:0;border-radius:99px;background:none}
+.pt-mm{bottom:auto;top:calc(100% + 4px)}
+.pt-mm .pt-link{display:block;width:100%;text-align:left;min-height:40px;font-weight:400}
+.ep23-g>.ep23-a[data-a="novo"]{grid-column:1/-1}
+.ep23-mais{grid-column:1/-1}
+.ep23-mais summary{min-height:40px;display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;font:400 13.5px/1.3 var(--f-b,system-ui,sans-serif);color:var(--mut,#66645D)}
+.ep23-mais summary::-webkit-details-marker{display:none}
+.ep23-mais summary::after{content:"";width:7px;height:7px;border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;transform:rotate(45deg);margin-top:-4px;opacity:.6}
+.ep23-mais[open] summary::after{transform:rotate(-135deg);margin-top:4px}
+.ep23-mais .ep23-g{margin-top:6px}
+.ep1-cb .ep1-mn[open]{flex:1 0 100%;order:3}
+.ep1-cb .ep1-mn[open] .ep1-mm2{position:static;box-shadow:none;margin-top:6px}
+details.ep1-hq,details.ep1-mn,details.pt-mn,details.ep23-mais{border:0;border-radius:0;padding:0}

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Aviso de privacidade · Erivelto Santos</title>
+<link rel="stylesheet" href="/fontes/fontes.css">
+<link rel="stylesheet" href="/privacidade/privacidade.css">
+</head>
+<body>
+<main class="pv">
+<p><a href="/" class="pv-volta">Voltar ao site</a></p>
+<h1>Aviso de privacidade</h1>
+<p class="pv-d">Versão v1</p>
+
+<h2>Quem cuida dos seus dados</h2>
+<p>Erivelto Santos, corretor de imóveis, CRECI 63.464. Ele decide para que os dados são usados.</p>
+
+<h2>Quais dados e para quê</h2>
+<p>Seu nome e seu WhatsApp, que você informa ao entrar no site. Servem para o corretor falar com você sobre imóveis. Também guardamos qual imóvel você olhou e a data.</p>
+
+<h2>Como guardamos</h2>
+<p>Nome e WhatsApp ficam cifrados no servidor. Só o corretor vê os contatos, no painel. Ficam guardados até você pedir para apagar.</p>
+
+<h2>Seus direitos</h2>
+<p>Você pode ver, corrigir e apagar os seus dados. Para corrigir, entre de novo no site com os dados certos, ou fale com o corretor pelo WhatsApp do site.</p>
+
+<h2>Apagar meus dados</h2>
+<form id="pv-apagar" class="pv-f" novalidate>
+  <label for="pv-nome">Seu nome</label>
+  <input id="pv-nome" name="nome" autocomplete="name" maxlength="60">
+  <label for="pv-wa">Seu WhatsApp</label>
+  <input id="pv-wa" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" maxlength="25" required>
+  <button type="submit">Apagar meus dados</button>
+  <p id="pv-msg" role="status"></p>
+</form>
+<p><button type="button" id="pv-ver" class="pv-b2">Ver os meus dados</button></p>
+<pre id="pv-dados" hidden></pre>
+
+<h2>Contato</h2>
+<p>Pelo botão do WhatsApp do site.</p>
+</main>
+<script src="/privacidade/privacidade.js"></script>
+</body>
+</html>

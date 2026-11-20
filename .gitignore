@@ -32,3 +32,6 @@ test-results/
 *.bak
 *.orig
 *~
+
+# Arquivos antigos aguardando exclusao manual
+_to_delete/

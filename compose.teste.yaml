@@ -1,0 +1,30 @@
+# Instância de TESTE na sua máquina (só o front, em modo prévia: ainda não há servidor/API):
+#   docker compose -f compose.teste.yaml up -d
+#   docker compose -f compose.teste.yaml logs tunel | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com'
+#     (no PowerShell: docker compose -f compose.teste.yaml logs tunel | Select-String trycloudflare)
+# O link aleatório muda a cada vez que o túnel reinicia. Qualquer pessoa com o link abre o site e o painel (sem senha na prévia):
+# não cadastre dado real e desligue quando terminar:  docker compose -f compose.teste.yaml down
+# "Unauthorized: Tunnel not found" no log = o Cloudflare apagou o túnel rápido (PC dormiu ou ficou muito tempo sem conexão).
+#   Criar um túnel novo (link novo): docker compose -f compose.teste.yaml up -d --force-recreate tunel
+# Também abre direto em http://localhost:8090  (painel: /painel/ · privacidade: /privacidade/)
+# Os arquivos são lidos direto da pasta: mudou um arquivo, é só recarregar a página.
+name: erivelto-teste
+services:
+  erivelto:
+    image: nginx:1.27-alpine
+    container_name: erivelto-teste
+    restart: "no"
+    volumes:
+      - ./:/usr/share/nginx/html:ro
+      - ./teste.nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "127.0.0.1:8090:8000"
+  tunel:
+    image: cloudflare/cloudflared:2026.10.7
+    container_name: erivelto-teste-tunel
+    restart: on-failure   # se o túnel rápido falhar ao abrir (acontece), tenta de novo sozinho
+    # túnel rápido: sem conta, sem token. http2 em vez de QUIC: no Docker Desktop (Windows) e em muitas redes de casa o
+    # QUIC (UDP 7844) é bloqueado e o túnel fica em "failed to dial to edge with quic"; http2 usa TCP 443 e passa.
+    command: tunnel --no-autoupdate --protocol http2 --edge-ip-version 4 --url http://erivelto:8000
+    depends_on:
+      - erivelto
