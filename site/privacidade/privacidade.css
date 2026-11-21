@@ -13,5 +13,6 @@ h2{font:600 18px/1.25 "Space Grotesk",system-ui,sans-serif;margin:28px 0 6px}
 .pv-f button,.pv-b2{min-height:48px;padding:0 16px;border:1px solid var(--ink);border-radius:10px;background:var(--ink);color:var(--bg);font:inherit;font-weight:600;cursor:pointer}
 .pv-b2{background:none;color:var(--ink)}
 a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.pv ul{margin:6px 0;padding-left:20px}.pv li{margin:4px 0}.pv a{color:var(--ink)}
 #pv-msg{min-height:1.4em;margin:0;font-size:14px}
 pre{white-space:pre-wrap;word-break:break-word;background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px}

@@ -20,6 +20,13 @@
       else msg.textContent = 'Não conseguimos confirmar que o nome e o WhatsApp são seus. Escreva o nome como entrou no site, ou fale com o corretor pelo WhatsApp do site.';
     });
   };
+  // WhatsApp do corretor (o número salvo no painel), para os pedidos que o formulário não resolve
+  req('GET', '/api/estado').then(function (r) {
+    var n = r.ok && r.j && r.j.whatsapp_numero, a = document.getElementById('pv-wa-link'), f = document.getElementById('pv-wa-fala');
+    if (!a || !/^55\d{10,11}$/.test(n || '')) return;
+    a.href = 'https://wa.me/' + n; a.textContent = ' +' + n.slice(0, 2) + ' ' + n.slice(2, 4) + ' ' + n.slice(4, -4) + '-' + n.slice(-4);
+    a.hidden = false; if (f) f.hidden = true;
+  });
   document.getElementById('pv-ver').onclick = function () {
     var pre = document.getElementById('pv-dados');
     req('GET', '/api/privacidade/meus-dados').then(function (r) {

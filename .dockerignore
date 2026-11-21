@@ -1,0 +1,9 @@
+.git
+.env
+dados
+dados-teste
+_to_delete
+**/__pycache__
+app/testes
+*.age
+chave-*.txt

@@ -74,6 +74,7 @@
   window.addEventListener('online', esvaziarFila);
 
   /* ---------- SITE ---------- */
+  var AVISO_VERSAO = 'v2'; // a mesma de site/privacidade/index.html e do padrão de ERV_AVISO_VERSAO no servidor
   P.estadoSite = function (est) {
     est = est || ESTADO;
     return {
@@ -94,7 +95,7 @@
     return 'Não consegui salvar agora. Tente de novo.';
   }
   P.entrar = function (nome, wa) {
-    return req('POST', 'api/contas', { nome: nome, whatsapp: wa, aceite: true, versao_aviso: 'v1' }).then(function (r) {
+    return req('POST', 'api/contas', { nome: nome, whatsapp: wa, aceite: true, versao_aviso: AVISO_VERSAO }).then(function (r) {
       if (!r.ok) return { ok: false, erro: msgConta(r) };
       return req('GET', 'api/estado').then(function (e) {
         if (e.ok) { ESTADO = e.j; if (P.g && P.g.refresh) P.g.refresh(P.estadoSite(e.j)); }
@@ -112,12 +113,29 @@
   };
   P.chamada = function (t) { enviarComReenvio('api/chamadas', { id: t.id, nm: t.nm, o: t.o }); };
 
+  // T05: CRECI e link legal sempre à vista na busca e nos resultados. Some na ficha do imóvel (classe "f5"), que tem botões embaixo.
+  function rodape() {
+    if (document.getElementById('pt-rodape')) return;
+    var r = el('div', { id: 'pt-rodape', class: 'pt-rodape' }, [
+      el('span', { texto: 'Erivelto Santos \u00b7 Corretor de imóveis \u00b7 CRECI 63.464 \u00b7 ' }), el('a', { href: 'privacidade/', texto: 'Privacidade' })]);
+    document.body.appendChild(r);
+    var sc = document.querySelector('.sc12');
+    function ver() { r.hidden = !!(sc && sc.classList.contains('f5')); }
+    if (sc && window.MutationObserver) new MutationObserver(ver).observe(sc, { attributes: true, attributeFilter: ['class'] });
+    ver();
+  }
   function iniciarSite() {
     return req('GET', 'api/estado').then(function (r) {
       if (!r.ok) { telaErro('Não consegui carregar os imóveis agora.'); return; }
       ESTADO = r.j; P.srv = true;
       try { window.SITE11.PLANO = ESTADO.plano; window.SITE11.WHATSAPP = !!ESTADO.whatsapp; window.SITE11.AVISO = false; } catch (e) { /* segue */ }
-      css(); iniciar(); esvaziarFila();
+      css();
+      // T23: sem número salvo no painel, o botão do WhatsApp não abre conversa nenhuma (nem conta como chamada): só avisa.
+      if (!P.waSite()) document.addEventListener('click', function (ev) {
+        var a = ev.target.closest && ev.target.closest('a[href^="https://wa.me/"]'); if (!a) return;
+        ev.preventDefault(); ev.stopImmediatePropagation(); aviso('O WhatsApp do corretor ainda não está disponível aqui.');
+      }, true);
+      iniciar(); rodape(); esvaziarFila();
       document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') esvaziarFila(); });
     });
   }
@@ -182,12 +200,78 @@
       at.input.focus();
     });
   }
+  // T24: termo do painel no 1º acesso. O texto vem de painel/termo.html; o aceite vai com a versão que está na tela.
+  function sairPainel() { return req('POST', 'api/painel/sair', {}).then(function () { location.reload(); }); }
+  function telaTermo(versao) {
+    return new Promise(function (res) {
+      css();
+      var texto = el('div', { class: 'pt-termo', id: 'pt-termo-corpo', tabindex: '0', texto: 'Carregando o termo…' });
+      var chk = el('input', { type: 'checkbox', id: 'pt-termo-ok', disabled: 'disabled' });
+      var msg = el('p', { class: 'pt-msg', role: 'alert' });
+      var btn = el('button', { type: 'submit', class: 'pt-btn pri', id: 'pt-termo-aceitar', disabled: 'disabled', texto: 'Aceitar e continuar' });
+      var sair = el('button', { type: 'button', class: 'pt-btn', id: 'pt-termo-sair', texto: 'Sair sem aceitar' });
+      var f = el('form', { class: 'pt-cartao pt-largo', novalidate: 'novalidate' }, [
+        el('h1', { class: 'pt-t', texto: 'Termo de uso do painel' }),
+        el('p', { class: 'pt-p', texto: 'Leia e aceite para usar o painel.' }), texto,
+        el('label', { class: 'pt-chk', for: 'pt-termo-ok' }, [chk, el('span', { texto: 'Li e aceito o termo (versão ' + versao + ').' })]), msg, btn, sair]);
+      var tela = el('div', { class: 'pt-tela', id: 'pt-termo' }, [f]);
+      chk.onchange = function () { btn.disabled = !chk.checked; };
+      sair.onclick = function () { sair.disabled = true; sairPainel(); };
+      f.onsubmit = function (ev) {
+        ev.preventDefault(); if (!chk.checked) return;
+        btn.disabled = true; msg.textContent = '';
+        req('POST', 'api/painel/termo/aceitar', { aceite: true, versao: versao }).then(function (r) {
+          if (r.ok) { tela.remove(); res(true); return; }
+          btn.disabled = false;
+          msg.textContent = r.status === 401 ? 'A sessão terminou. Recarregue a página e entre de novo.' : r.status === 400 ? 'O termo mudou. Recarregue a página para ler a versão nova.' : 'Não foi possível registrar agora. Tente de novo.';
+        });
+      };
+      document.body.appendChild(tela);
+      fetch('painel/termo.html', { cache: 'no-store' }).then(function (r) { return r.ok ? r.text() : ''; }).then(function (h) {
+        var t = h && new DOMParser().parseFromString(h, 'text/html').getElementById('pt-termo-texto');
+        // só libera o aceite se o texto na tela for o da versão que o servidor pede
+        if (!t || t.getAttribute('data-versao') !== versao) { texto.textContent = 'Não consegui carregar o termo desta versão. Recarregue a página; se continuar, fale com a Loud House.'; return; }
+        texto.innerHTML = t.innerHTML; chk.disabled = false; chk.focus();
+      }, function () { texto.textContent = 'Não consegui carregar o termo. Recarregue a página.'; });
+    });
+  }
+  // Conta (aba Perfil do painel): WhatsApp do site, trocar senha e sair. O painel/c.js só chama P.contaHtml(); os toques chegam aqui.
+  var EMAIL = '';
+  function waBonito(n) { return n ? '+' + n.slice(0, 2) + ' ' + n.slice(2, 4) + ' ' + n.slice(4, 9) + '-' + n.slice(9) : ''; }
+  P.contaHtml = function () {
+    var n = P.waSite(), ch = (ref && ref.d && ref.d.chamadas) || [];
+    return '<div class="sec" id="pt-conta"><div class="t">Conta</div>' + (EMAIL ? '<span class="sub">' + attr(EMAIL) + '</span>' : '') +
+      '<button class="lin" data-pt="wa"><span class="v">WhatsApp do site<br><span class="sub" id="pt-conta-wa">' + (n ? waBonito(n) : 'Ainda sem número: o botão do site não abre conversa') + '</span></span><span class="ch">›</span></button>' +
+      '<div class="dica" id="pt-conta-toques">Toques no botão do WhatsApp do site: ' + ch.length + '</div>' +
+      '<button class="lin" data-pt="senha"><span class="v">Trocar senha</span><span class="ch">›</span></button>' +
+      '<button class="lin" data-pt="sair"><span class="v">Sair</span></button>' +
+      '<div class="dica"><a href="painel/termo.html" target="_blank" rel="noopener">Termo de uso do painel</a> · <a href="privacidade/" target="_blank" rel="noopener">Aviso de privacidade do site</a></div></div>';
+  };
+  function redesenharPerfil() { var t = document.querySelector('#c-app [data-tab="perfil"][aria-current="page"]'); if (t) t.click(); }
+  function telaWa() {
+    css();
+    var inp = el('input', { id: 'ep34w', class: 'pt-in', type: 'tel', inputmode: 'tel', autocomplete: 'off', maxlength: '19', 'aria-label': 'WhatsApp do site', 'aria-describedby': 'ep34m', value: waFmt(P.waSite().slice(2)) });
+    var lk = el('a', { id: 'ep34l', class: 'pt-p', target: '_blank', rel: 'noopener noreferrer' }), msg = el('p', { id: 'ep34m', class: 'pt-p', 'aria-live': 'polite' });
+    var btn = el('button', { type: 'button', class: 'pt-btn pri', id: 'ep34s', disabled: 'disabled', texto: 'Salvar' }), fe = el('button', { type: 'button', class: 'pt-btn', id: 'pt-wa-fechar', texto: 'Fechar' });
+    var tela = el('div', { class: 'pt-tela', id: 'pt-wa', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'pt-wa-t' }, [el('div', { class: 'pt-cartao' }, [
+      el('h1', { class: 'pt-t', id: 'pt-wa-t', texto: 'WhatsApp do site' }), el('p', { class: 'pt-p', texto: 'O botão do site abre a conversa com este número.' }), inp, lk, msg, btn, fe])]);
+    fe.onclick = function () { tela.remove(); redesenharPerfil(); };
+    document.body.appendChild(tela); P.waLigar(tela); inp.focus();
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('#pt-conta [data-pt]'); if (!b || !P.srv) return;
+    var a = b.getAttribute('data-pt');
+    if (a === 'wa') telaWa();
+    else if (a === 'senha') telaTroca(false);
+    else if (a === 'sair') { b.disabled = true; flush().then(sairPainel); }
+  });
   function barra(email) {
+    EMAIL = email;
     var b = el('div', { class: 'pt-barra', id: 'pt-barra' });
     var t = el('button', { type: 'button', class: 'pt-link', texto: 'Trocar senha' });
     t.onclick = function () { m.removeAttribute('open'); telaTroca(false); };
     var s = el('button', { type: 'button', class: 'pt-link', texto: 'Sair', id: 'pt-sair' });
-    s.onclick = function () { flush().then(function () { return req('POST', 'api/painel/sair', {}); }).then(function () { location.reload(); }); };
+    s.onclick = function () { flush().then(sairPainel); };
     var m = el('details', { class: 'pt-mn' }, [el('summary', { 'aria-label': 'Conta', texto: '\u22ef' }), el('div', { class: 'pt-mm' }, [t, s])]);
     b.appendChild(el('span', { class: 'pt-em', texto: email })); b.appendChild(m);
     document.body.insertBefore(b, document.body.firstChild);
@@ -252,6 +336,7 @@
     if (r.ok) { tentativas = 0; ERRO = ''; if (PEND <= 1 && !AGENDADO) marca('ok', 'Salvo · ' + hora()); return r; }
     if (r.status === 409) { BLOQ = true; ERRO = 'conflito'; marca('err', 'Mudou em outro aparelho'); aviso('Este painel mudou em outro aparelho. Recarregue a página para continuar.', 'erro'); return r; }
     if (r.status === 401) { BLOQ = true; marca('err', 'Sessão encerrada'); aviso('A sessão terminou. Entre de novo (suas mudanças não salvas ficam nesta tela até recarregar).', 'erro'); return r; }
+    if (r.status === 403 && r.j && r.j.erro === 'aceitar_termo') { BLOQ = true; ERRO = 'termo'; marca('err', 'Falta aceitar o termo'); aviso('O termo de uso do painel mudou. Recarregue a página para ler e aceitar.', 'erro'); return r; }
     if (r.status === 400) { ERRO = 'invalido'; marca('err', 'Não salvou: confira ' + ((r.j && r.j.campo) || 'os campos')); return r; }
     ERRO = 'rede'; tentativas++; marca('err', 'Não salvou · tentando de novo');
     if (tentativas <= 6) setTimeout(function () { P.salvar(); }, Math.min(30000, 1500 * tentativas * tentativas));
@@ -526,8 +611,12 @@
   /* ---------- WhatsApp do site: campo no painel (Configurações); o site lê o número daqui ---------- */
   var WA_PADRAO = '5551989498872', WA_CHAVE = 'erivelto_wa_site', RE_WA = /^55[1-9][1-9]9\d{8}$/;
   function waLocal() { try { var v = localStorage.getItem(WA_CHAVE); return RE_WA.test(v || '') ? v : null; } catch (e) { return null; } }
-  // Modo servidor: o número vem da API. Prévia: o que o painel guardou neste aparelho, ou o padrão.
-  P.waSite = function () { var n = P.srv ? (ESTADO && ESTADO.whatsapp_numero) : waLocal(); return RE_WA.test(n || '') ? n : WA_PADRAO; };
+  // Modo servidor: só o número salvo no painel (API); sem número, '' (o site não abre conversa com ninguém).
+  // Prévia (sem servidor): o que o painel guardou neste aparelho, ou o número padrão da prévia.
+  P.waSite = function () {
+    if (P.srv) { var n = ESTADO && ESTADO.whatsapp_numero; return RE_WA.test(n || '') ? n : ''; }
+    return waLocal() || WA_PADRAO;
+  };
   function waDig(v) {
     v = String(v || ''); var d = v.replace(/\D/g, '');
     if (v.indexOf('+') >= 0) d = d.replace(/^55?/, ''); else if (d.length > 11 && d.indexOf('55') === 0) d = d.slice(2);
@@ -582,6 +671,7 @@
       return req('GET', 'api/painel/estado');
     }).then(function (r) {
       if (!r) return;
+      if (r.status === 403 && r.j && r.j.erro === 'aceitar_termo') return telaTermo(r.j.versao).then(function () { return iniciarPainel(); });
       if (!r.ok) { telaErro('Não consegui carregar o painel agora.'); return; }
       if (r.j.admin && r.j.admin.trocar) return telaTroca(true).then(function () { return iniciarPainel(); });
       ESTADO = r.j; REV = r.j.rev;

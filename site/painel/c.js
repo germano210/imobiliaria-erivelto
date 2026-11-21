@@ -305,7 +305,7 @@ window.ICO14={"cama": ["Cama", "<rect x=\"5\" y=\"7\" width=\"22\" height=\"9\" 
       '<div class="med"><span class="nm">Prazos</span><span class="chips" data-prazos>' + [120, 180, 240, 300, 360, 420].map(function (p) { return '<button class="chip" data-pz="' + p + '" aria-pressed="' + ((fn.prazos || []).indexOf(p) >= 0) + '">' + p / 12 + ' anos</button>'; }).join('') + '</span></div>' +
       '<div class="med"><span class="nm">Tabela</span><span class="chips">' + [['ambas', 'Price e SAC'], ['price', 'Price'], ['sac', 'SAC']].map(function (t) { return '<button class="chip" data-tab2="' + t[0] + '" aria-pressed="' + (fn.tab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</span></div>' +
       '<div class="dica">Bancos e taxas: ' + ((fn.bancos || []).length ? (fn.bancos || []).map(function (b) { return esc(b.n) + ' ' + esc(b.tx) + '%'; }).join(', ') : 'nenhum ainda') + '.</div></div>' +
-      (srv() ? '' : '<div class="dica">Prévia: o que você muda aqui fica só neste navegador.</div>') + '</div>';
+      (srv() ? (PONTE.contaHtml ? PONTE.contaHtml() : '') : '<div class="dica">Prévia: o que você muda aqui fica só neste navegador.</div>') + '</div>';
   }
   function cartao() {
     var im = ATUAL, fs = im.fotos || [];

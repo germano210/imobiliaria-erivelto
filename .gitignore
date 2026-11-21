@@ -1,37 +1,24 @@
-# Documentacao e instrucoes locais, nao usadas para servir o site
-*.md
-*.mdx
-/LEIA-ME.txt
-
-# Segredos e configuracoes locais
+# dados de verdade e de teste (banco, fotos, backups) nunca vão para o Git
+dados/
+dados-teste/
 .env
-.env.*
-!.env.example
-!.env.*.example
+_to_delete/
+__pycache__/
+.pytest_cache/
+*.pyc
+# chaves do age (backup)
+chave-*.txt
+*.age
+# atenção: *.md NÃO é ignorado (documentação entra no Git)
 
-# Sistema operacional e editores
+# sistema operacional e editores
 .DS_Store
 Thumbs.db
 desktop.ini
 .vscode/
 .idea/
-.history/
-
-# Dependencias, builds e caches
-node_modules/
-dist/
-build/
-coverage/
-.cache/
-playwright-report/
-test-results/
-
-# Temporarios e backups
 *.log
 *.tmp
 *.bak
-*.orig
-*~
-
-# Arquivos antigos aguardando exclusao manual
-_to_delete/
+# contexto do agente (mora em D:\trabalhos)
+/AGENTS.md
