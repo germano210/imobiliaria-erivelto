@@ -1,6 +1,6 @@
 r"""Erivelto Santos · site do corretor de imóveis
 
-Um app serve tudo: o site (pasta site/), o painel (/painel/), o aviso de privacidade (/privacidade/) e a API (/api/...).
+Um app serve tudo: o site (pasta site/), o painel (/painel/), o aviso de privacidade (/privacidade/), os termos de uso (/termos/) e a API (/api/...).
 Banco PostgreSQL (ERV_BANCO) e fotos em ERV_DADOS/midia. O contrato da API é o site/ponte.js: o servidor se adapta a ele.
 
 Rodar local:   cd app && ERV_HTTPS=0 ERV_ORIGENS=http://localhost:8000 uvicorn app:app --port 8000
@@ -28,10 +28,10 @@ CHAVE_DADOS = E("ERV_CHAVE_DADOS")              # 32 bytes em base64 (obrigatór
 HTTPS = E("ERV_HTTPS", "1") == "1"              # 0 só em teste local sem https (HSTS e cookie Secure)
 NOINDEX = E("ERV_NOINDEX", "1") == "1"          # 1 = pede aos buscadores para não indexar nada
 ORIGENS = {o.strip().rstrip("/").lower() for o in E("ERV_ORIGENS", "").split(",") if o.strip()}
-TUNEL_TESTE = E("ERV_TUNEL_TESTE", "0") == "1"  # compose.teste.yaml: aceita o link aleatório *.trycloudflare.com
+TUNEL_TESTE = E("ERV_TUNEL_TESTE", "0") == "1"  # compose.yaml (teste): aceita o link aleatório *.trycloudflare.com
 IP_CABECALHO = E("ERV_IP_CABECALHO", "")        # ex.: CF-Connecting-IP quando só o cloudflared fala com o app
 PLANO = E("ERV_PLANO", "erivelto")              # basico | fasico | erivelto (os mesmos nomes do painel)
-AVISO_VERSAO = E("ERV_AVISO_VERSAO", "v2")      # versão do aviso de privacidade que o visitante aceita (site/privacidade)
+AVISO_VERSAO = E("ERV_AVISO_VERSAO", "v3")      # versão do aviso de privacidade que o visitante aceita (site/privacidade)
 TERMO_VERSAO = E("ERV_TERMO_VERSAO", "v1")      # versão do termo que o corretor aceita no 1º acesso (site/painel/termo.html)
 LEADS_MESES = int(E("ERV_LEADS_MESES", "0"))    # 0 = contatos ficam até a pessoa pedir para apagar
 FOTO_LADO = int(E("ERV_FOTO_LADO", "2560"))     # lado maior da foto guardada (o ponte.js envia até 2560 px)
@@ -44,7 +44,11 @@ FOTO_MAX = 3 * 2**20            # o ponte.js nunca envia mais de 2,9 MB
 ESTADO_MAX = 2 * 2**20
 IMOVEL_MAX = 200 * 1024
 COOKIE_P, COOKIE_V = "erv_p", "erv_v"
-TIPOS = ("casa", "apartamento", "terreno")
+TIPOS = ("casa", "sobrado", "apartamento", "terreno", "sitio", "sala", "galpao")   # T41: sobrado, sítio/chácara, sala comercial, galpão
+SITUACOES_IMOVEL = ("disp", "res", "vend")    # T39: disponível, reservado, vendido
+FINALIDADES = ("venda", "aluguel")             # T40
+SITUACOES_LEAD = ("novo", "falei", "visita", "proposta", "fechado", "perdido")   # T43
+RE_COD = re.compile(r"ES-\d{3,5}")             # T42: código do imóvel
 PLANOS = {"basico": {"cid": 3, "im": 3}, "fasico": {"cid": 20, "im": 10}, "erivelto": {"cid": None, "im": None}}
 RE_ID = re.compile(r"[A-Za-z0-9_-]{1,40}")
 RE_FOTO = re.compile(r"(?!api/)(?!.*\.\.)(?!.*//)[A-Za-z0-9_][A-Za-z0-9_./-]{0,150}\.(?:webp|jpe?g|png|avif)")
@@ -119,6 +123,10 @@ create table if not exists termos(
   id serial primary key, usuario_id integer references usuarios(id) on delete set null, email text not null,
   versao text not null, ip text, criado timestamptz not null default now());   -- T24: aceite do termo do painel (fica guardado)
 create index if not exists ix_termos_usuario on termos(usuario_id, versao);
+alter table leads add column if not exists situacao text not null default 'novo';   -- T43: em que pé está (o corretor marca)
+alter table leads add column if not exists nota text;                               -- T43: anotação curta do corretor
+alter table leads add column if not exists pedido text;                             -- T44: dia e período da visita pedida
+alter table leads add column if not exists vender jsonb;                            -- T45: {tipo, cidade, obs} de quem quer vender
 create index if not exists ix_sessoes_expira on sessoes(expira);
 create index if not exists ix_visitas_expira on visitas(expira);
 create index if not exists ix_acessos_criado on acessos(criado);
@@ -158,6 +166,15 @@ def migrar():
         c.execute(ESQUEMA)
         c.execute("insert into estado(id, tipos) values (1, %s) on conflict (id) do nothing",
                   (Jsonb({t: True for t in TIPOS}),))
+        # T42: imóveis antigos sem código ganham um (no rascunho e no publicado, para não aparecer "mudança não publicada")
+        usados = {r["cod"] for r in c.execute("select rascunho->>'cod' as cod from imoveis").fetchall() if r["cod"]}
+        n = max([int(x[3:]) for x in usados if RE_COD.fullmatch(x)] or [0])
+        for r in c.execute("select id from imoveis where coalesce(rascunho->>'cod', '') !~ '^ES-[0-9]{3,5}$' order by ordem").fetchall():
+            n += 1
+            cod = f"ES-{n:03d}"
+            c.execute("""update imoveis set rascunho = jsonb_set(rascunho, '{cod}', to_jsonb(%s::text)),
+                         publicado = case when publicado is null then null else jsonb_set(publicado, '{cod}', to_jsonb(%s::text)) end
+                         where id = %s""", (cod, cod, r["id"]))
 
 
 def q(sql, *a):
@@ -370,7 +387,7 @@ def cabecalhos(request, resp):
     h.setdefault("X-Frame-Options", "SAMEORIGIN" if inicio else "DENY")
     if HTTPS:
         h.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
-    if NOINDEX or caminho.startswith(("/api/", "/painel", "/privacidade", "/midia/")):
+    if NOINDEX or caminho.startswith(("/api/", "/painel", "/privacidade", "/termos", "/midia/")):
         h.setdefault("X-Robots-Tag", "noindex, nofollow")
     if caminho.startswith("/api/"):
         h["Cache-Control"] = "no-store"
@@ -604,6 +621,14 @@ def campo_errado(o):
     for k in ("end", "nomes", "loc", "fn"):
         if o.get(k) is not None and not isinstance(o[k], dict):
             return k
+    if o.get("sit") is not None and o["sit"] not in SITUACOES_IMOVEL:
+        return "situação"
+    if o.get("vendMostra") is not None and not isinstance(o["vendMostra"], bool):
+        return "situação"
+    if o.get("final") is not None and o["final"] not in FINALIDADES:
+        return "finalidade"
+    if o.get("cod") is not None and not (isinstance(o["cod"], str) and RE_COD.fullmatch(o["cod"])):
+        return "código"
     for k in ("infos", "px", "ar"):
         if o.get(k) is not None and not isinstance(o[k], list):
             return k
@@ -861,6 +886,11 @@ def para_visitante(pub, com_conta):
     return o
 
 
+def vai_ao_site(pub):
+    """T39: vendido só aparece se o corretor marcou "mostrar como vendido"."""
+    return pub.get("sit") != "vend" or pub.get("vendMostra") is True
+
+
 def conta_de(request):
     t = request.cookies.get(COOKIE_V)
     if not t:
@@ -873,13 +903,31 @@ def conta_de(request):
 def estado_publico(request: Request):
     c = conta_de(request)
     e = q1("select tipos, mapa_pub from estado where id=1")
-    ims = [para_visitante(i["publicado"], bool(c)) for i in q("select publicado from imoveis where publicado is not null order by ordem")]
+    ims = [para_visitante(i["publicado"], bool(c)) for i in q("select publicado from imoveis where publicado is not null order by ordem")
+           if vai_ao_site(i["publicado"])]
     n = whatsapp_numero()
     conta = {"nome": decifrar(c["nome_cif"], "nome"), "wa": wa_bonito(decifrar(c["wa_cif"], "wa"))} if c else None
     return {"plano": PLANO, "whatsapp": bool(n), "whatsapp_numero": n, "tipos": e["tipos"], "imoveis": ims, "mapa": e["mapa_pub"], "conta": conta}
 
 
 # ---------------- site: conta do visitante, leads e chamadas (T16, T17) ----------------
+def conta_gravar(c, nome, wa):
+    """Dentro da transação: acha a conta pelo WhatsApp (ou cria), corrige o nome e guarda o aceite do aviso. Devolve (id, historico)."""
+    idx = indice_wa(wa)
+    conta = c.execute("select id, nome_cif from contas where wa_hmac = %s for update", (idx,)).fetchone()
+    if conta:
+        # mesmo número com outro nome: o nome é corrigido (como o aviso promete), mas esta sessão não vê o histórico
+        historico = nome_chave(decifrar(conta["nome_cif"], "nome")) == nome_chave(nome)
+        c.execute("update contas set nome_cif = %s, atualizado = now() where id = %s", (cifrar(nome, "nome"), conta["id"]))
+        cid = conta["id"]
+    else:
+        historico = True
+        cid = c.execute("insert into contas(wa_hmac, nome_cif, wa_cif) values (%s, %s, %s) returning id",
+                        (idx, cifrar(nome, "nome"), cifrar(wa, "wa"))).fetchone()["id"]
+    c.execute("insert into aceites(conta_id, versao) values (%s, %s)", (cid, AVISO_VERSAO))
+    return cid, historico
+
+
 @app.post("/api/contas")
 def contas_entrar(request: Request, corpo: dict = Depends(Corpo())):
     espera = gasta(chave_lim("contas-ip", ip_de(request)), 20, 600)
@@ -893,19 +941,8 @@ def contas_entrar(request: Request, corpo: dict = Depends(Corpo())):
         raise Erro(400, erro="invalido", campo="whatsapp")
     if corpo.get("aceite") is not True or corpo.get("versao_aviso") != AVISO_VERSAO:
         raise Erro(400, erro="aceite_obrigatorio", versao=AVISO_VERSAO)
-    idx = indice_wa(wa)
     with POOL.connection() as c:
-        conta = c.execute("select id, nome_cif from contas where wa_hmac = %s for update", (idx,)).fetchone()
-        if conta:
-            # mesmo número com outro nome: o nome é corrigido (como o aviso promete), mas esta sessão não vê o histórico
-            historico = nome_chave(decifrar(conta["nome_cif"], "nome")) == nome_chave(nome)
-            c.execute("update contas set nome_cif = %s, atualizado = now() where id = %s", (cifrar(nome, "nome"), conta["id"]))
-            cid = conta["id"]
-        else:
-            historico = True
-            cid = c.execute("insert into contas(wa_hmac, nome_cif, wa_cif) values (%s, %s, %s) returning id",
-                            (idx, cifrar(nome, "nome"), cifrar(wa, "wa"))).fetchone()["id"]
-        c.execute("insert into aceites(conta_id, versao) values (%s, %s)", (cid, AVISO_VERSAO))
+        cid, historico = conta_gravar(c, nome, wa)
         velho = request.cookies.get(COOKIE_V)
         if velho:
             c.execute("delete from visitas where hash = %s", (hash_token(velho),))
@@ -941,11 +978,12 @@ def leads_novo(request: Request, corpo: dict = Depends(Corpo())):
     if iid is not None and not (isinstance(iid, str) and q1("select 1 as x from imoveis where id=%s and publicado is not null", iid)):
         iid = None
     imovel, cidade = texto_curto(corpo.get("imovel"), 200), texto_curto(corpo.get("cidade"), 80)
+    pedido = texto_curto(corpo.get("pedido"), 120) if via == "visita" else None    # T44: "sáb, 23/11, à tarde"
     with POOL.connection() as c:
         l = c.execute("select * from leads where conta_id = %s for update", (conta["id"],)).fetchone()
         if not l:
-            c.execute("insert into leads(conta_id, via, imovel_id, imovel, cidade) values (%s, %s, %s, %s, %s)",
-                      (conta["id"], J([via]), iid, imovel, cidade))
+            c.execute("insert into leads(conta_id, via, imovel_id, imovel, cidade, pedido) values (%s, %s, %s, %s, %s, %s)",
+                      (conta["id"], J([via]), iid, imovel, cidade, pedido))
         else:
             vias = l["via"] if via in l["via"] else (l["via"] + [via])[:12]
             if iid:        # como o site faz: o imóvel novo substitui; sem imóvel, a cidade só preenche o que faltava
@@ -954,6 +992,8 @@ def leads_novo(request: Request, corpo: dict = Depends(Corpo())):
             else:
                 c.execute("update leads set via=%s, cidade=%s, atualizado=now() where id=%s",
                           (J(vias), l["cidade"] if l["cidade"] not in (None, "", "-") else cidade, l["id"]))
+            if pedido:
+                c.execute("update leads set pedido=%s where id=%s", (pedido, l["id"]))
         c.execute("update contas set atualizado = now() where id = %s", (conta["id"],))
     return {"ok": True}
 
@@ -965,11 +1005,63 @@ def painel_leads(u=Depends(admin)):
                   from leads l join contas c on c.id = l.conta_id order by l.atualizado"""):
         m = re.match(r'"(.*)" · ', l["imovel"] or "")
         o = {"nome": decifrar(l["nome_cif"], "nome"), "wa": wa_bonito(decifrar(l["wa_cif"], "wa")), "imovel": l["imovel"] or "-",
-             "id": l["imovel_id"], "cidade": l["cidade"] or "-", "t": l["t"], "via": l["via"]}
+             "id": l["imovel_id"], "cidade": l["cidade"] or "-", "t": l["t"], "via": l["via"],
+             "lid": l["id"], "sit": l["situacao"], "nota": l["nota"] or "", "pedido": l["pedido"], "vender": l["vender"]}
         if m:
             o["nm"] = m.group(1)
         saida.append(o)
     return {"leads": saida}
+
+
+@app.put("/api/painel/leads/{lid}")
+def painel_lead_mudar(lid: int, corpo: dict = Depends(Corpo()), u=Depends(admin)):
+    """T43: o corretor marca em que pé está a conversa e escreve uma anotação curta."""
+    sit, nota = corpo.get("sit"), corpo.get("nota")
+    if sit is not None and sit not in SITUACOES_LEAD:
+        raise Erro(400, erro="invalido", campo="situação")
+    if nota is not None and (not isinstance(nota, str) or len(nota) > 1000):
+        raise Erro(400, erro="invalido", campo="nota")
+    if sit is None and nota is None:
+        raise Erro(400, erro="invalido", campo="nada")
+    nota = "".join(ch for ch in nota if ch.isprintable() or ch == "\n").strip() if nota is not None else None
+    r = q("""update leads set situacao = coalesce(%s, situacao), nota = case when %s then %s else nota end
+             where id = %s returning id""", sit, nota is not None, nota, lid)
+    if not r:
+        raise Erro(404, erro="nao_encontrado")
+    return {"ok": True}
+
+
+# ---------------- T45: "Quero vender meu imóvel" ----------------
+TIPOS_VENDER = TIPOS + ("outro",)
+
+
+@app.post("/api/vender")
+def vender(request: Request, corpo: dict = Depends(Corpo())):
+    if gasta(chave_lim("vender-ip", ip_de(request)), 10, 3600):
+        raise Erro(429, erro="muitas_tentativas")
+    nome = nome_limpo(corpo.get("nome"))
+    if not 2 <= len(nome) <= 60:
+        raise Erro(400, erro="invalido", campo="nome")
+    wa = wa_visitante(corpo.get("whatsapp"))
+    if not wa:
+        raise Erro(400, erro="invalido", campo="whatsapp")
+    if corpo.get("tipo") not in TIPOS_VENDER:
+        raise Erro(400, erro="invalido", campo="tipo")
+    cidade, obs = texto_curto(corpo.get("cidade"), 80), texto_curto(corpo.get("obs"), 300) or ""
+    if not cidade or len(cidade) < 2:
+        raise Erro(400, erro="invalido", campo="cidade")
+    if corpo.get("aceite") is not True or corpo.get("versao_aviso") != AVISO_VERSAO:
+        raise Erro(400, erro="aceite_obrigatorio", versao=AVISO_VERSAO)
+    dados = {"tipo": corpo["tipo"], "cidade": cidade, "obs": obs}
+    with POOL.connection() as c:
+        cid, _ = conta_gravar(c, nome, wa)
+        l = c.execute("select * from leads where conta_id = %s for update", (cid,)).fetchone()
+        if not l:
+            c.execute("insert into leads(conta_id, via, cidade, vender) values (%s, %s, %s, %s)", (cid, J(["vender"]), cidade, J(dados)))
+        else:
+            vias = l["via"] if "vender" in l["via"] else (l["via"] + ["vender"])[:12]
+            c.execute("update leads set via=%s, vender=%s, atualizado=now() where id=%s", (J(vias), J(dados), l["id"]))
+    return {"ok": True}
 
 
 @app.post("/api/chamadas")
@@ -1029,7 +1121,9 @@ def privacidade_meus_dados(request: Request):
         return j
     j["primeira_vez"] = iso(c["criado"])
     j["aceites_do_aviso"] = [{"versao": a["versao"], "data": iso(a["criado"])} for a in q("select versao, criado from aceites where conta_id=%s order by id", c["id"])]
-    j["contatos"] = [{"imovel": l["imovel"] or "-", "cidade": l["cidade"] or "-", "por": l["via"], "data": iso(l["atualizado"])}
+    j["contatos"] = [{k: v for k, v in {"imovel": l["imovel"] or "-", "cidade": l["cidade"] or "-", "por": l["via"], "data": iso(l["atualizado"]),
+                      "visita_pedida": l["pedido"], "quero_vender": l["vender"], "situacao_marcada_pelo_corretor": l["situacao"],
+                      "anotacao_do_corretor": l["nota"]}.items() if v not in (None, "")}
                      for l in q("select * from leads where conta_id=%s", c["id"])]
     return j
 
@@ -1061,7 +1155,7 @@ def midia(nome: str, request: Request):
 
 @app.api_route("/{caminho:path}", methods=["GET", "HEAD"])
 def site(caminho: str, request: Request):
-    if caminho in ("painel", "privacidade"):
+    if caminho in ("painel", "privacidade", "termos"):
         return RedirectResponse("/" + caminho + "/", 308)
     partes = caminho.split("/") if caminho else []
     if partes and partes[-1] == "":

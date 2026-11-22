@@ -209,3 +209,23 @@ body.c-on{overflow:hidden}
 #c-app .ficha,#c-app .pill{display:inline-flex;align-items:center;gap:6px;height:30px;box-sizing:border-box;background:#eef3f7;border:0;border-radius:10px;padding:0 10px 0 8px;font:400 13px Poppins,system-ui,sans-serif;color:#2f3b45;white-space:nowrap}
 #c-app .ficha .ix,#c-app .pill .ix{width:18px;height:18px;color:#01416b}
 #c-app .fichas,#c-app .pills{gap:6px}
+/* T39–T43: código, situação, aluguel e contatos */
+#c-app .tags{display:flex;flex-wrap:wrap;gap:4px}
+#c-app .tag.cod{background:#eef0f2;color:#3b4650;letter-spacing:.04em}
+#c-app .tag.alug{background:#01416b;color:#fff}
+#c-app .tag.s-res{background:#f6e6b4;color:#6b4c00}
+#c-app .tag.s-vend{background:#1c1c1c;color:#fff}
+#c-app .lin.col{flex-direction:column;align-items:stretch;gap:8px;padding-top:10px;padding-bottom:10px}
+#c-app .lin.cod .v{font-weight:500;letter-spacing:.05em}
+#c-app .ct-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#c-app .ct-f{margin:4px 0 12px}
+#c-app .ct-f .chip{font-size:13px;padding:8px 12px}
+#c-app .chip .n{opacity:.7;font-size:12px}
+#c-app .lead{background:#fff;border-radius:20px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+#c-app .ld-l1{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#c-app .lead .s{font-size:13px;color:var(--mu)}
+#c-app .ld-pd{font-size:13px;background:#f6f3ea;border-radius:10px;padding:6px 10px}
+#c-app .ld-sit{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#c-app .ld-sit select{min-height:40px;border-radius:10px;border:1px solid #d6dde3;background:#fff;padding:0 10px;font:inherit;font-size:14px}
+#c-app .ld-nota{width:100%;min-height:44px;border-radius:12px;border:1px solid #d6dde3;padding:8px 10px;font:inherit;font-size:14px;resize:vertical;box-sizing:border-box}
+#c-app .ld-sit select:focus-visible,#c-app .ld-nota:focus-visible{outline:2px solid var(--az);outline-offset:1px}

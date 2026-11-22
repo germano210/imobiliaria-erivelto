@@ -1,4 +1,4 @@
-"""T03 (aviso de privacidade v2 coerente com o servidor), T05 (CRECI + link Privacidade) e T23 (WhatsApp sem número de teste).
+"""T03 (aviso de privacidade v3 coerente com o servidor), T05 (CRECI + link Privacidade) e T23 (WhatsApp sem número de teste).
 Aqui fica o que dá para conferir sem navegador; o resto está no roteiro de navegador (testes/e2e/roteiro.py)."""
 import re
 
@@ -10,18 +10,18 @@ MARIA = {"nome": "Maria Silva", "whatsapp": "(51) 99999-1234", "aceite": True}
 
 
 def test_t03_versao_v2_igual_em_todo_lugar():
-    assert re.search(r'id="pv-versao" data-versao="v2">Versão v2 ', AVISO)
-    assert re.search(r"var AVISO_VERSAO = 'v2';", PONTE) and "versao_aviso: AVISO_VERSAO" in PONTE and "'v1'" not in PONTE
-    assert 'AVISO_VERSAO = E("ERV_AVISO_VERSAO", "v2")' in (RAIZ / "app/app.py").read_text()
-    assert "\nERV_AVISO_VERSAO=v2\n" in (RAIZ / ".env.example").read_text()
-    assert erv.AVISO_VERSAO == "v2"
+    assert re.search(r'id="pv-versao" data-versao="v3">Versão v3 ', AVISO)
+    assert re.search(r"var AVISO_VERSAO = 'v3';", PONTE) and "versao_aviso: AVISO_VERSAO" in PONTE and "'v1'" not in PONTE
+    assert 'AVISO_VERSAO = E("ERV_AVISO_VERSAO", "v3")' in (RAIZ / "app/app.py").read_text()
+    assert "\nERV_AVISO_VERSAO=v3\n" in (RAIZ / ".env.example").read_text()
+    assert erv.AVISO_VERSAO == "v3"
 
 
 def test_t03_servidor_so_aceita_a_versao_atual(c):
     r = c.post("/api/contas", json=dict(MARIA, versao_aviso="v1"))
-    assert r.status_code == 400 and r.json() == {"erro": "aceite_obrigatorio", "versao": "v2"}
-    assert c.post("/api/contas", json=dict(MARIA, versao_aviso="v2")).status_code == 200
-    assert erv.q1("select versao from aceites")["versao"] == "v2"
+    assert r.status_code == 400 and r.json() == {"erro": "aceite_obrigatorio", "versao": "v3"}
+    assert c.post("/api/contas", json=dict(MARIA, versao_aviso="v3")).status_code == 200
+    assert erv.q1("select versao from aceites")["versao"] == "v3"
 
 
 def test_t03_pagina_tem_as_secoes_o_aviso_de_modelo_e_o_formulario(c):
@@ -38,7 +38,7 @@ def test_t03_pagina_tem_as_secoes_o_aviso_de_modelo_e_o_formulario(c):
     assert {"pv-apagar", "pv-nome", "pv-wa", "pv-msg", "pv-ver", "pv-dados", "pv-wa-link"} <= usados
     for i in usados:
         assert AVISO.count(f'id="{i}"') == 1, i
-    assert "termos" not in AVISO.lower() and "termos" not in PONTE.lower()      # não existe página de Termos de uso: nada de link para ela
+    assert "termos" not in AVISO.lower()      # o aviso v3 não cita os Termos de uso (T04); se passar a citar, é texto novo: subir a versão
 
 
 def test_t03_o_que_o_aviso_promete_e_o_que_o_servidor_faz():
@@ -59,7 +59,7 @@ def test_t03_o_que_o_aviso_promete_e_o_que_o_servidor_faz():
 
 def test_t03_apagar_leva_tudo_que_o_aviso_diz(c, painel):
     publicar(painel)
-    assert c.post("/api/contas", json=dict(MARIA, versao_aviso="v2")).status_code == 200
+    assert c.post("/api/contas", json=dict(MARIA, versao_aviso="v3")).status_code == 200
     assert c.post("/api/leads", json={"via": "login", "imovel_id": "casa1", "imovel": "Casa", "cidade": "Osório"}).status_code == 200
     r = cliente().post("/api/privacidade/apagar", json={"nome": "maria silva", "whatsapp": "51 99999 1234"})
     assert r.json()["apagado"] is True
@@ -69,6 +69,7 @@ def test_t03_apagar_leva_tudo_que_o_aviso_diz(c, painel):
 
 def test_t05_rodape_com_creci_e_link_privacidade_no_ponte():
     assert "CRECI 63.464" in PONTE and "href: 'privacidade/', texto: 'Privacidade'" in PONTE and "id: 'pt-rodape'" in PONTE
+    assert "href: 'termos/', texto: 'Termos'" in PONTE      # T04
     assert ".pt-rodape{" in (RAIZ / "site/ponte.css").read_text()
 
 

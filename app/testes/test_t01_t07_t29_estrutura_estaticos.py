@@ -8,7 +8,7 @@ from conftest import RAIZ, erv
 
 def test_t01_estrutura_de_arquivos():
     for f in ("site/index.html", "site/ponte.js", "app/app.py", "app/requirements.txt", ".env.example", ".gitignore", "Dockerfile",
-              "compose.teste.yaml", "backup.sh", "restaurar.sh"):
+              "compose.yaml", "compose.producao.yaml", "backup.sh", "restaurar.sh"):
         assert (RAIZ / f).is_file(), f
     ignora = (RAIZ / ".gitignore").read_text().splitlines()
     for linha in ("dados/", "dados-teste/", ".env", "_to_delete/", "__pycache__/"):
@@ -110,7 +110,7 @@ def test_t29_range_nos_videos(c):
 
 
 def test_compose_de_teste():
-    novo = yaml.safe_load((RAIZ / "compose.teste.yaml").read_text())
+    novo = yaml.safe_load((RAIZ / "compose.yaml").read_text())
     s = novo["services"]
     assert set(s) == {"erivelto", "banco", "tunel"}
     assert s["erivelto"]["ports"] == ["127.0.0.1:8090:8000"]
@@ -118,15 +118,19 @@ def test_compose_de_teste():
     assert s["banco"]["volumes"] == ["banco:/var/lib/postgresql/data"] and "fotos:/dados" in s["erivelto"]["volumes"]
     assert set(novo["volumes"]) == {"banco", "fotos"}
     assert not any(str(v).startswith(("./dados", "/")) for v in s["banco"]["volumes"] + s["erivelto"]["volumes"] if "site" not in str(v))
-    texto = (RAIZ / "compose.teste.yaml").read_text()
-    for trecho in ("up -d --build", "logs tunel", "python app.py usuario", "compose.teste.yaml down\n", "down -v"):
+    texto = (RAIZ / "compose.yaml").read_text()
+    for trecho in ("docker compose up -d --build", "docker compose logs tunel", "docker compose exec erivelto python app.py usuario",
+                   "docker compose down\n", "down -v"):
         assert trecho in texto, trecho
+    # é o compose PADRÃO da pasta (sem -f) e não depende de .env: nenhuma variável ${...} para preencher
+    assert "-f compose" not in texto.replace("-f compose.producao.yaml", "") and "${" not in texto and "env_file" not in texto
+    assert novo["name"] == "erivelto-teste" and s["erivelto"]["container_name"] == "erivelto-teste"
     docker = (RAIZ / "Dockerfile").read_text()
     assert "mkdir -p /dados/midia && chown -R erv /dados" in docker      # o volume de fotos herda este dono
-    antigo = RAIZ / "compose.teste.yaml.antigo"
+    antigo = RAIZ / "compose.yaml.antigo"
     if antigo.is_file():
         assert s["tunel"] == yaml.safe_load(antigo.read_text())["services"]["tunel"]
-    assert "SÓ TESTE" in (RAIZ / "compose.teste.yaml").read_text()
+    assert "SÓ TESTE" in (RAIZ / "compose.yaml").read_text()
 
 
 def test_scripts_tem_sintaxe_valida():

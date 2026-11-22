@@ -1,0 +1,108 @@
+# Erivelto · PRODUÇÃO (site + painel + API + banco próprio). Para testar na sua máquina, use o compose.yaml (o padrão da pasta).
+# TODO comando de produção leva -f compose.producao.yaml (sem ele, o Docker usa o compose de TESTE).
+# !!! Este arquivo NÃO foi executado por quem o escreveu (não havia Docker no ambiente). O 1º "up" no servidor é a conferência. !!!
+#
+# Antes da 1ª vez (na pasta do projeto, no servidor):
+#   1. cp .env.example .env   e preencha (ver README, "Instalar no servidor"). Nenhum segredo fica neste arquivo.
+#   2. mkdir -p dados/midia && sudo chown -R 1000:1000 dados     (as fotos ficam em ./dados/midia; o app roda como usuário 1000)
+# Subir / atualizar:
+#      docker compose -f compose.producao.yaml up -d --build
+#      docker compose -f compose.producao.yaml ps                                   (os dois serviços devem ficar "healthy")
+#      curl -s http://127.0.0.1:8080/api/saude             (troque 8080 se mudou ERV_PORTA) -> {"ok":true,"servico":"erivelto"}
+# Criar o usuário do painel (mostra a senha temporária uma vez):
+#      docker compose -f compose.producao.yaml exec erivelto python app.py usuario email@exemplo.com "Nome"
+# Parar (os dados ficam):   docker compose -f compose.producao.yaml down          NUNCA use "down -v" aqui: apaga o banco.
+#
+# Túnel do Cloudflare, duas formas (escolha UMA):
+#   a) Já existe um cloudflared no servidor para o Erivelto: aponte o domínio, no painel do Cloudflare, para
+#      http://127.0.0.1:8080 (a porta de ERV_PORTA). Não precisa de mais nada aqui.
+#   b) Túnel dentro deste compose: ponha no .env  ERV_TUNEL_TOKEN=<token do túnel>  e  COMPOSE_PROFILES=tunel
+#      e, no painel do Cloudflare, aponte o domínio para  http://erivelto:8000.
+#   O túnel do Erivelto fica numa conta do Cloudflare DIFERENTE da dos outros sites do servidor: token dessa conta.
+#
+# Onde ficam os dados:
+#   banco -> volume do Docker "erivelto_banco" (o backup.sh tira a cópia com pg_dump, não precisa da pasta)
+#   fotos -> pasta ./dados/midia (o backup.sh lê daqui)
+name: erivelto
+services:
+  banco:
+    image: postgres:17-alpine
+    container_name: erivelto-banco
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?preencha POSTGRES_USER no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?preencha POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: ${POSTGRES_DB:?preencha POSTGRES_DB no .env}
+    volumes:
+      - banco:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    logging: &registro
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # sem "ports": o banco só é visto pelos containers deste compose
+
+  erivelto:
+    build: .
+    image: erivelto-app
+    container_name: erivelto
+    restart: unless-stopped
+    environment:
+      # Só o que o app usa entra no container (o token do túnel e a chave do backup ficam de fora).
+      # Criou uma variável ERV_ nova no app? Acrescente aqui. Vazio = o app usa o padrão dele.
+      # O endereço do banco é montado com os mesmos valores do serviço acima (o ERV_BANCO do .env não é usado aqui).
+      # Por isso a senha do banco deve ter só letras e números (ex.: openssl rand -hex 24).
+      ERV_BANCO: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@banco:5432/${POSTGRES_DB}
+      ERV_CHAVE_DADOS: ${ERV_CHAVE_DADOS:?preencha ERV_CHAVE_DADOS no .env (python app/app.py chave)}
+      ERV_ORIGENS: ${ERV_ORIGENS:?preencha ERV_ORIGENS no .env (https://dominio, sem barra no fim)}
+      ERV_SITE: /srv/site
+      ERV_DADOS: /dados
+      ERV_HTTPS: "1"
+      ERV_TUNEL_TESTE: "0"
+      ERV_NOINDEX: ${ERV_NOINDEX:-1}
+      ERV_IP_CABECALHO: ${ERV_IP_CABECALHO:-CF-Connecting-IP}
+      ERV_PLANO: ${ERV_PLANO:-}
+      ERV_AVISO_VERSAO: ${ERV_AVISO_VERSAO:-}
+      ERV_TERMO_VERSAO: ${ERV_TERMO_VERSAO:-}
+      ERV_LEADS_MESES: ${ERV_LEADS_MESES:-}
+      ERV_FOTO_LADO: ${ERV_FOTO_LADO:-}
+      ERV_WHATSAPP: ${ERV_WHATSAPP:-}
+    volumes:
+      - ./dados:/dados
+    ports:
+      - "127.0.0.1:${ERV_PORTA:-8080}:8000"     # só a própria máquina alcança; para fora, só pelo túnel
+    depends_on:
+      banco:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:      # igual ao do Dockerfile, mas confere mais cedo (o túnel espera o app ficar "healthy")
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/api/saude')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging: *registro
+
+  tunel:
+    profiles: ["tunel"]      # só sobe com COMPOSE_PROFILES=tunel no .env (forma "b" acima)
+    image: cloudflare/cloudflared:2026.10.7
+    container_name: erivelto-tunel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${ERV_TUNEL_TOKEN:-}
+    depends_on:
+      erivelto:
+        condition: service_healthy
+    logging: *registro
+
+volumes:
+  banco:

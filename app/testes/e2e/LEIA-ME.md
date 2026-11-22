@@ -22,7 +22,7 @@ Sai com código 0 quando todos os passos passam. Com `E2E_DEBUG=1` mostra o erro
 Para só deixar o site no ar e olhar à mão: `python3 app/testes/e2e/servidor_local.py voce@exemplo.com`
 (mostra o endereço e a senha temporária; Ctrl+C desliga e apaga).
 
-## O que o roteiro faz (18 passos, em cada aparelho)
+## O que o roteiro faz (19 passos, em cada aparelho)
 
 1. Cria o usuário pela linha de comando.
 2. Segurança básica: painel sem login dá 401, senha errada não entra, `/.git/config` e `/app/app.py` dão 404.
@@ -30,14 +30,15 @@ Para só deixar o site no ar e olhar à mão: `python3 app/testes/e2e/servidor_l
 4. Termo do painel: aparece antes de tudo, sem aceite a API dá 403, o aceite fica no banco.
 5. Cadastra um imóvel pela interface (tipo, preço, cidade, 1 foto enviada) e publica.
 6. Abre o site em outro navegador e vê o imóvel.
-7. Linha com CRECI e link Privacidade na busca e nos resultados.
+7. Linha com CRECI e links Privacidade, Termos e Quero vender na busca e nos resultados.
 8. Sem número salvo, o botão do WhatsApp só avisa.
 9. Visitante entra (nome + WhatsApp + aceite) e vira contato no painel.
 10. Salva o WhatsApp do site no painel.
 11. O botão abre `https://wa.me/55…` com a mensagem pronta; a chamada aparece no painel.
 12. Troca o número no painel. 13. O site usa o número novo.
-14. Privacidade: versão v2, ver os dados, apagar os dados.
-15. Aba Site do painel. 16. Troca de senha. 17. Sair. 18. Sem erros de JavaScript.
+14. T39–T45: reservado e código no site, vendido escondido, "Para alugar" no filtro, pedir visita, quero vender, situação, anotação e planilha dos contatos.
+15. Privacidade: versão v3, ver os dados, apagar os dados.
+16. Aba Site do painel. 17. Troca de senha. 18. Sair. 19. Sem erros de JavaScript.
 
 ## O que este roteiro NÃO cobre
 

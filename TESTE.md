@@ -1,9 +1,9 @@
 # Roteiro de aceite (conferir à mão)
 
-Faça primeiro no link de teste (`https://....trycloudflare.com`, ver `compose.teste.yaml`) e depois no domínio `https://eriveltosantosimoveis.com.br`.
+Faça primeiro no link de teste (`https://....trycloudflare.com`, ver `compose.yaml`) e depois no domínio `https://eriveltosantosimoveis.com.br`.
 Use dados inventados no teste. Marque cada passo: ok ou não ok. Anote o aparelho e o navegador.
 
-Antes de começar: crie o usuário (`docker exec -it erivelto-teste python app.py usuario voce@exemplo.com "Teste"`) e guarde a senha temporária.
+Antes de começar: crie o usuário (`docker compose exec erivelto python app.py usuario voce@exemplo.com "Teste"`) e guarde a senha temporária.
 
 ## A. Painel, 1º acesso (celular)
 
@@ -44,7 +44,7 @@ Antes de começar: crie o usuário (`docker exec -it erivelto-teste python app.p
 
 | # | Faça | Deve acontecer |
 |---|---|---|
-| D1 | Abra o site em janela anônima | Carrega e mostra a busca. No pé: "Erivelto Santos · Corretor de imóveis · CRECI 63.464 · Privacidade" |
+| D1 | Abra o site em janela anônima | Carrega e mostra a busca. No pé: "Erivelto Santos · Corretor de imóveis · CRECI 63.464 · Privacidade · Termos" |
 | D2 | Toque "Ver imóveis disponíveis" | Mostra o imóvel publicado, com foto, preço e cidade. A linha do pé continua e não cobre botão |
 | D3 | Toque "Sobre a casa" | Abre a ficha. A linha do pé some |
 | D4 | Toque "Login", preencha nome e WhatsApp sem marcar o aceite | Botão "Entrar" apagado |
@@ -57,11 +57,26 @@ Antes de começar: crie o usuário (`docker exec -it erivelto-teste python app.p
 
 | # | Faça | Deve acontecer |
 |---|---|---|
-| E1 | No pé do site, toque "Privacidade" | Abre o aviso, "Versão v2" |
-| E2 | No aparelho em que entrou como visitante, toque "Ver os meus dados" | Mostra nome, WhatsApp, aceite (v2) e o contato |
+| E1 | No pé do site, toque "Privacidade" | Abre o aviso, "Versão v3" |
+| E2 | No aparelho em que entrou como visitante, toque "Ver os meus dados" | Mostra nome, WhatsApp, aceite (v3) e o contato |
 | E3 | Em OUTRO aparelho, "Apagar meus dados" com o WhatsApp certo e um nome errado | "Não conseguimos confirmar..." Nada é apagado |
 | E4 | Com o nome e o WhatsApp certos | "Pronto: seus dados foram apagados." |
 | E5 | Painel > Contatos (recarregue) | O contato sumiu |
+| E7 | No pé do site, toque "Quero vender", preencha e envie | "Recebido". O pedido aparece em Painel > Contatos, com "Quer vender" |
+| E6 | No pé do site, toque "Termos" | Abre os termos de uso, "Versão v1". Antes de publicar no domínio: nenhum trecho entre [colchetes] |
+
+## H. Situação, aluguel, código e contatos (T39–T45)
+
+| # | Faça | Deve acontecer |
+|---|---|---|
+| H1 | Painel > Imóveis | Cada imóvel tem um código (ES-001…) |
+| H2 | Abra um imóvel, toque "Reservado" e "Publicar mudanças"; abra o site | O cartão mostra os selos "Reservado" e o código |
+| H3 | Marque "Vendido" (sem "Mostrar no site como vendido") e publique | O imóvel some do site e continua no painel |
+| H4 | Crie um imóvel "Para: Aluguel", com preço 2500, e publique | No site aparece "Para alugar" e "R$ 2.500/mês"; no filtro "Tipo" aparece "Para alugar"; não tem simulação |
+| H5 | Crie um sobrado (ou galpão, sala, sítio) e publique | O tipo aparece no filtro "Tipo" do site |
+| H6 | Entre no site como visitante, abra a ficha, "Pedir visita", escolha dia e período | Abre o WhatsApp com a mensagem citando o código, o dia e o período. Em Painel > Contatos: "Pediu visita: …" |
+| H7 | Painel > Contatos: mude a situação e escreva uma anotação; recarregue | Ficam salvas; o filtro por situação mostra o contato |
+| H8 | "Baixar planilha (CSV)" e abra no Excel | Uma linha por contato, com acentos certos |
 
 ## F. Senha e sair
 
@@ -80,8 +95,8 @@ Antes de começar: crie o usuário (`docker exec -it erivelto-teste python app.p
 | G1 | Sem estar logado, abra `/api/painel/estado` e `/api/painel/leads` | `{"erro":"sem_sessao"}` (401). Nenhum dado |
 | G2 | Abra `/.git/config` | "Não encontrado." (404) |
 | G3 | Abra `/app/app.py` | "Não encontrado." (404) |
-| G4 | Abra `/.env` e `/compose.teste.yaml` | 404 |
+| G4 | Abra `/.env` e `/compose.yaml` | 404 |
 | G5 | Erre a senha do painel 5 vezes | "Muitas tentativas. Tente de novo em 15 min." |
 | G6 | Só no domínio: o endereço abre com cadeado (https) | Sim |
 
-Depois do G5, para liberar na hora: `python app.py senha email` gera senha nova e zera o bloqueio do e-mail.
+Depois do G5, para liberar na hora: `docker compose exec erivelto python app.py senha email` gera senha nova e zera o bloqueio do e-mail.

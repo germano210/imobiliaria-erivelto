@@ -9,7 +9,7 @@ MAPA = {"modo": "perto", "cidade": "Santo Antônio da Patrulha", "raio": 42, "no
 def test_t13_estado_inicial_no_formato_do_painel(painel):
     e = painel.get("/api/painel/estado").json()
     assert e["v"] == 3 and e["rev"] == 1 and e["imoveis"] == [] and e["exemplo"] is False
-    assert e["tipos"] == {"casa": True, "apartamento": True, "terreno": True}
+    assert e["tipos"] == {t: True for t in erv.TIPOS} and set(erv.TIPOS) >= {"casa", "apartamento", "terreno"}
     assert e["admin"] == {"email": "corretor@exemplo.com", "nome": "Corretor", "trocar": False} and e["plano"] == "erivelto"
 
 
@@ -109,7 +109,7 @@ def test_t14_sem_conta_nao_sai_rua_numero_nem_ponto(painel, c):
 def test_t14_com_conta_sai_so_o_que_o_corretor_marcou(painel, c):
     publicar(painel)
     publicar(painel, imovel("casa2", nomes={"rua": False, "num": True, "bairro": False}))
-    assert c.post("/api/contas", json={"nome": "Maria Silva", "whatsapp": "(51) 99999-1234", "aceite": True, "versao_aviso": "v2"}).status_code == 200
+    assert c.post("/api/contas", json={"nome": "Maria Silva", "whatsapp": "(51) 99999-1234", "aceite": True, "versao_aviso": "v3"}).status_code == 200
     e = c.get("/api/estado").json()
     a, b = e["imoveis"]
     assert a["end"] == {"bairro": "Centro", "rua": "Rua das Flores", "num": "123"} and a["loc"] == {"ll": [-50.5201, -29.8183]}

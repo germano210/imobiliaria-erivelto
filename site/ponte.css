@@ -83,3 +83,24 @@
 .ep1-cb .ep1-mn[open]{flex:1 0 100%;order:3}
 .ep1-cb .ep1-mn[open] .ep1-mm2{position:static;box-shadow:none;margin-top:6px}
 details.ep1-hq,details.ep1-mn,details.pt-mn,details.ep23-mais{border:0;border-radius:0;padding:0}
+/* T39, T40, T42: selos no cartão e na ficha (código, para alugar, reservado, vendido). Medidas em --q, como o resto do site. */
+.pt-selos{position:absolute;left:calc(3*var(--q,4px));top:calc(3*var(--q,4px));z-index:2;display:flex;flex-wrap:wrap;gap:calc(1.2*var(--q,4px));max-width:calc(100% - 6*var(--q,4px));pointer-events:none}
+.ex12~.pt-selos{top:calc(9.5*var(--q,4px))}
+.pt-selo{border-radius:999px;padding:calc(.8*var(--q,4px)) calc(2.2*var(--q,4px));font:600 calc(2.3*var(--q,4px))/1.2 Poppins,system-ui,sans-serif;letter-spacing:.03em;background:rgba(255,255,255,.92);color:#111;white-space:nowrap}
+.pt-selo.vend{background:#111;color:#fff;text-transform:uppercase}
+.pt-selo.res{background:#d9a520;color:#111;text-transform:uppercase}
+.pt-selo.alug{background:#01416b;color:#fff}
+.pt-selo.cod{font-weight:500;letter-spacing:.06em}
+.pt-selos.f{position:static;display:flex;margin:calc(1.4*var(--q,4px)) 0 0}
+.pt-selos.f .pt-selo{background:#eee;font-size:calc(2.1*var(--q,4px))}
+.pt-selos.f .pt-selo.vend{background:#111}.pt-selos.f .pt-selo.res{background:#d9a520}.pt-selos.f .pt-selo.alug{background:#01416b}
+/* T44: "Pedir visita" logo acima do botão do WhatsApp da ficha */
+.pt-visita{display:block;margin:calc(3*var(--q,4px)) auto 0;min-height:40px;padding:0 calc(4*var(--q,4px));border:1px solid currentColor;border-radius:999px;background:transparent;color:inherit;font:500 calc(2.8*var(--q,4px))/1 Poppins,system-ui,sans-serif;cursor:pointer}
+.pt-visita:focus-visible,.pt-chip:focus-visible{outline:2px solid var(--acc,#FF4F1F);outline-offset:2px}
+/* T44 e T45: escolhas em pílulas e caixa de texto */
+.pt-chips{display:flex;flex-wrap:wrap;gap:8px}
+.pt-chip{min-height:40px;padding:0 14px;border:1px solid var(--line,#D9D6CC);border-radius:999px;background:var(--bg,#F2F1EC);color:var(--ink,#121211);font:inherit;font-size:14px;cursor:pointer}
+.pt-chip[aria-checked="true"]{background:var(--ink,#121211);color:var(--surf,#fff);border-color:var(--ink,#121211)}
+.pt-area{min-height:84px;padding:10px 12px;resize:vertical;line-height:1.4}
+#pt-vender .pt-cartao{margin:auto}
+#pt-vender,#pt-visita{z-index:2147483200}   /* por cima da linha do rodapé */

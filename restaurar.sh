@@ -18,7 +18,7 @@ cd "$(dirname "$0")"
 ENV_ARQ="${ERV_ENV:-.env}"
 if [ -f "$ENV_ARQ" ]; then set -a; . "$ENV_ARQ"; set +a; fi
 SERVICO="${ERV_BACKUP_SERVICO:-banco}"
-DC=(docker compose); [ -n "${ERV_BACKUP_COMPOSE:-}" ] && DC+=(-f "$ERV_BACKUP_COMPOSE")
+DC=(docker compose -f "${ERV_BACKUP_COMPOSE:-compose.producao.yaml}")   # o compose.yaml da pasta é o de TESTE
 if [ "${ERV_RESTAURAR_LOCAL:-0}" = "1" ]; then
   pg() { local f="$1"; shift; "$f" "$@"; }
 else
@@ -49,8 +49,8 @@ cat <<FIM
 
 Conferido. O banco restaurado é "$NOVO" e as fotos estão em $DEST/midia.
 Para colocar no ar (o site fica fora por alguns segundos):
-  1. pare o app (docker compose stop erivelto)
+  1. pare o app (docker compose -f compose.producao.yaml stop erivelto)
   2. guarde a pasta atual:  mv dados/midia dados/midia-antes-$MARCA  &&  mv "$DEST/midia" dados/midia
-  3. no .env, aponte ERV_BANCO para o banco "$NOVO"
-  4. suba de novo (docker compose up -d) e confira o site e o painel
+  3. no .env, troque POSTGRES_DB para "$NOVO" (o compose de produção monta o endereço do banco com ele)
+  4. suba de novo (docker compose -f compose.producao.yaml up -d) e confira o site e o painel
 FIM

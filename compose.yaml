@@ -1,25 +1,28 @@
 # Instância de TESTE na sua máquina (site + painel + API + banco próprio), separada de qualquer site no ar.
+# É o compose PADRÃO da pasta: os comandos "docker compose ..." sem -f usam este arquivo. Não precisa de .env.
+# (A produção é o compose.producao.yaml e sempre leva -f compose.producao.yaml.)
 # Rode os comandos na pasta do projeto (onde está este arquivo). Funciona no Docker Desktop (Windows/Mac) e no Linux.
 #
 # 1. SUBIR (a 1ª vez demora: baixa as imagens e monta o app)
-#      docker compose -f compose.teste.yaml up -d --build
+#      docker compose up -d --build
 # 2. PEGAR O LINK público de teste (https://....trycloudflare.com)
-#      docker compose -f compose.teste.yaml logs tunel
-#    (no Linux/Mac, só o link:  docker compose -f compose.teste.yaml logs tunel | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com')
-#    (no PowerShell:            docker compose -f compose.teste.yaml logs tunel | Select-String trycloudflare)
+#      docker compose logs tunel
+#    (no Linux/Mac, só o link:  docker compose logs tunel | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com')
+#    (no PowerShell:            docker compose logs tunel | Select-String trycloudflare)
 #    Também abre direto em http://localhost:8090  (painel: /painel/ · privacidade: /privacidade/)
 # 3. CRIAR O USUÁRIO do painel (mostra a senha temporária uma vez; o painel pede para trocar e para aceitar o termo)
-#      docker exec -it erivelto-teste python app.py usuario voce@exemplo.com "Teste"
-#    Esqueceu a senha:  docker exec -it erivelto-teste python app.py senha voce@exemplo.com
+#      docker compose exec erivelto python app.py usuario voce@exemplo.com "Teste"
+#    Esqueceu a senha:  docker compose exec erivelto python app.py senha voce@exemplo.com
+#    Ver quem tem acesso: docker compose exec erivelto python app.py usuarios
 # 4. DESLIGAR (os dados de teste ficam guardados para a próxima vez)
-#      docker compose -f compose.teste.yaml down
+#      docker compose down
 # 5. APAGAR OS DADOS DE TESTE (banco e fotos) e começar do zero
-#      docker compose -f compose.teste.yaml down -v
+#      docker compose down -v
 #
 # O link aleatório muda a cada vez que o túnel reinicia. Qualquer pessoa com o link abre o site; o painel pede senha.
 # Não cadastre dado real.
 # "Unauthorized: Tunnel not found" no log = o Cloudflare apagou o túnel rápido (PC dormiu ou ficou muito tempo sem conexão).
-#   Criar um túnel novo (link novo): docker compose -f compose.teste.yaml up -d --force-recreate tunel
+#   Criar um túnel novo (link novo): docker compose up -d --force-recreate tunel
 # Os arquivos de site/ são lidos direto da pasta: mudou um arquivo, é só recarregar a página. Mudou app/app.py: suba de novo com --build.
 #
 # Onde ficam os dados: em dois VOLUMES do Docker (erivelto-teste_banco e erivelto-teste_fotos), não em pasta do projeto.

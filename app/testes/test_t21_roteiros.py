@@ -54,7 +54,7 @@ def test_t21_roteiro_do_corretor(servidor, capsys):
     assert e["imoveis"][0]["preco"] == 800000 and e["imoveis"][0]["pub"]["preco"] == 850000 and e["mapa_pub"] == mapa
     # 6. um visitante entra e pede informações; o corretor vê
     v = cliente()
-    v.post("/api/contas", json={"nome": "Ana Souza", "whatsapp": "(51) 98111-2222", "aceite": True, "versao_aviso": "v2"})
+    v.post("/api/contas", json={"nome": "Ana Souza", "whatsapp": "(51) 98111-2222", "aceite": True, "versao_aviso": "v3"})
     v.post("/api/leads", json={"via": "foto", "imovel_id": "k3j2h1", "imovel": '"Casa de 3 quartos" · R$ 850.000', "cidade": casa["cidade"]})
     v.post("/api/chamadas", json={"id": "k3j2h1", "nm": "Casa de 3 quartos", "o": "pedido"})
     assert [x["nome"] for x in p.get("/api/painel/leads").json()["leads"]] == ["Ana Souza"]
@@ -82,9 +82,9 @@ def test_t21_roteiro_do_visitante(painel):
     # 2. clica no WhatsApp sem entrar: chamada anônima
     assert v.post("/api/chamadas", json={"id": "casa1", "nm": "Casa", "o": '"Casa" · R$ 850.000 · "Pedir mais informações"'}).status_code == 200
     # 3. tenta entrar sem marcar o aceite, com número ruim, e depois certo (P.entrar)
-    assert v.post("/api/contas", json={"nome": "João Pereira", "whatsapp": "(51) 98765-4321", "aceite": False, "versao_aviso": "v2"}).json()["erro"] == "aceite_obrigatorio"
-    assert v.post("/api/contas", json={"nome": "João Pereira", "whatsapp": "98765", "aceite": True, "versao_aviso": "v2"}).json()["campo"] == "whatsapp"
-    assert v.post("/api/contas", json={"nome": "João Pereira", "whatsapp": "(51) 98765-4321", "aceite": True, "versao_aviso": "v2"}).status_code == 200
+    assert v.post("/api/contas", json={"nome": "João Pereira", "whatsapp": "(51) 98765-4321", "aceite": False, "versao_aviso": "v3"}).json()["erro"] == "aceite_obrigatorio"
+    assert v.post("/api/contas", json={"nome": "João Pereira", "whatsapp": "98765", "aceite": True, "versao_aviso": "v3"}).json()["campo"] == "whatsapp"
+    assert v.post("/api/contas", json={"nome": "João Pereira", "whatsapp": "(51) 98765-4321", "aceite": True, "versao_aviso": "v3"}).status_code == 200
     e = v.get("/api/estado").json()
     assert e["conta"] == {"nome": "João Pereira", "wa": "(51) 98765-4321"}
     assert e["imoveis"][0]["end"]["rua"] == "Rua das Flores" and e["imoveis"][0]["loc"]["ll"] == [-50.5201, -29.8183]
@@ -98,7 +98,7 @@ def test_t21_roteiro_do_visitante(painel):
     assert cliente().get("/api/estado").json()["conta"] is None
     # 6. página de privacidade: ver os dados e apagar
     d = v.get("/api/privacidade/meus-dados").json()
-    assert d["nome"] == "João Pereira" and d["contatos"][0]["por"] == ["login", "fin"] and d["aceites_do_aviso"][0]["versao"] == "v2"
+    assert d["nome"] == "João Pereira" and d["contatos"][0]["por"] == ["login", "fin"] and d["aceites_do_aviso"][0]["versao"] == "v3"
     r = v.post("/api/privacidade/apagar", json={"whatsapp": "(51) 98765-4321", "nome": "João Pereira"})
     assert r.json()["apagado"] is True
     assert v.get("/api/privacidade/meus-dados").status_code == 401

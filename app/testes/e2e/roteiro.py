@@ -56,7 +56,7 @@ RODAPE_JS = """() => {
     }
   }
   const topo = document.elementFromPoint((a.getBoundingClientRect().left + a.getBoundingClientRect().right) / 2, (a.getBoundingClientRect().top + a.getBoundingClientRect().bottom) / 2);
-  return { visivel: true, texto: r.innerText.replace(/\\s+/g, ' ').trim(), link: a.innerText, href: a.getAttribute('href'), destino: a.href,
+  return { visivel: true, texto: r.innerText.replace(/\\s+/g, ' ').trim(), link: a.innerText, href: a.getAttribute('href'), destino: a.href, links: [...r.querySelectorAll('a')].map(x => [x.innerText, x.getAttribute('href')]),
            dentro: b.top >= 0 && b.left >= 0 && b.bottom <= innerHeight && b.right <= innerWidth, altura: Math.round(b.height),
            linkPorCima: topo === a, cobre: [...new Set(cobre)] };
 }"""
@@ -176,7 +176,7 @@ class Roteiro:
             st.goto(s.url + "/privacidade/")
             for rota in ("estado", "leads", "chamadas", "termo"):
                 assert self.api(st, "GET", "api/painel/" + rota)["status"] == 401, rota
-            for url in ("/.git/config", "/app/app.py", "/.env", "/dados/", "/compose.teste.yaml"):
+            for url in ("/.git/config", "/app/app.py", "/.env", "/dados/", "/compose.yaml", "/compose.producao.yaml"):
                 assert st.request.get(s.url + url).status == 404, url
             p.goto(s.url + "/painel/")
             p.locator("#pt-login").wait_for()
@@ -247,7 +247,8 @@ class Roteiro:
             assert self.api(st, "GET", "api/estado")["j"]["imoveis"] == [], "apareceu no site antes de publicar"
             p.locator("#c-app [data-pub]").click()
             expect(p.locator("#c-app .toast")).to_contain_text("Publicado")
-            expect(p.locator("#c-app .item .tag")).to_have_text(re.compile("site", re.I))
+            expect(p.locator("#c-app .item .tag").first).to_have_text(re.compile("site", re.I))
+            expect(p.locator("#c-app .item .tag.cod")).to_have_text(re.compile(r"^ES-\d{3}$"))       # T42
             fotos = s.sql("select arquivo, largura from fotos order by id")
             assert [f["largura"] for f in fotos] == [1280, 2000], fotos          # 2 tamanhos, sem ampliar
             from PIL import Image
@@ -278,21 +279,26 @@ class Roteiro:
             for tela in ("rodape_inicio", "rodape_resultados"):
                 r = g[tela]
                 assert r["visivel"], f"{tela}: a linha não aparece"
-                assert r["texto"] == "Erivelto Santos · Corretor de imóveis · CRECI 63.464 · Privacidade", r["texto"]
+                assert r["texto"] == "Erivelto Santos · Corretor de imóveis · CRECI 63.464 · Privacidade · Termos · Quero vender", r["texto"]
+                assert r["links"] == [["Privacidade", "privacidade/"], ["Termos", "termos/"], ["Quero vender", "#vender"]], r["links"]
                 assert r["link"] == "Privacidade" and r["href"] == "privacidade/" and r["destino"] == s.url + "/privacidade/", r
                 assert r["dentro"] and r["linkPorCima"], f"{tela}: fora da tela ou o link está coberto: {r}"
                 assert not r["cobre"], f"{tela}: a linha cobre {r['cobre']}"
                 assert r["altura"] <= 44, f"{tela}: a linha ficou alta demais ({r['altura']} px)"
-            assert "termos" not in st.locator("body").inner_text().lower()
             st.locator(".vm12").first.click()
             st.locator("a.nw12").wait_for(state="visible")
             self.espera(lambda: not st.evaluate(RODAPE_JS)["visivel"], msg="na ficha do imóvel a linha deveria sumir (ali ficam os botões)")
             st.locator(".x12").click()
             self.espera(lambda: st.evaluate(RODAPE_JS)["visivel"], msg="ao voltar da ficha a linha deveria reaparecer")
-            st.locator("#pt-rodape a").click()
+            st.locator("#pt-rodape a").nth(1).click()
+            st.wait_for_url(s.url + "/termos/")
+            expect(st.locator("h1")).to_have_text("Termos de uso")
+            st.locator("a.pv-volta").click()
+            st.wait_for_url(s.url + "/")
+            st.locator("#pt-rodape a").first.click()
             st.wait_for_url(s.url + "/privacidade/")
             expect(st.locator("h1")).to_have_text("Aviso de privacidade")
-        self.passo("T05: linha com nome, CRECI 63.464 e link Privacidade visível na busca e nos resultados, sem cobrir botão; o link abre /privacidade/", rodape)
+        self.passo("T05, T04 e T45: linha com nome, CRECI 63.464 e links Privacidade, Termos e Quero vender visível na busca e nos resultados, sem cobrir botão; os links abrem /privacidade/ e /termos/", rodape)
 
         def whatsapp_sem_numero():
             assert self.api(st, "GET", "api/estado")["j"]["whatsapp_numero"] is None
@@ -326,7 +332,7 @@ class Roteiro:
             expect(entrar).to_be_enabled()
             entrar.click()
             self.espera(lambda: (self.api(st, "GET", "api/estado")["j"].get("conta") or {}).get("nome") == VISITANTE, msg="o visitante não ficou conectado")
-            assert s.sql("select versao from aceites") == [{"versao": "v2"}]
+            assert s.sql("select versao from aceites") == [{"versao": "v3"}]
             c = s.sql("select nome_cif, wa_cif from contas")[0]
             assert VISITANTE.encode() not in bytes(c["nome_cif"]) and b"99999" not in bytes(c["wa_cif"]), "nome/WhatsApp sem cifra no banco"
             self.espera(lambda: s.sql("select count(*) as n from leads")[0]["n"] == 1, msg="o contato não chegou ao servidor")
@@ -336,7 +342,7 @@ class Roteiro:
             expect(p.locator("#c-app .main a.wa")).to_have_attribute("href", "https://wa.me/5551999991234")
             expect(p.locator('#c-app nav.tabs [data-tab="contatos"] .n')).to_have_text("1")
             self.foto(p, "09-painel-contatos")
-        self.passo("visitante entra com nome + WhatsApp (só com o aceite do aviso v2) e vira contato no painel", visitante)
+        self.passo("visitante entra com nome + WhatsApp (só com o aceite do aviso v3) e vira contato no painel", visitante)
 
         def troca_whatsapp(numero, digitado, bonito):
             def f():
@@ -389,16 +395,93 @@ class Roteiro:
             expect(st.locator("#pv-wa-link")).to_have_attribute("href", "https://wa.me/" + WA2)
         self.passo("o site (e a página de privacidade) passam a usar o número novo", site_reflete)
 
+        def tarefas_39_45():
+            from urllib.parse import parse_qs, urlsplit
+            # T42: o imóvel criado pelo painel ganhou código. T39: marcar "Reservado" pela tela e publicar.
+            cod = self.api(p, "GET", "api/painel/estado")["j"]["imoveis"][0]["cod"]
+            assert re.fullmatch(r"ES-\d{3}", cod), cod
+            self.recarregar_painel(); self.aba("imoveis")
+            p.locator("#c-app [data-abrir]").first.click()
+            p.locator('#c-app [data-si="res"]').click()
+            expect(p.locator("#c-app [data-pub]")).to_have_text("Publicar mudanças")
+            p.locator("#c-app [data-pub]").click()
+            expect(p.locator("#c-app [data-abrir]").first).to_contain_text("Reservado")
+            # T40 e T41: um sobrado para alugar e um galpão vendido (escondido), pela API do painel
+            e = self.api(p, "GET", "api/painel/estado")["j"]
+            base = {k: v for k, v in e["imoveis"][0].items() if k not in ("pub", "id", "cod", "sit")}
+            novos = [dict(base, id="alug1", cod="ES-901", tipo="sobrado", final="aluguel", preco=2500, fin=False),
+                     dict(base, id="vend1", cod="ES-902", tipo="galpao", sit="vend")]
+            assert self.api(p, "PUT", "api/painel/estado", {"rev": e["rev"], "imoveis": novos})["status"] == 200
+            for i in novos:
+                assert self.api(p, "POST", f"api/painel/imoveis/{i['id']}/publicar", {})["status"] == 200
+            self.abrir_resultados()
+            ids = st.evaluate("[...document.querySelectorAll('article.cd12')].map(a => a.dataset.id)")
+            assert sorted(ids) == sorted([e["imoveis"][0]["id"], "alug1"]), ids                     # o vendido escondido não aparece
+            selos = st.evaluate("Object.fromEntries([...document.querySelectorAll('article.cd12')].map(a => [a.dataset.id, a.querySelector('.pt-selos') ? a.querySelector('.pt-selos').innerText.replace(/\\s+/g, ' ') : '']))")
+            assert "RESERVADO" in selos[e["imoveis"][0]["id"]].upper() and cod in selos[e["imoveis"][0]["id"]], selos
+            assert selos["alug1"].replace("\n", " ") in ("Para alugar ES-901",), selos
+            assert "2.500/mês" in st.locator("article.cd12[data-id=alug1]").inner_text()
+            self.foto(st, "13b-site-selos")
+            # filtro de tipo: "Para alugar" é uma categoria
+            st.locator(".fd12[data-f='t']").first.click()
+            opcoes = st.locator("[role=menuitemcheckbox]").all_inner_texts()
+            assert any(o.startswith("Para alugar") for o in opcoes) and any(o.startswith("Casa") for o in opcoes), opcoes
+            assert not any(o.startswith("Galpão") for o in opcoes), opcoes
+            st.keyboard.press("Escape"); st.mouse.click(5, 5)
+            # T44: pedir visita na ficha do imóvel reservado (o visitante entrou no site no passo 9)
+            self.abrir_ficha()
+            st.locator(".pt-visita").click()
+            st.locator("#pt-visita .pt-chip").nth(1).click()          # amanhã
+            st.locator("#pt-visita .pt-chip[data-v=tarde]").click()
+            with ctx_v.expect_page() as nova:
+                st.locator("#pt-visita-ir").click()
+            aba = nova.value; aba.wait_for_load_state()
+            msg = parse_qs(urlsplit(aba.url).query)["text"][0]; aba.close()
+            assert "(cód. " + cod + ")" in msg and "que está reservado, e quero marcar uma visita amanhã" in msg and "à tarde." in msg, msg
+            self.espera(lambda: (s.sql("select pedido from leads where pedido is not null") or [{}])[0].get("pedido", "").startswith("amanhã"),
+                        msg="a visita pedida não chegou ao contato")
+            # T45: quero vender (outro navegador, sem login)
+            o = self.pagina(self.contexto(), "outro")
+            o.goto(s.url + "/"); o.locator("#pt-rodape a[data-pt-vender]").click()
+            o.locator("#pt-vender .pt-chip[data-v=terreno]").click()
+            o.fill("#pt-v-cidade", "Rolante"); o.fill("#pt-v-nome", "Pedro Lima"); o.fill("#pt-v-wa", "(51) 98888-7777")
+            expect(o.locator("#pt-v-enviar")).to_be_disabled()
+            o.check("#pt-v-aceite"); o.click("#pt-v-enviar")
+            expect(o.locator("#pt-v-ok")).to_contain_text("O Erivelto vai falar com você")
+            assert s.sql("select vender from leads where vender is not null")[0]["vender"]["cidade"] == "Rolante"
+            # T43: no painel, o contato da visita muda de situação e ganha anotação; a planilha sai com os dois
+            self.recarregar_painel(); self.aba("contatos")
+            caixa = p.locator("#c-app .lead", has_text="Pediu visita")
+            expect(caixa).to_contain_text(cod)
+            caixa.locator("[data-sit-l]").select_option("visita")
+            self.espera(lambda: s.sql("select count(*) as n from leads where situacao = 'visita'")[0]["n"] == 1, msg="a situação não foi salva")
+            caixa = p.locator("#c-app .lead", has_text="Pediu visita")
+            caixa.locator("[data-nota-l]").fill("Confirmar no sábado"); p.locator("#c-app h1").click()
+            self.espera(lambda: s.sql("select count(*) as n from leads where nota = 'Confirmar no sábado'")[0]["n"] == 1, msg="a anotação não foi salva")
+            expect(p.locator("#c-app .lead", has_text="Quer vender")).to_contain_text("Terreno em Rolante")
+            with p.expect_download() as d:
+                p.locator("#c-app [data-csv]").click()
+            csv = open(d.value.path(), encoding="utf-8-sig").read()
+            assert "Visita marcada" in csv and "Confirmar no sábado" in csv and "Terreno em Rolante" in csv, csv[:300]
+            self.foto(p, "13c-painel-contatos")
+            # quem pediu para vender também apaga os próprios dados pela página de privacidade (e o pedido sai junto)
+            o.goto(s.url + "/privacidade/"); o.fill("#pv-nome", "pedro lima"); o.fill("#pv-wa", "51 98888-7777")
+            o.click("#pv-apagar button[type=submit]")
+            expect(o.locator("#pv-msg")).to_have_text("Pronto: seus dados foram apagados.")
+            assert s.sql("select count(*) as n from leads where vender is not null")[0]["n"] == 0
+            o.context.close()
+        self.passo("T39–T45: reservado e código no site; vendido escondido; aluguel na categoria Para alugar; pedir visita; quero vender; situação, anotação e planilha dos contatos", tarefas_39_45)
+
         def privacidade():
             st.goto(s.url + "/privacidade/")
-            expect(st.locator("#pv-versao")).to_contain_text("Versão v2")
+            expect(st.locator("#pv-versao")).to_contain_text("Versão v3")
             for i in ("quem", "dados", "base", "tempo", "quem-ve", "cookies", "seguranca", "direitos", "mudancas", "versao"):
                 expect(st.locator("h2#" + i)).to_be_visible()
             assert st.evaluate("document.documentElement.scrollWidth <= innerWidth"), "a página de privacidade passa da largura da tela"
             self.foto(st, "12-privacidade")
             st.click("#pv-ver")
             expect(st.locator("#pv-dados")).to_contain_text(VISITANTE)
-            expect(st.locator("#pv-dados")).to_contain_text('"versao": "v2"')
+            expect(st.locator("#pv-dados")).to_contain_text('"versao": "v3"')
             outro = self.contexto()                         # outro aparelho, sem estar conectado: nome errado não apaga
             o = self.pagina(outro, "outro")
             o.goto(s.url + "/privacidade/")
@@ -416,8 +499,8 @@ class Roteiro:
             expect(st.locator("#pv-dados")).to_contain_text("Para ver os dados, entre no site")
             self.recarregar_painel()
             self.aba("contatos")
-            expect(p.locator("#c-app .main")).to_contain_text("Quem pedir informações pelo site aparece aqui.")
-        self.passo("T03: aviso de privacidade v2 com as seções; ver os meus dados; apagar os dados some com o contato do painel", privacidade)
+            expect(p.locator("#c-app .main")).to_contain_text("pelo site aparece aqui.")
+        self.passo("T03: aviso de privacidade v3 com as seções; ver os meus dados; apagar os dados some com o contato do painel", privacidade)
 
         def aba_site():
             self.aba("site")
@@ -451,7 +534,7 @@ class Roteiro:
             self.entrar_painel(SENHA2)                              # a nova entra direto: sem troca e sem termo de novo
             p.locator("#c-app nav.tabs").wait_for()
             assert p.locator("#pt-termo").count() == 0 and p.locator("#pt-troca").count() == 0
-            expect(p.locator("#c-app .item .pr")).to_have_text("R$ 850 mil")
+            expect(p.locator("#c-app .item .pr").first).to_have_text("R$ 850 mil")
             self.aba("perfil")
             p.locator('#pt-conta [data-pt="sair"]').click()
             p.locator("#pt-login").wait_for()

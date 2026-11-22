@@ -12,7 +12,7 @@ if [ -f "$ENV_ARQ" ]; then set -a; . "$ENV_ARQ"; set +a; fi
 DEST="${ERV_BACKUP_DESTINO:-/mnt/backup/erivelto}"
 PASTA_DADOS="${ERV_BACKUP_DADOS:-dados}"          # pasta do host que tem midia/ dentro
 SERVICO="${ERV_BACKUP_SERVICO:-banco}"
-DC=(docker compose); [ -n "${ERV_BACKUP_COMPOSE:-}" ] && DC+=(-f "$ERV_BACKUP_COMPOSE")
+DC=(docker compose -f "${ERV_BACKUP_COMPOSE:-compose.producao.yaml}")   # o compose.yaml da pasta é o de TESTE
 mkdir -p "$DEST" "$PASTA_DADOS/midia"
 QUANDO=$(date +%Y-%m-%d_%H%M)
 TMP=$(mktemp -d "$DEST/.tmp-XXXXXX"); trap 'rm -rf "$TMP"' EXIT

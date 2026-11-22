@@ -1,7 +1,7 @@
 """T20 limpeza."""
 from conftest import cliente, erv, imovel, jpeg, publicar
 
-MARIA = {"nome": "Maria Silva", "whatsapp": "(51) 99999-1234", "aceite": True, "versao_aviso": "v2"}
+MARIA = {"nome": "Maria Silva", "whatsapp": "(51) 99999-1234", "aceite": True, "versao_aviso": "v3"}
 
 
 def test_t20_limpar(painel, c, monkeypatch, capsys):

@@ -74,7 +74,7 @@
   window.addEventListener('online', esvaziarFila);
 
   /* ---------- SITE ---------- */
-  var AVISO_VERSAO = 'v2'; // a mesma de site/privacidade/index.html e do padrão de ERV_AVISO_VERSAO no servidor
+  var AVISO_VERSAO = 'v3'; // a mesma de site/privacidade/index.html e do padrão de ERV_AVISO_VERSAO no servidor
   P.estadoSite = function (est) {
     est = est || ESTADO;
     return {
@@ -108,22 +108,205 @@
       return req('GET', 'api/estado');
     }).then(function (e) { if (e && e.ok) { ESTADO = e.j; if (P.g && P.g.refresh) P.g.refresh(P.estadoSite(e.j)); } });
   };
+  P.leadMudar = function (lid, dados) { return req('PUT', 'api/painel/leads/' + encodeURIComponent(lid), dados); };   // T43
   P.lead = function (d) {
     enviarComReenvio('api/leads', { via: d.via, imovel_id: d.id || undefined, imovel: d.imovel || undefined, cidade: d.cidade || undefined });
   };
   P.chamada = function (t) { enviarComReenvio('api/chamadas', { id: t.id, nm: t.nm, o: t.o }); };
 
-  // T05: CRECI e link legal sempre à vista na busca e nos resultados. Some na ficha do imóvel (classe "f5"), que tem botões embaixo.
+  // T05, T04 e T45: CRECI, links legais (Privacidade, Termos) e "Quero vender" sempre à vista na busca e nos resultados. Some na ficha do imóvel (classe "f5"), que tem botões embaixo.
   function rodape() {
     if (document.getElementById('pt-rodape')) return;
     var r = el('div', { id: 'pt-rodape', class: 'pt-rodape' }, [
-      el('span', { texto: 'Erivelto Santos \u00b7 Corretor de imóveis \u00b7 CRECI 63.464 \u00b7 ' }), el('a', { href: 'privacidade/', texto: 'Privacidade' })]);
+      el('span', { texto: 'Erivelto Santos \u00b7 Corretor de imóveis \u00b7 CRECI 63.464 \u00b7 ' }), el('a', { href: 'privacidade/', texto: 'Privacidade' }), el('span', { texto: ' \u00b7 ' }), el('a', { href: 'termos/', texto: 'Termos' }),
+      el('span', { texto: ' \u00b7 ' }), el('a', { href: '#vender', 'data-pt-vender': '1', texto: 'Quero vender' })]);
     document.body.appendChild(r);
     var sc = document.querySelector('.sc12');
     function ver() { r.hidden = !!(sc && sc.classList.contains('f5')); }
     if (sc && window.MutationObserver) new MutationObserver(ver).observe(sc, { attributes: true, attributeFilter: ['class'] });
     ver();
   }
+  /* ---------- T39–T45: o que o site mostra de cada imóvel (o site/index.html chama estas funções; ver remendos.py) ---------- */
+  var RE_COD = /^ES-\d{3,5}$/;
+  var VIT = typeof WeakMap === 'function' ? new WeakMap() : null;
+  // T39: vendido sai da busca (ou fica no fim, com selo, se o corretor marcou "mostrar como vendido"). T40: aluguel vira a
+  // categoria "Para alugar" (tipo "aluguel" na busca; o tipo de verdade fica em "tr"), sem financiamento.
+  P.vitrine = function (lista) {
+    var ok = [], vend = [];
+    (lista || []).forEach(function (a) {
+      if (!a) return;
+      var sit = a.sit === 'res' || a.sit === 'vend' ? a.sit : 'disp', alug = a.final === 'aluguel';
+      if (sit === 'vend' && !a.vendMostra) return;
+      var b = a;
+      if (alug || sit === 'vend') {
+        b = VIT && VIT.get(a);
+        if (!b) {
+          b = JSON.parse(JSON.stringify(a));
+          if (alug) { b.tr = a.tipo; b.tipo = 'aluguel'; b.alug = true; }
+          b.fin = false; b.fn = null;            // aluguel e vendido: sem simulação de financiamento
+          if (VIT) VIT.set(a, b);
+        }
+      }
+      (sit === 'vend' ? vend : ok).push(b);
+    });
+    return ok.concat(vend);
+  };
+  P.selos = function (a, ficha) {
+    if (!a) return '';
+    var s = [];
+    if (a.sit === 'vend') s.push('<span class="pt-selo vend">Vendido</span>');
+    else if (a.sit === 'res') s.push('<span class="pt-selo res">Reservado</span>');
+    if (a.alug) s.push('<span class="pt-selo alug">Para alugar</span>');
+    if (RE_COD.test(a.cod || '')) s.push('<span class="pt-selo cod">' + a.cod + '</span>');
+    return s.length ? '<span class="pt-selos' + (ficha ? ' f' : '') + '">' + s.join('') + '</span>' : '';
+  };
+  // T42 (código), T40 (aluguel), T39 (reservado/vendido) na mensagem pronta do WhatsApp. Recebe a mensagem que o site montou.
+  P.msg = function (a, t) {
+    if (!a || typeof t !== 'string') return t;
+    if (RE_COD.test(a.cod || '')) t = t.replace(/^(Olá, Erivelto! Vi no seu site [^"]*"[^"]*")/, '$1 (cód. ' + a.cod + ')');
+    if (a.alug) t = t.replace(' o imóvel "', ' o imóvel para alugar "').replace(/, de (R\$.*?), e quero/, ', por R$ ' + (+a.preco || 0).toLocaleString('pt-BR') + '/mês, e quero');
+    if (a.sit === 'vend') t = t.replace('e quero mais informações.', 'que já foi vendido, e quero um imóvel parecido.');
+    else if (a.sit === 'res') t = t.replace('e quero mais informações.', 'que está reservado, e quero mais informações.');
+    return t;
+  };
+
+  /* ---------- T44: pedir visita (dia e período vão na mensagem do WhatsApp; quem entrou no site vira contato "visita") ---------- */
+  var VISITAS = {};
+  P.botaoVisita = function (a) {
+    if (!a || a.sit === 'vend' || a.ex) return '';
+    VISITAS[a.id] = a;
+    return '<button type="button" class="pt-visita" data-pt-visita="' + attr(a.id) + '">Pedir visita</button>';
+  };
+  var PERIODOS = [['manha', 'de manhã'], ['tarde', 'à tarde'], ['noite', 'à noite']];
+  function dias() {
+    var out = [], d = new Date(), sem = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+    for (var i = 0; i < 7; i++) {
+      var x = new Date(d.getFullYear(), d.getMonth(), d.getDate() + i), dm = ('0' + x.getDate()).slice(-2) + '/' + ('0' + (x.getMonth() + 1)).slice(-2);
+      out.push([dm, i === 0 ? 'Hoje' : i === 1 ? 'Amanhã' : sem[x.getDay()] + ' ' + dm, i === 0 ? 'hoje (' + dm + ')' : i === 1 ? 'amanhã (' + dm + ')' : sem[x.getDay()] + ', ' + dm]);
+    }
+    return out;
+  }
+  function contaVisitante() {
+    if (P.srv) { var c = ESTADO && ESTADO.conta; return c && c.nome && c.wa ? c : null; }
+    try { var l = JSON.parse(localStorage.getItem('erivelto_conta') || 'null'); return l && l.nome && l.wa ? l : null; } catch (e) { return null; }
+  }
+  function store() { return P.g || window.ST12 || null; }
+  function abrirWa(href) {   // passa pelos mesmos avisos do site (prévia e "sem número"): um link de verdade, clicado
+    var a = el('a', { href: href, target: '_blank', rel: 'noopener' }); a.style.display = 'none';
+    document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); }, 0);
+  }
+  function telaVisita(a, base) {
+    css();
+    var escolha = { dia: null, per: null }, ds = dias();
+    var msg = el('p', { class: 'pt-msg', 'aria-live': 'polite' });
+    var ir = el('button', { type: 'button', class: 'pt-btn pri', id: 'pt-visita-ir', disabled: 'disabled', texto: 'Abrir o WhatsApp' });
+    var fe = el('button', { type: 'button', class: 'pt-btn', texto: 'Cancelar' });
+    function grupo(nome, itens, k) {
+      var g = el('div', { class: 'pt-chips', role: 'radiogroup', 'aria-label': nome });
+      itens.forEach(function (it) {
+        var b = el('button', { type: 'button', class: 'pt-chip', role: 'radio', 'aria-checked': 'false', 'data-v': it[0], texto: it[1] });
+        b.onclick = function () { escolha[k] = it; g.querySelectorAll('.pt-chip').forEach(function (o) { o.setAttribute('aria-checked', String(o === b)); }); ir.disabled = !(escolha.dia && escolha.per); };
+        g.appendChild(b);
+      });
+      return g;
+    }
+    var tela = el('div', { class: 'pt-tela', id: 'pt-visita', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'pt-visita-t' }, [el('div', { class: 'pt-cartao' }, [
+      el('h1', { class: 'pt-t', id: 'pt-visita-t', texto: 'Pedir visita' }),
+      el('p', { class: 'pt-p', texto: 'Escolha o dia e o período. A mensagem vai pronta para o WhatsApp do Erivelto; ele confirma o horário com você.' }),
+      el('p', { class: 'pt-lb', texto: 'Dia' }), grupo('Dia', ds, 'dia'), el('p', { class: 'pt-lb', texto: 'Período' }), grupo('Período', PERIODOS, 'per'), msg, ir, fe])]);
+    fe.onclick = function () { tela.remove(); };
+    ir.onclick = function () {
+      if (!escolha.dia || !escolha.per) return;
+      if (P.srv && !P.waSite()) { msg.textContent = 'O WhatsApp do corretor ainda não está disponível aqui.'; return; }
+      var pedido = escolha.dia[2] + ', ' + escolha.per[1];
+      var texto = base.indexOf('e quero mais informações.') >= 0 ? base.replace('e quero mais informações.', 'e quero marcar uma visita ' + pedido + '.') : base + ' Quero marcar uma visita ' + pedido + '.';
+      var href = 'https://wa.me/' + P.waSite() + '?text=' + encodeURIComponent(texto);
+      registrarVisita(a, pedido);
+      tela.remove(); abrirWa(href);
+    };
+    document.body.appendChild(tela); var b0 = tela.querySelector('.pt-chip'); if (b0) b0.focus();
+  }
+  function nomeDe(a) { var m = /"([^"]*)"/.exec(a.__msg || ''); return (a.nome && String(a.nome).trim()) || (m ? m[1] : 'Imóvel'); }
+  function registrarVisita(a, pedido) {
+    var nm = nomeDe(a), preco = a.__preco || '', o = '"' + nm + '"' + (preco ? ' · ' + preco : '') + ' · "Pedir visita"';
+    var ch = { t: Date.now(), c: a.cidade, id: a.id, nm: nm, o: o }, st = store(), c = contaVisitante();
+    if (P.srv) {
+      P.chamada(ch);
+      if (c) enviarComReenvio('api/leads', { via: 'visita', imovel_id: a.id, imovel: '"' + nm + '"' + (preco ? ' · ' + preco : ''), cidade: a.cidade, pedido: pedido });
+      return;
+    }
+    if (!st || !st.d) return;   // prévia: fica neste navegador, como o resto
+    st.d.chamadas.push(ch);
+    if (c) {
+      var dig = String(c.wa).replace(/\D/g, ''), l = st.d.leads.filter(function (x) { return String(x.wa || '').replace(/\D/g, '') === dig; })[0];
+      if (!l) { l = { nome: c.nome, wa: c.wa, via: [], t: Date.now() }; st.d.leads.push(l); }
+      if ((l.via || []).indexOf('visita') < 0) l.via = (l.via || []).concat('visita');
+      l.imovel = '"' + nm + '"' + (preco ? ' · ' + preco : ''); l.nm = nm; l.id = a.id; l.cidade = a.cidade; l.pedido = pedido; l.t = Date.now();
+    }
+    try { st.save(); } catch (e) { /* segue */ }
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('[data-pt-visita]'); if (!b) return;
+    ev.preventDefault(); ev.stopPropagation();
+    var a = VISITAS[b.getAttribute('data-pt-visita')]; if (!a) return;
+    var lk = b.parentNode && b.parentNode.querySelector('a.nw12'), base = '';
+    try { base = new URL(lk.href).searchParams.get('text') || ''; } catch (e) { base = ''; }
+    if (!base) base = 'Olá, Erivelto! Vi no seu site o imóvel "' + (a.nome || 'Imóvel') + '", em ' + a.cidade + ', e quero mais informações.';
+    a.__msg = base; var pm = /, (?:de|por) (R\$.*?), e quero/.exec(base); a.__preco = pm ? pm[1] : '';
+    telaVisita(a, base);
+  });
+
+  /* ---------- T45: "Quero vender meu imóvel" (formulário curto; cai nos contatos do painel) ---------- */
+  var TIPOS_VENDER = [['casa', 'Casa'], ['apartamento', 'Apartamento'], ['terreno', 'Terreno'], ['sobrado', 'Sobrado'], ['sitio', 'Sítio ou chácara'], ['sala', 'Sala comercial'], ['galpao', 'Galpão'], ['outro', 'Outro']];
+  P.telaVender = function () {
+    css();
+    var tipo = null;
+    var g = el('div', { class: 'pt-chips', role: 'radiogroup', 'aria-label': 'Tipo do imóvel' });
+    TIPOS_VENDER.forEach(function (t) {
+      var b = el('button', { type: 'button', class: 'pt-chip', role: 'radio', 'aria-checked': 'false', 'data-v': t[0], texto: t[1] });
+      b.onclick = function () { tipo = t[0]; g.querySelectorAll('.pt-chip').forEach(function (o) { o.setAttribute('aria-checked', String(o === b)); }); ver(); };
+      g.appendChild(b);
+    });
+    var cid = el('input', { class: 'pt-in', id: 'pt-v-cidade', maxlength: '80', autocomplete: 'address-level2', 'aria-label': 'Cidade do imóvel', placeholder: 'Ex.: Santo Antônio da Patrulha' });
+    var obs = el('textarea', { class: 'pt-in pt-area', id: 'pt-v-obs', maxlength: '300', rows: '3', 'aria-label': 'Conte um pouco (opcional)', placeholder: 'Ex.: 3 quartos, pátio grande, perto do centro' });
+    var nome = el('input', { class: 'pt-in', id: 'pt-v-nome', maxlength: '60', autocomplete: 'name', 'aria-label': 'Seu nome', placeholder: 'Seu nome' });
+    var wa = el('input', { class: 'pt-in', id: 'pt-v-wa', type: 'tel', inputmode: 'tel', maxlength: '25', autocomplete: 'tel', 'aria-label': 'Seu WhatsApp', placeholder: 'Seu WhatsApp com DDD' });
+    var ace = el('label', { class: 'pt-chk' }); ace.innerHTML = '<input type="checkbox" id="pt-v-aceite"><span>Li e aceito o <a href="privacidade/" target="_blank" rel="noopener">aviso de privacidade</a></span>';
+    var msg = el('p', { class: 'pt-msg', 'aria-live': 'polite' });
+    var env = el('button', { type: 'button', class: 'pt-btn pri', id: 'pt-v-enviar', disabled: 'disabled', texto: 'Enviar' });
+    var fe = el('button', { type: 'button', class: 'pt-btn', texto: 'Fechar' });
+    var corpo = el('div', { class: 'pt-cartao pt-largo' }, [
+      el('h1', { class: 'pt-t', id: 'pt-v-t', texto: 'Quero vender meu imóvel' }),
+      el('p', { class: 'pt-p', texto: 'Conte o básico. O Erivelto fala com você pelo WhatsApp para combinar uma avaliação. Enviar não é contrato nem compromisso.' }),
+      el('p', { class: 'pt-lb', texto: 'Tipo' }), g, el('p', { class: 'pt-lb', texto: 'Cidade' }), cid, el('p', { class: 'pt-lb', texto: 'Conte um pouco (opcional)' }), obs,
+      el('p', { class: 'pt-lb', texto: 'Seu nome' }), nome, el('p', { class: 'pt-lb', texto: 'Seu WhatsApp' }), wa, ace, msg, env, fe]);
+    var tela = el('div', { class: 'pt-tela', id: 'pt-vender', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'pt-v-t' }, [corpo]);
+    var chk = ace.querySelector('input');
+    function dados() { return { tipo: tipo, cidade: cid.value.trim(), obs: obs.value.trim(), nome: nome.value.trim(), whatsapp: wa.value.trim() }; }
+    function ver() { var d = dados(); env.disabled = !(d.tipo && d.cidade.length >= 2 && d.nome.length >= 2 && waDig(d.whatsapp).length >= 10 && chk.checked); }
+    [cid, obs, nome, wa].forEach(function (i) { i.oninput = ver; }); chk.onchange = ver;
+    fe.onclick = function () { tela.remove(); };
+    function pronto(texto) { corpo.innerHTML = ''; corpo.appendChild(el('h1', { class: 'pt-t', id: 'pt-v-t', texto: 'Recebido' })); corpo.appendChild(el('p', { class: 'pt-p', id: 'pt-v-ok', texto: texto })); var f2 = el('button', { type: 'button', class: 'pt-btn pri', texto: 'Fechar' }); f2.onclick = function () { tela.remove(); }; corpo.appendChild(f2); f2.focus(); }
+    env.onclick = function () {
+      var d = dados(); if (env.disabled) return;
+      if (!P.srv) {
+        var st = store();
+        if (st && st.d) { st.d.leads.push({ nome: d.nome, wa: d.whatsapp, via: ['vender'], imovel: '-', id: null, cidade: d.cidade, t: Date.now(), vender: { tipo: d.tipo, cidade: d.cidade, obs: d.obs } }); try { st.save(); } catch (e) { /* segue */ } }
+        pronto('Prévia: o pedido ficou só neste navegador. No site no ar, ele chega ao painel do Erivelto.'); return;
+      }
+      env.disabled = true; msg.textContent = 'Enviando…';
+      req('POST', 'api/vender', { nome: d.nome, whatsapp: d.whatsapp, tipo: d.tipo, cidade: d.cidade, obs: d.obs, aceite: true, versao_aviso: AVISO_VERSAO }).then(function (r) {
+        if (r.ok) { pronto('O Erivelto vai falar com você pelo WhatsApp.'); return; }
+        msg.textContent = r.status === 400 && r.j && r.j.campo === 'cidade' ? 'Confira a cidade.' : msgConta(r); env.disabled = false;
+      });
+    };
+    document.body.appendChild(tela); var b0 = g.querySelector('.pt-chip'); if (b0) b0.focus();
+  };
+  document.addEventListener('click', function (ev) {
+    var a = ev.target.closest && ev.target.closest('[data-pt-vender]'); if (!a) return;
+    ev.preventDefault(); P.telaVender();
+  });
+
   function iniciarSite() {
     return req('GET', 'api/estado').then(function (r) {
       if (!r.ok) { telaErro('Não consegui carregar os imóveis agora.'); return; }
@@ -686,7 +869,7 @@
 
   /* ---------- partida ---------- */
   var comeco = P.pagina === 'painel' ? iniciarPainel : iniciarSite;
-  detectar().then(function (ok) { if (ok) return comeco(); iniciar(); }).catch(function (e) {
+  detectar().then(function (ok) { if (ok) return comeco(); iniciar(); if (P.pagina === 'site') { css(); rodape(); } }).catch(function (e) {
     if (window.console) console.error('ponte', e && e.message); if (!P.srv) iniciar();
   });
 })();

@@ -56,7 +56,7 @@ atexit.register(lambda: shutil.rmtree(DADOS, ignore_errors=True))
 os.environ.update(
     ERV_BANCO=BANCO, ERV_DADOS=str(DADOS), ERV_SITE=str(RAIZ / "site"), ERV_HTTPS="0", ERV_ORIGENS=ORIGEM, ERV_NOINDEX="1",
     ERV_CHAVE_DADOS=base64.b64encode(b"chave-so-dos-testes-0123456789ab").decode(), ERV_TUNEL_TESTE="0", ERV_PLANO="erivelto",
-    ERV_LEADS_MESES="0", ERV_IP_CABECALHO="", ERV_WHATSAPP="", ERV_FOTO_LADO="2560", ERV_AVISO_VERSAO="v2", ERV_TERMO_VERSAO="v1")
+    ERV_LEADS_MESES="0", ERV_IP_CABECALHO="", ERV_WHATSAPP="", ERV_FOTO_LADO="2560", ERV_AVISO_VERSAO="v3", ERV_TERMO_VERSAO="v1")
 
 import app as erv  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

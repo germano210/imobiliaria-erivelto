@@ -3,7 +3,7 @@ import json
 
 from conftest import cliente, erv, imovel, publicar
 
-MARIA = {"nome": "Maria Silva", "whatsapp": "(51) 99999-1234", "aceite": True, "versao_aviso": "v2"}
+MARIA = {"nome": "Maria Silva", "whatsapp": "(51) 99999-1234", "aceite": True, "versao_aviso": "v3"}
 
 
 def test_t16_validacao_como_o_ponte_espera(c):
@@ -32,7 +32,7 @@ def test_t16_contato_cifrado_em_repouso_e_aceite_registrado(c):
     assert erv.decifrar(linha["nome_cif"], "nome") == "Maria Silva" and erv.decifrar(linha["wa_cif"], "wa") == "5551999991234"
     assert linha["wa_hmac"] == erv.indice_wa("5551999991234") and len(linha["wa_hmac"]) == 64
     a = erv.q("select * from aceites")
-    assert len(a) == 1 and a[0]["versao"] == "v2" and a[0]["conta_id"] == linha["id"] and a[0]["criado"] is not None
+    assert len(a) == 1 and a[0]["versao"] == "v3" and a[0]["conta_id"] == linha["id"] and a[0]["criado"] is not None
     # nenhuma tabela guarda o contato em texto puro
     tudo = json.dumps([erv.q(f"select * from {t}") for t in ("visitas", "leads", "aceites", "tentativas", "acessos")], default=str)
     assert "Maria" not in tudo and "99999" not in tudo
@@ -152,8 +152,9 @@ def test_t19_meus_dados(painel, c):
     c.post("/api/leads", json={"via": "login", "imovel_id": "casa1", "imovel": '"Casa" · R$ 850.000', "cidade": "Osório"})
     j = c.get("/api/privacidade/meus-dados").json()
     assert j["nome"] == "Maria Silva" and j["whatsapp"] == "(51) 99999-1234"
-    assert j["aceites_do_aviso"][0]["versao"] == "v2" and j["aceites_do_aviso"][0]["data"]
-    assert j["contatos"] == [{"imovel": '"Casa" · R$ 850.000', "cidade": "Osório", "por": ["login"], "data": j["contatos"][0]["data"]}]
+    assert j["aceites_do_aviso"][0]["versao"] == "v3" and j["aceites_do_aviso"][0]["data"]
+    assert j["contatos"] == [{"imovel": '"Casa" · R$ 850.000', "cidade": "Osório", "por": ["login"], "data": j["contatos"][0]["data"],
+                              "situacao_marcada_pelo_corretor": "novo"}]   # T43: a situação que o corretor marca aparece aqui
 
 
 def test_t19_quem_entra_com_o_numero_de_outra_pessoa_nao_ve_o_historico(painel, c):
