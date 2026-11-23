@@ -93,6 +93,13 @@ Não há comando para excluir usuário nem para apagar o contato de um visitante
 - **No site:** selos no cartão e na ficha, a categoria "Para alugar" no filtro de tipo, o botão "Pedir visita" na ficha (dia e período vão na mensagem do WhatsApp) e o link "Quero vender" no pé da página.
 - **Rotas novas:** `PUT /api/painel/leads/<id>` (situação e anotação) e `POST /api/vender` (formulário "Quero vender"; limite de 10 por hora por IP).
 
+## R86 (23/11) · pedidos do Erivelto e do John
+
+- **Painel:** cômodos e "o que tem" viram linhas editáveis (ícone de uma grade de 32, nome, medida em m² ou vagas, observação; adicionar e excluir). Ficam em `cm` e `ot` no imóvel; `c`, `x`, `outros` e `infos` continuam saindo deles (o site antigo segue lendo). Campos novos: `onde` {t: cf|ca|lot|bairro|outro, n, e}, `per` (aluguel: mes|dia|ano), `end`/`nomes` (já tratados pelo `para_visitante`), `mapa` + `loc` (toque no mapa; só há imagem de Santo Antônio da Patrulha) e `px` (lugares perto). Contatos em 2 grupos ("Querem comprar ou alugar" × "Querem anunciar"). Aba **Desempenho**. Cor `#003641`.
+- **Servidor:** tabela `aberturas` (dia, imóvel, total; sem IP, conta ou cookie), `POST /api/visto` (limite 120/h por IP, só soma) e `GET /api/painel/desempenho`. O `migrar()` cria a tabela sozinho na subida.
+- **Site (ponte.js/ponte.css):** cor `#003641`, botão "Anunciar meu imóvel" ao lado do Login (abre o "Quero vender"), letras maiores, cartão de vidro branco com a foto à esquerda e "Ver cômodos", a lista some por baixo do grid de busca, ficha com "Onde fica" e cômodos/itens em quadrados com ícone, "Pedir visita" em forma de conversa, aluguel /mês, /dia ou /ano (`PONTE.sufixo`, nos remendos do T40).
+- Testes: `app/testes/test_r86_desempenho_e_campos.py` (4). Total: 108 passam.
+
 ## Backup e restauração
 
 - `./backup.sh`: gera `erivelto-AAAA-MM-DD_HHMM.tar.age` (banco + fotos), cifrado com a chave pública do age (`ERV_BACKUP_CHAVE`), em `ERV_BACKUP_DESTINO`. Apaga os com mais de 14 dias. A chave privada fica fora do servidor.

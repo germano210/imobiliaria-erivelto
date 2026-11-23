@@ -4,7 +4,7 @@ body.c-on{overflow:hidden}
 #c-app,#c-app *{box-sizing:border-box}
 #c-app button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 #c-app input{font:inherit;color:inherit}
-#c-app{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;background:#f9f9f9;overflow:hidden;font-family:Poppins,system-ui,sans-serif;color:#1d1d1f;-webkit-font-smoothing:antialiased;--az:#01416b;--az2:#e6eef4;--cz:#f2f1ed;--mu:#6b6862;--ok:#1f8a4c;--ln:#eceae5}
+#c-app{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;background:#f9f9f9;overflow:hidden;font-family:Poppins,system-ui,sans-serif;color:#1d1d1f;-webkit-font-smoothing:antialiased;--az:#003641;--az2:#e3eeef;--cz:#f2f1ed;--mu:#6b6862;--ok:#1f8a4c;--ln:#eceae5}
 #c-app .main{flex:1;overflow:auto;-webkit-overflow-scrolling:touch}
 #c-app .wrap{padding:22px 18px 28px;display:flex;flex-direction:column;gap:14px}
 #c-app h1{margin:0;font-size:26px;font-weight:500;letter-spacing:-.01em}
@@ -229,3 +229,44 @@ body.c-on{overflow:hidden}
 #c-app .ld-sit select{min-height:40px;border-radius:10px;border:1px solid #d6dde3;background:#fff;padding:0 10px;font:inherit;font-size:14px}
 #c-app .ld-nota{width:100%;min-height:44px;border-radius:12px;border:1px solid #d6dde3;padding:8px 10px;font:inherit;font-size:14px;resize:vertical;box-sizing:border-box}
 #c-app .ld-sit select:focus-visible,#c-app .ld-nota:focus-visible{outline:2px solid var(--az);outline-offset:1px}
+
+/* R86 · cômodos e itens em linhas, onde fica, mapa, contatos em 2 grupos, Desempenho. Cor principal do Erivelto: #003641 */
+#c-app .cm-lista{display:flex;flex-direction:column;background:#fff;border-radius:14px;border:1px solid var(--ln)}
+#c-app .cm-r{display:flex;gap:10px;align-items:flex-start;padding:10px;border-bottom:1px solid var(--ln)}
+#c-app .cm-r:last-child{border-bottom:0}
+#c-app .cm-i{width:42px;height:42px;border-radius:12px;background:var(--az2);display:flex;align-items:center;justify-content:center;flex:none;color:var(--az)}
+#c-app .cm-i .ix{width:24px;height:24px}
+#c-app .cm-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+#c-app .cm-n{border:0;font:500 15px Poppins,system-ui,sans-serif;padding:2px 0;background:none;width:100%;color:#1d1d1f}
+#c-app .cm-l2{display:flex;gap:8px;align-items:center}
+#c-app .cm-m{display:flex;align-items:center;gap:4px;background:var(--cz);border-radius:8px;padding:2px 8px;flex:none}
+#c-app .cm-m input{width:46px;border:0;background:none;font:400 14px Poppins,system-ui,sans-serif;text-align:right}
+#c-app .cm-m span{font-size:12px;color:var(--mu)}
+#c-app .cm-o{flex:1;min-width:0;border:0;border-bottom:1px dashed #d6d2c8;background:none;font:400 13px Poppins,system-ui,sans-serif;color:#8C471C;padding:3px 0}
+#c-app .cm-o::placeholder{color:#9fb0b3}
+#c-app .cm-x{width:32px;height:32px;border-radius:9px;background:#fbeeee;color:#b23b3b;flex:none;font-size:15px}
+#c-app .cm-add{border:1.5px dashed #9fb3b8;border-radius:12px;padding:12px;color:var(--az);font-weight:500;background:#fff;width:100%}
+#c-app .cm-g{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+#c-app .cm-g button{border:1px solid var(--ln);border-radius:12px;padding:9px 2px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;line-height:1.2;background:#fff;color:#2e3a3f}
+#c-app .cm-g button .ix{width:26px;height:26px;color:var(--az)}
+#c-app .cm-g button[aria-pressed=true]{border:2px solid var(--az);background:var(--az2)}
+#c-app .mp-box{position:relative;border-radius:14px;overflow:hidden;aspect-ratio:1;background:#dfe5e2;cursor:crosshair}
+#c-app .mp-box img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+#c-app .mp-p{position:absolute;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none}
+#c-app .mp-p.pino{width:16px;height:16px;background:var(--az);border:3px solid #fff;box-shadow:0 1px 6px #0007}
+#c-app .mp-p.area{width:22%;aspect-ratio:1;background:#00364140;border:2px solid #fff}
+#c-app .mp-d{position:absolute;left:8px;bottom:8px;background:#fff;border-radius:8px;padding:4px 8px;font-size:12px}
+#c-app .seg{display:flex;background:#ecebe6;border-radius:12px;padding:3px;gap:2px;margin:0 0 12px}
+#c-app .seg button{flex:1;padding:8px 4px;border-radius:9px;font-size:13px;color:var(--mu);line-height:1.25}
+#c-app .seg button[aria-selected=true]{background:#fff;color:var(--az);font-weight:500;box-shadow:0 1px 3px #0002}
+#c-app .seg .n{font-size:11px;opacity:.8}
+#c-app .kps{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+#c-app .kp{background:#fff;border-radius:14px;padding:12px;display:flex;flex-direction:column;border:1px solid var(--ln)}
+#c-app .kp b{font-size:26px;font-weight:600;color:var(--az);line-height:1.1}
+#c-app .kp span{font-size:12px;color:var(--mu)}
+#c-app .ds-l{display:grid;grid-template-columns:1fr;gap:3px;padding:7px 0;border-bottom:1px solid var(--ln)}
+#c-app .ds-l:last-child{border-bottom:0}
+#c-app .ds-n{font-size:13.5px;font-weight:500}
+#c-app .ds-b{height:8px;background:var(--cz);border-radius:8px;overflow:hidden}
+#c-app .ds-b i{display:block;height:100%;background:var(--az);border-radius:8px;min-width:2px}
+#c-app .ds-v{font-size:12px;color:var(--mu)}

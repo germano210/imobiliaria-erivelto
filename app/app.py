@@ -131,6 +131,9 @@ create index if not exists ix_sessoes_expira on sessoes(expira);
 create index if not exists ix_visitas_expira on visitas(expira);
 create index if not exists ix_acessos_criado on acessos(criado);
 create index if not exists ix_chamadas_criado on chamadas(criado);
+create table if not exists aberturas(
+  dia date not null, imovel_id text not null default '', n integer not null default 0,
+  primary key (dia, imovel_id));                       -- R86: contador do Desempenho. Só soma por dia e imóvel ('' = o site): sem IP, sem conta, sem cookie
 """
 
 
@@ -1081,6 +1084,27 @@ def chamadas_nova(request: Request, corpo: dict = Depends(Corpo())):
     q("insert into chamadas(imovel_id, nm, o, cidade) values (%s, %s, %s, %s)", iid, texto_curto(corpo.get("nm"), 120),
       texto_curto(corpo.get("o"), 240), texto_curto(i["publicado"].get("cidade"), 80))
     return {"ok": True}
+
+
+@app.post("/api/visto")
+def visto(request: Request, corpo: dict = Depends(Corpo())):
+    """R86 · Desempenho: conta uma abertura do site (sem id) ou de um imóvel publicado (id). Guarda só o total do dia."""
+    if gasta(chave_lim("visto-ip", ip_de(request)), 120, 3600):
+        return {"ok": True}   # passou do limite: não conta, mas não dá erro ao visitante
+    iid = corpo.get("id") or ""
+    if iid:
+        if not (isinstance(iid, str) and RE_ID.fullmatch(iid)) or not q1("select 1 from imoveis where id=%s and publicado is not null", iid):
+            raise Erro(400, erro="invalido", campo="id")
+    q("""insert into aberturas(dia, imovel_id, n) values ((now() at time zone 'America/Sao_Paulo')::date, %s, 1)
+         on conflict (dia, imovel_id) do update set n = aberturas.n + 1""", iid)
+    return {"ok": True}
+
+
+@app.get("/api/painel/desempenho")
+def painel_desempenho(u=Depends(admin)):
+    r = q("""select to_char(dia, 'YYYY-MM-DD') as dia, imovel_id as id, n from aberturas
+             where dia > (now() at time zone 'America/Sao_Paulo')::date - 400 order by dia""")
+    return {"aberturas": r}
 
 
 @app.get("/api/painel/chamadas")

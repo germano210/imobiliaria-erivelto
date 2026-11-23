@@ -195,31 +195,43 @@
     var a = el('a', { href: href, target: '_blank', rel: 'noopener' }); a.style.display = 'none';
     document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); }, 0);
   }
-  function telaVisita(a, base) {
+  function telaVisita(a, base) {   // R86: em forma de conversa com o corretor (escolha C de John). Mesma mensagem, mesmo registro.
     css();
-    var escolha = { dia: null, per: null }, ds = dias();
+    var escolha = { dia: null, per: null }, ds = dias(), nm = nomeDe(a), conta = contaVisitante();
     var msg = el('p', { class: 'pt-msg', 'aria-live': 'polite' });
-    var ir = el('button', { type: 'button', class: 'pt-btn pri', id: 'pt-visita-ir', disabled: 'disabled', texto: 'Abrir o WhatsApp' });
+    var ir = el('button', { type: 'button', class: 'pt-btn pri', id: 'pt-visita-ir', disabled: 'disabled', texto: 'Enviar pelo WhatsApp' });
     var fe = el('button', { type: 'button', class: 'pt-btn', texto: 'Cancelar' });
-    function grupo(nome, itens, k) {
-      var g = el('div', { class: 'pt-chips', role: 'radiogroup', 'aria-label': nome });
+    var eu = el('p', { class: 'pt-bal eu vazio', 'aria-live': 'polite', texto: 'Escolha o dia e o período…' });
+    var nome = conta ? null : el('input', { class: 'pt-in', id: 'pt-visita-nome', maxlength: '60', autocomplete: 'name', 'aria-label': 'Seu nome (opcional)', placeholder: 'Seu nome (opcional)' });
+    function frase() {
+      if (!escolha.dia || !escolha.per) { eu.textContent = 'Escolha o dia e o período…'; eu.classList.add('vazio'); return; }
+      eu.textContent = 'Quero visitar ' + escolha.dia[2] + ', ' + escolha.per[1] + '.'; eu.classList.remove('vazio');
+    }
+    function grupo(nome2, itens, k) {
+      var g = el('div', { class: 'pt-chips', role: 'radiogroup', 'aria-label': nome2 });
       itens.forEach(function (it) {
         var b = el('button', { type: 'button', class: 'pt-chip', role: 'radio', 'aria-checked': 'false', 'data-v': it[0], texto: it[1] });
-        b.onclick = function () { escolha[k] = it; g.querySelectorAll('.pt-chip').forEach(function (o) { o.setAttribute('aria-checked', String(o === b)); }); ir.disabled = !(escolha.dia && escolha.per); };
+        b.onclick = function () { escolha[k] = it; g.querySelectorAll('.pt-chip').forEach(function (o) { o.setAttribute('aria-checked', String(o === b)); }); ir.disabled = !(escolha.dia && escolha.per); frase(); };
         g.appendChild(b);
       });
       return g;
     }
-    var tela = el('div', { class: 'pt-tela', id: 'pt-visita', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'pt-visita-t' }, [el('div', { class: 'pt-cartao' }, [
-      el('h1', { class: 'pt-t', id: 'pt-visita-t', texto: 'Pedir visita' }),
-      el('p', { class: 'pt-p', texto: 'Escolha o dia e o período. A mensagem vai pronta para o WhatsApp do Erivelto; ele confirma o horário com você.' }),
-      el('p', { class: 'pt-lb', texto: 'Dia' }), grupo('Dia', ds, 'dia'), el('p', { class: 'pt-lb', texto: 'Período' }), grupo('Período', PERIODOS, 'per'), msg, ir, fe])]);
+    var PER_C = [['manha', 'Manhã', 'de manhã'], ['tarde', 'Tarde', 'à tarde'], ['noite', 'Noite', 'à noite']].map(function (p) { return [p[0], p[1], p[2]]; });
+    var gp = grupo('Período', PER_C, 'per');
+    gp.querySelectorAll('.pt-chip').forEach(function (b, j) { b.onclick = (function (o) { return function () { escolha.per = [PER_C[j][0], PER_C[j][2]]; gp.querySelectorAll('.pt-chip').forEach(function (x) { x.setAttribute('aria-checked', String(x === b)); }); ir.disabled = !(escolha.dia && escolha.per); frase(); }; })(); });
+    var topo = el('div', { class: 'pt-ctop' });
+    topo.innerHTML = '<span class="pt-cav"><img src="lg/logo.webp" alt=""></span><span><b>Erivelto Santos</b><small>Corretor de imóveis · confirma o horário com você</small></span>';
+    var ele = el('p', { class: 'pt-bal ele', texto: 'Oi! Quer conhecer ' + (nm && nm !== 'Imóvel' ? '"' + nm + '"' : 'o imóvel') + '? Me diga o dia e o período que fica bom para você.' });
+    var tela = el('div', { class: 'pt-tela', id: 'pt-visita', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'pt-visita-t' }, [el('div', { class: 'pt-cartao pt-conversa' }, [
+      el('h1', { class: 'pt-t pt-sr', id: 'pt-visita-t', texto: 'Pedir visita' }), topo, ele, eu,
+      el('p', { class: 'pt-lb', texto: 'Dia' }), grupo('Dia', ds, 'dia'), el('p', { class: 'pt-lb', texto: 'Período' }), gp].concat(nome ? [nome] : []).concat([msg, ir, fe]))]);
     fe.onclick = function () { tela.remove(); };
     ir.onclick = function () {
       if (!escolha.dia || !escolha.per) return;
       if (P.srv && !P.waSite()) { msg.textContent = 'O WhatsApp do corretor ainda não está disponível aqui.'; return; }
       var pedido = escolha.dia[2] + ', ' + escolha.per[1];
       var texto = base.indexOf('e quero mais informações.') >= 0 ? base.replace('e quero mais informações.', 'e quero marcar uma visita ' + pedido + '.') : base + ' Quero marcar uma visita ' + pedido + '.';
+      var quem = nome && nome.value.trim(); if (quem) texto += ' Sou ' + quem.slice(0, 60) + '.';
       var href = 'https://wa.me/' + P.waSite() + '?text=' + encodeURIComponent(texto);
       registrarVisita(a, pedido);
       tela.remove(); abrirWa(href);
@@ -318,9 +330,125 @@
         var a = ev.target.closest && ev.target.closest('a[href^="https://wa.me/"]'); if (!a) return;
         ev.preventDefault(); ev.stopImmediatePropagation(); aviso('O WhatsApp do corretor ainda não está disponível aqui.');
       }, true);
-      iniciar(); rodape(); esvaziarFila();
+      iniciar(); rodape(); esvaziarFila(); liga86(); visto86('');
       document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') esvaziarFila(); });
     });
+  }
+
+  /* ---------- R86 (23/11): pedido do Erivelto e do John ----------
+     cor principal #003641; "Anunciar meu imóvel" ao lado do Login; letras maiores; cartão de vidro branco com a foto à esquerda;
+     a lista some por baixo do grid de busca (sem corte reto); "Ver cômodos" abre no cartão; ficha com "Onde fica" e
+     "O que o imóvel tem" em ícones grandes; Pedir visita em forma de conversa; aluguel /mês, /dia ou /ano; contador do Desempenho. */
+  var ICO86 = {"cama":"<rect x=\"5\" y=\"7\" width=\"22\" height=\"9\" rx=\"2\"/><rect x=\"8\" y=\"11\" width=\"6.5\" height=\"4\" rx=\"1.5\"/><rect x=\"17.5\" y=\"11\" width=\"6.5\" height=\"4\" rx=\"1.5\"/><path d=\"M3 16h26v7H3z\"/><path d=\"M3 20h26M5 23v3M27 23v3\"/>","suite":"<path d=\"M4 24V12M4 19h24v5M28 24v-6a3 3 0 0 0-3-3H14v4\"/><circle cx=\"9\" cy=\"15.5\" r=\"2.2\"/><path d=\"M22 5.5c0 1.7-1.3 3-3 3s-3-1.3-3-3c0-1.6 3-4 3-4s3 2.4 3 4z\"/>","banho":"<path d=\"M4 16h24v3a6 6 0 0 1-6 6H10a6 6 0 0 1-6-6z\"/><path d=\"M7 16V8.5a3 3 0 0 1 6 0\"/><path d=\"M10 25l-1 3M22 25l1 3\"/>","sofa":"<path d=\"M6.5 14v-3.5a3 3 0 0 1 3-3h13a3 3 0 0 1 3 3V14\"/><path d=\"M4 14.5a2 2 0 0 1 4 0V19h16v-4.5a2 2 0 0 1 4 0V23H4z\"/><path d=\"M6 23v3M26 23v3\"/>","cozinha":"<rect x=\"7\" y=\"9\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M7 15h18\"/><circle cx=\"12\" cy=\"12\" r=\"1\"/><circle cx=\"16\" cy=\"12\" r=\"1\"/><circle cx=\"20\" cy=\"12\" r=\"1\"/><rect x=\"11\" y=\"18.5\" width=\"10\" height=\"5\" rx=\"1\"/><path d=\"M12 5v2M16 5v2M20 5v2\"/>","lavanderia":"<rect x=\"7\" y=\"4\" width=\"18\" height=\"24\" rx=\"2\"/><path d=\"M7 10h18\"/><circle cx=\"16\" cy=\"19\" r=\"5\"/><circle cx=\"11\" cy=\"7\" r=\".8\"/>","garagem":"<path d=\"M3 13L16 5l13 8\"/><path d=\"M6 11.5V27h20V11.5\"/><path d=\"M10.5 21l1.4-3.6h8.2l1.4 3.6\"/><rect x=\"9.5\" y=\"21\" width=\"13\" height=\"4\" rx=\"1\"/><path d=\"M11.5 25v1.5M20.5 25v1.5\"/>","varanda":"<path d=\"M3 13L16 5l13 8\"/><path d=\"M6 12v15M26 12v15M6 16h20M6 27h20\"/><path d=\"M10 16c0 4 3 6 6 6s6-2 6-6\"/>","sacada":"<path d=\"M5 18h22M5 18v9M27 18v9M5 27h22M10 18v9M15 18v9M20 18v9\"/><path d=\"M9 14V6h14v8\"/><path d=\"M16 6v8\"/>","churras":"<path d=\"M6 13h20a10 10 0 0 1-20 0z\"/><path d=\"M11.5 22l-3 6.5M20.5 22l3 6.5M16 23v5.5\"/><path d=\"M12.5 9.5c0-2 2-2 2-4M17.5 9.5c0-2 2-2 2-4\"/>","piscina":"<path d=\"M10 19V7a2.5 2.5 0 0 1 5 0\"/><path d=\"M18 19V7a2.5 2.5 0 0 1 5 0\"/><path d=\"M10 11h8M10 15h8\"/><path d=\"M3 22c2 0 2-1.4 4.3-1.4S9.6 22 11.9 22s2.3-1.4 4.6-1.4S18.8 22 21 22s2.2-1.4 4.4-1.4S27.8 22 29 22\"/><path d=\"M3 26.5c2 0 2-1.4 4.3-1.4s2.3 1.4 4.6 1.4 2.3-1.4 4.6-1.4 2.3 1.4 4.5 1.4 2.2-1.4 4.4-1.4 2.4 1.4 3.6 1.4\"/>","jardim":"<path d=\"M16 28V14\"/><path d=\"M16 18c-5 0-8-3-8-8 5 0 8 3 8 8zM16 15c0-4.5 2.7-7.5 7.5-7.5 0 4.5-2.7 7.5-7.5 7.5z\"/><path d=\"M8 28h16\"/>","patio":"<circle cx=\"16\" cy=\"11\" r=\"6.5\"/><path d=\"M16 17.5V27M11 27h10M13 14l3 3 3-3\"/>","armario":"<rect x=\"6\" y=\"4\" width=\"20\" height=\"24\" rx=\"1\"/><path d=\"M16 4v24M13 14.5v3M19 14.5v3M6 24h20\"/>","academia":"<path d=\"M4 13v6M8 10v12M24 10v12M28 13v6M8 16h16\"/>","salao":"<path d=\"M6 27l5-15 9 9z\"/><path d=\"M14 8l1-3M20 10l3-2M22 15l3 1\"/><circle cx=\"18\" cy=\"5\" r=\".8\"/><circle cx=\"26\" cy=\"11\" r=\".8\"/>","escritura":"<path d=\"M9 4h10l6 6v18H9z\"/><path d=\"M19 4v6h6\"/><path d=\"M12.5 15h9M12.5 19h9M12.5 23h5\"/>","agua":"<path d=\"M12 6s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z\"/><path d=\"M23 4l-4 8h5l-4 8\"/>","elevador":"<rect x=\"7\" y=\"4\" width=\"18\" height=\"24\" rx=\"2\"/><path d=\"M16 4v24\"/><path d=\"M10.5 13l2-2.5 2 2.5M17.5 11l2 2.5 2-2.5\"/>","portaria":"<path d=\"M16 4l10 4v7c0 6-4.5 10.5-10 13-5.5-2.5-10-7-10-13V8z\"/><path d=\"M12 16l3 3 5-6\"/>","murado":"<path d=\"M4 26h24M4 11h24M4 26V11M28 26V11M4 16h24M4 21h24M10 11v5M18 11v5M14 16v5M22 16v5M10 21v5M18 21v5\"/>","esquina":"<path d=\"M4 9h17a2 2 0 0 1 2 2v17\"/><path d=\"M4 15h11a2 2 0 0 1 2 2v11\"/><path d=\"M4 12h3M10 12h3M20 25v-3M20 19v-3\"/>","frente":"<path d=\"M4 16h24M4 12v8M28 12v8\"/><path d=\"M8 16l3-2.5M8 16l3 2.5M24 16l-3-2.5M24 16l-3 2.5\"/>","andar":"<path d=\"M5 27h6v-6h6v-6h6V9h4\"/><path d=\"M5 27h22\"/>","condominio":"<rect x=\"5\" y=\"7\" width=\"22\" height=\"20\" rx=\"2\"/><path d=\"M5 12h22M10 4v5M22 4v5\"/><path d=\"M13 21.5c0 1.2 1.3 2 3 2s3-.8 3-2-1.3-1.7-3-2-3-.8-3-2 1.3-2 3-2 3 .8 3 2M16 14v1.5M16 23.5V25\"/>","terreno":"<path d=\"M3 26l7-6 6 4 6-7 7 9z\"/><path d=\"M16 17V5l6 3-6 3\"/>","area":"<path d=\"M6 7h20v15H6z\" stroke-dasharray=\"2.2 2.2\"/><path d=\"M11 12.5l.6 1.2 1.3.2-.9.9.2 1.3-1.2-.6-1.2.6.2-1.3-.9-.9 1.3-.2z\"/><path d=\"M20 15l.6 1.2 1.3.2-.9.9.2 1.3-1.2-.6-1.2.6.2-1.3-.9-.9 1.3-.2z\"/><path d=\"M6 26.5h20M6 25v3M26 25v3\"/>","chave":"<circle cx=\"10\" cy=\"16\" r=\"5\"/><path d=\"M15 16h13M24 16v4M28 16v3\"/>","plano":"<path d=\"M3 23h26\"/><path d=\"M6 23v-4h20v4\"/><path d=\"M11 15h10M16 11v4\"/>","predio":"<rect x=\"8\" y=\"4\" width=\"16\" height=\"24\"/><path d=\"M12 9h2M18 9h2M12 14h2M18 14h2M12 19h2M18 19h2M14 28v-4h4v4\"/>","outro":"<path d=\"M16 28s-8-7.5-8-14a8 8 0 0 1 16 0c0 6.5-8 14-8 14z\"/><circle cx=\"16\" cy=\"14\" r=\"3\"/>","mais":"<circle cx=\"16\" cy=\"16\" r=\"11\"/><path d=\"M16 11v10M11 16h10\"/>"};
+  var PER86 = { mes: '/mês', dia: '/dia', ano: '/ano' };
+  P.sufixo = function (a) { return PER86[a && a.per] || '/mês'; };
+  var ONDE86 = { cf: 'Condomínio fechado', ca: 'Condomínio aberto', lot: 'Loteamento', bairro: 'Bairro', outro: '' };
+  var MAP86 = {};
+  function ic86(k, cl) { return '<svg viewBox="0 0 32 32" class="' + (cl || 'r86-ic') + '" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + (ICO86[k] || ICO86.mais) + '</svg>'; }
+  function e86(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function onde86(a) {
+    var o = a && a.onde, t = o && ONDE86[o.t] !== undefined ? ONDE86[o.t] : null, b = a && a.end && a.end.bairro;
+    var p = [];
+    if (t !== null) p.push(o.t === 'outro' ? (o.n || '') : t + (o.n ? ' ' + o.n : ''));
+    if (b && !(o && o.t === 'bairro' && o.n === b)) p.push(b);
+    return p.filter(Boolean).join(' · ');
+  }
+  function m2txt(v) { return (+v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' m²'; }
+  function linhas86(a) {
+    var L = [];
+    (Array.isArray(a.cm) ? a.cm : []).forEach(function (r) { if (r && r.n) L.push({ k: r.k, n: r.n, s: r.k === 'garagem' ? (r.q > 1 ? r.q + ' vagas' : '1 vaga') : (r.m2 ? m2txt(r.m2) : ''), o: r.o || '' }); });
+    return L;
+  }
+  function itens86(a) { return (Array.isArray(a.ot) ? a.ot : []).filter(function (r) { return r && r.n; }).map(function (r) { return { k: r.k, n: r.n, o: r.o || '' }; }); }
+  var vit0 = P.vitrine;
+  P.vitrine = function (e) { var r = vit0 ? vit0(e) : e; (r || []).forEach(function (a) { if (a && a.id) MAP86[a.id] = a; }); return r; };
+
+  // contador do Desempenho: o site (1 vez por aba) e cada imóvel aberto (1 vez por aba). Sem cookie, sem dado pessoal.
+  var VISTO86 = {};
+  function visto86(id) {
+    if (!P.srv || P.pagina !== 'site' || /[?&]painel=1/.test(location.search)) return;
+    var k = id || '_site'; if (VISTO86[k]) return; VISTO86[k] = 1;
+    try { if (sessionStorage.getItem('erv_v_' + k)) return; sessionStorage.setItem('erv_v_' + k, '1'); } catch (e) { /* segue */ }
+    req('POST', 'api/visto', id ? { id: id } : {});
+  }
+  P.visto = visto86;
+
+  // cartão da lista
+  function cartao86(art) {
+    if (art.dataset.r86) return; var a = MAP86[art.dataset.id]; if (!a) return;
+    art.dataset.r86 = '1'; art.classList.add('r86c');
+    var ov = art.querySelector('.ov7'), nm = art.querySelector('.nm8'), bt = art.querySelector('.bt7'); if (!ov) return;
+    var od = onde86(a);
+    if (od && nm) nm.insertAdjacentHTML('afterend', '<p class="r86-onde">' + ic86('condominio', 'r86-ic s') + '<span>' + e86(od) + '</span></p>');
+    var cm = linhas86(a), ot = itens86(a);
+    if ((cm.length || ot.length) && bt) {
+      art.dataset.r86l = cm.length ? 'Ver cômodos' : 'Ver o que tem';
+      bt.insertAdjacentHTML('afterbegin', '<button type="button" class="r86-mais" data-r86-mais aria-expanded="false">' + art.dataset.r86l + ' <span aria-hidden="true">+</span></button>');
+      art.insertAdjacentHTML('beforeend', '<div class="r86-gav" hidden>' +
+        (cm.length ? '<div class="r86-cms">' + cm.map(function (r) { return '<div class="r86-cm">' + ic86(r.k) + '<span><b>' + e86(r.n) + '</b>' + (r.s ? '<small>' + e86(r.s) + '</small>' : '') + (r.o ? '<em>' + e86(r.o) + '</em>' : '') + '</span></div>'; }).join('') + '</div>' : '') +
+        (ot.length ? '<div class="r86-ots">' + ot.map(function (r) { return '<span class="r86-ot">' + ic86(r.k, 'r86-ic s') + e86(r.n) + '</span>'; }).join('') + '</div>' : '') + '</div>');
+    }
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('[data-r86-mais]'); if (!b) return;
+    ev.preventDefault(); ev.stopPropagation();
+    var art = b.closest('.cd12'), g = art && art.querySelector('.r86-gav'); if (!g) return;
+    var ab = g.hidden; g.hidden = !ab; art.classList.toggle('r86-ab', ab); b.setAttribute('aria-expanded', String(ab));
+    b.innerHTML = ab ? 'Fechar <span aria-hidden="true">−</span>' : (art.dataset.r86l || 'Ver cômodos') + ' <span aria-hidden="true">+</span>';
+  }, true);
+
+  // ficha do imóvel (o site chama P.botaoVisita ao montar a ficha: é a deixa para completar)
+  var bv0 = P.botaoVisita;
+  P.botaoVisita = function (a) { var h = bv0 ? bv0(a) : ''; if (a && a.id) { setTimeout(function () { ficha86(a); }, 0); visto86(a.id); } return h; };
+  function ficha86(a0) {
+    var a = MAP86[a0.id] || a0, nv = document.querySelector('.sc12 .nv12'); if (!nv) return;
+    var velho = nv.querySelector('.r86-f'); if (velho) velho.remove();
+    var od = onde86(a), oe = a.onde && a.onde.e, cm = linhas86(a), ot = itens86(a);
+    if (!od && !cm.length && !ot.length) { nv.classList.remove('r86-fo'); return; }
+    var h = '<div class="r86-f">';
+    if (od) h += '<div class="r86-fo1">' + ic86('condominio') + '<span><b>' + e86(od) + '</b>' + (oe ? '<small>' + e86(oe) + '</small>' : '') + '</span></div>';
+    if (cm.length) h += '<p class="r86-ft">Cômodos e medidas</p><div class="r86-gr">' + cm.map(function (r) { return '<div class="r86-t">' + ic86(r.k) + '<b>' + e86(r.n) + '</b>' + (r.s ? '<small>' + e86(r.s) + '</small>' : '') + (r.o ? '<em>' + e86(r.o) + '</em>' : '') + '</div>'; }).join('') + '</div>';
+    if (ot.length) h += '<p class="r86-ft">O que o imóvel tem</p><div class="r86-gr">' + ot.map(function (r) { return '<div class="r86-t">' + ic86(r.k) + '<b>' + e86(r.n) + '</b>' + (r.o ? '<em>' + e86(r.o) + '</em>' : '') + '</div>'; }).join('') + '</div>';
+    h += '</div>';
+    var nh = nv.querySelector('.nh12'), alvo = nv.querySelector('.nv24s') || nh;
+    if (alvo && alvo !== nh) alvo.insertAdjacentHTML('afterbegin', h); else if (nh) nh.insertAdjacentHTML('afterend', h); else nv.insertAdjacentHTML('afterbegin', h);
+    nv.classList.toggle('r86-fo', cm.length + ot.length > 0);
+  }
+
+  // "Anunciar meu imóvel" ao lado do Login (abre o mesmo formulário do "Quero vender")
+  function anunciar86() {
+    var sc = document.querySelector('.sc12'), li = sc && sc.querySelector('.li12'); if (!li) return;
+    var b = sc.querySelector('.pt-anun');
+    if (!b) { b = el('button', { type: 'button', class: 'pt-anun', 'data-pt-vender': '1' }); b.innerHTML = '<span class="l">Anunciar meu imóvel</span><span class="c">Anunciar</span>'; sc.appendChild(b); }
+    var s = getComputedStyle(li), q = li.getBoundingClientRect(), qs = sc.getBoundingClientRect();
+    var vis = s.display !== 'none' && s.visibility !== 'hidden' && +s.opacity > 0.05 && q.width > 0;
+    b.style.display = vis ? '' : 'none'; if (!vis) return;
+    b.style.top = (q.top - qs.top + (q.height - b.offsetHeight) / 2) + 'px';
+    b.style.right = (qs.right - q.left + 10) + 'px';
+  }
+  // a lista some por baixo do grid de busca: a área de rolar começa no meio do grid (o grid fica por cima)
+  function corte86() {
+    var ls = document.querySelector('.sc12 .ls12'), bk = document.querySelector('.sc12 .bk12');
+    if (!ls || !bk) return;
+    var ql = ls.getBoundingClientRect(), qb = bk.getBoundingClientRect();
+    if (!ql.height || !qb.height) return;
+    var atual = parseFloat(ls.style.getPropertyValue('--r86d')) || 0, topo = ql.top + atual, d = Math.max(0, Math.round(topo - (qb.top + qb.height * 0.5)));
+    if (Math.abs(d - atual) > 1) ls.style.setProperty('--r86d', d + 'px');
+  }
+  var T86 = 0;
+  function ciclo86() {
+    if (T86) return; T86 = requestAnimationFrame(function () {
+      T86 = 0;
+      document.querySelectorAll('.sc12 .lsi12 .cd12[data-id]:not([data-r86])').forEach(cartao86);
+      anunciar86(); corte86();
+    });
+  }
+  function liga86() {
+    if (P.pagina !== 'site') return;
+    document.documentElement.classList.add('r86');
+    new MutationObserver(ciclo86).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+    window.addEventListener('resize', ciclo86); ciclo86();
+    setInterval(ciclo86, 1200);
   }
 
   /* ---------- PAINEL ---------- */
@@ -875,7 +1003,7 @@
 
   /* ---------- partida ---------- */
   var comeco = P.pagina === 'painel' ? iniciarPainel : iniciarSite;
-  detectar().then(function (ok) { if (ok) return comeco(); iniciar(); if (P.pagina === 'site') { css(); rodape(); } }).catch(function (e) {
+  detectar().then(function (ok) { if (ok) return comeco(); iniciar(); if (P.pagina === 'site') { css(); rodape(); liga86(); } }).catch(function (e) {
     if (window.console) console.error('ponte', e && e.message); if (!P.srv) iniciar();
   });
 })();

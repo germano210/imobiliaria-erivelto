@@ -61,7 +61,7 @@ os.environ.update(
 import app as erv  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
-TABELAS = "usuarios, sessoes, imoveis, fotos, contas, visitas, aceites, leads, chamadas, config, tentativas, acessos, termos"
+TABELAS = "usuarios, sessoes, imoveis, fotos, contas, visitas, aceites, leads, chamadas, config, tentativas, acessos, termos, aberturas"
 
 
 @pytest.fixture(scope="session")

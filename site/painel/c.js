@@ -8,7 +8,7 @@ Object.assign(window.ICO14, {
   "galpao": ["Galpão", "<path d=\"M4 27V13l12-7 12 7v14\"/><path d=\"M4 27h24\"/><path d=\"M10 27v-8h12v8M10 23h12\"/>", "site"]
 });
 /* Painel do Erivelto 14.0 · versão A ("cartão vivo"), escolhida por John em 19/11.
-   Um painel só: Site · Imóveis · Contatos · Perfil. Usa o estado do bundle (window.__EST).
+   Um painel só: Site · Imóveis · Contatos · Desempenho (R86) · Perfil. Usa o estado do bundle (window.__EST).
    Cômodos, medidas e itens ficam em im.c / im.m / im.x / im.outros e são convertidos, a cada mudança,
    para o que o site já lê: im.infos [{i,t}] e im.ar [{r,n,m2}]. Servidor: salva e publica pela ponte (PONTE);
    prévia: neste navegador. Contra o "flic": a folha abre uma vez; tocar muda só aquele botão e o cartão de trás. */
@@ -52,7 +52,9 @@ Object.assign(window.ICO14, {
   var CIDADES = ['Santo Antônio da Patrulha', 'Osório', 'Taquara', 'Rolante', 'Tramandaí', 'Capão da Canoa', 'Gravataí', 'Caraá'];
 
   /* ---------- formatos ---------- */
-  function fmtPrecoIm(im) { var p = fmtPreco(im.preco); return p && im.final === 'aluguel' ? 'R$ ' + pontos(im.preco) + '/mês' : p; }
+  var PER = { mes: '/mês', dia: '/dia', ano: '/ano' };   // R86: o corretor escolhe como o aluguel aparece
+  function perDe(im) { return PER[im.per] ? im.per : 'mes'; }
+  function fmtPrecoIm(im) { var p = fmtPreco(im.preco); return p && im.final === 'aluguel' ? 'R$ ' + pontos(im.preco) + PER[perDe(im)] : p; }
   function fmtPreco(n) { n = +n || 0; if (!n) return ''; if (n >= 1e6) return 'R$ ' + (n / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + ' mi'; if (n >= 1e3) return 'R$ ' + Math.round(n / 1e3) + ' mil'; return 'R$ ' + n; }
   function pontos(v) { return v ? String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : ''; }
   function nomeTipo(t) { var x = TIPOS.filter(function (a) { return a[0] === t; })[0]; return x ? x[1] : ''; }
@@ -64,7 +66,7 @@ Object.assign(window.ICO14, {
 
   /* ---------- dados: lê o formato do site uma vez (infos/ar) e escreve de volta a cada mudança ---------- */
   function ler(im) {
-    if (im.c && im.m && im.x) return;
+    if (im.c && im.m && im.x) { lerLinhas(im); return; }
     var c = {}, m = {}, x = [], outros = [];
     (im.infos || []).forEach(function (o) {
       var t = String(o.t || '');
@@ -87,8 +89,32 @@ Object.assign(window.ICO14, {
       else if (a.r === 'outra' && /privativa/i.test(a.n || '')) m.privativa = v;
     });
     im.c = im.c || c; im.m = im.m || m; im.x = im.x || x; im.outros = im.outros || outros;
+    lerLinhas(im);
+  }
+  /* R86: cada cômodo e cada item é uma linha {k: ícone, n: nome, m2 ou q (vagas), o: observação}. Lê o formato antigo uma vez. */
+  var CM_C = { cama: 'quartos', suite: 'suites', banho: 'banheiros', sofa: 'salas', cozinha: 'cozinhas', garagem: 'vagas' };
+  function numerado(base, i, n) { return n > 1 ? base + ' ' + (i + 1) : base; }
+  function lerLinhas(im) {
+    if (!Array.isArray(im.cm)) {
+      var c = im.c || {}, L = [], q = c.quartos || 0, su = Math.min(c.suites || 0, q), i;
+      for (i = 0; i < su; i++) L.push({ k: 'suite', n: numerado('Suíte', i, su) });
+      for (i = 0; i < q - su; i++) L.push({ k: 'cama', n: numerado('Quarto', i, q - su) });
+      for (i = 0; i < (c.banheiros || 0); i++) L.push({ k: 'banho', n: numerado('Banheiro', i, c.banheiros) });
+      for (i = 0; i < (c.salas || 0); i++) L.push({ k: 'sofa', n: numerado('Sala', i, c.salas) });
+      for (i = 0; i < (c.cozinhas || 0); i++) L.push({ k: 'cozinha', n: numerado('Cozinha', i, c.cozinhas) });
+      if (c.vagas) L.push({ k: 'garagem', n: 'Garagem', q: c.vagas });
+      im.cm = L;
+    }
+    if (!Array.isArray(im.ot)) im.ot = (im.x || []).filter(function (k) { return ICO[k]; }).map(function (k) { return { k: k, n: ICO[k][0] }; }).concat((im.outros || []).map(function (o) { return { k: 'mais', n: o }; }));
+    if (im.pub && typeof im.pub === 'object' && (!Array.isArray(im.pub.cm) || !Array.isArray(im.pub.ot))) { if (!im.pub.c) { var cp = im.pub; ['c', 'm', 'x', 'outros'].forEach(function (k) { if (im[k] && cp[k] === undefined && !cp.infos) cp[k] = JSON.parse(JSON.stringify(im[k])); }); } lerPub(im.pub); }   // o publicado ganha as mesmas linhas: abrir não vira "mudança"
+  }
+  function lerPub(p) { if (!p.c || !p.x) { var t = { infos: p.infos, ar: p.ar }; ler(t); p.c = p.c || t.c; p.m = p.m || t.m; p.x = p.x || t.x; p.outros = p.outros || t.outros; } var keep = p.pub; p.pub = null; lerLinhas(p); p.pub = keep; }
+  function sincLinhas(im) {
+    if (Array.isArray(im.cm)) { var c = {}; im.cm.forEach(function (r) { var k = CM_C[r.k]; if (!k) return; var q = r.k === 'garagem' ? Math.max(1, +r.q || 1) : 1; c[k] = (c[k] || 0) + q; if (r.k === 'suite') c.quartos = (c.quartos || 0) + 1; }); im.c = c; }
+    if (Array.isArray(im.ot)) { im.x = []; im.outros = []; im.ot.forEach(function (r) { if (ICO[r.k] && r.k !== 'mais' && r.n === ICO[r.k][0]) im.x.push(r.k); else im.outros.push(r.n); }); }
   }
   function escrever(im) {
+    sincLinhas(im);
     var c = im.c || {}, m = im.m || {}, inf = [];
     if (im.tipo !== 'terreno') {   // CONT_T já limita o que cada tipo tem (trocarTipo tira o resto)
       if (c.quartos) inf.push({ i: 'cama', t: c.quartos + (c.suites ? ' (' + plural(c.suites, 'suíte', 'suítes') + ')' : '') });
@@ -101,8 +127,8 @@ Object.assign(window.ICO14, {
     if (m.cond) inf.push({ i: 'condominio', t: 'Condomínio R$ ' + pontos(m.cond) });
     if (m.iptu) inf.push({ i: 'condominio', t: 'IPTU R$ ' + pontos(m.iptu) + '/mês' });
     if (m.frente) inf.push({ i: 'frente', t: m.frente + ' m de frente' });
-    (im.x || []).forEach(function (k) { if (ICO[k]) inf.push({ i: k, t: ICO[k][0].toLowerCase() }); });
-    (im.outros || []).forEach(function (o) { inf.push({ i: 'mais', t: o }); });
+    if (Array.isArray(im.ot)) im.ot.forEach(function (r) { if (r.n) inf.push({ i: ICO[r.k] ? r.k : 'mais', t: r.n }); });
+    else { (im.x || []).forEach(function (k) { if (ICO[k]) inf.push({ i: k, t: ICO[k][0].toLowerCase() }); }); (im.outros || []).forEach(function (o) { inf.push({ i: 'mais', t: o }); }); }
     im.infos = inf;
     var ar = [];
     if (m.total) ar.push({ r: 'total', n: '', m2: m.total });
@@ -111,7 +137,8 @@ Object.assign(window.ICO14, {
     if (m.privativa) ar.push({ r: 'outra', n: 'privativa', m2: m.privativa });
     im.ar = ar;
   }
-  function vis(o) { var c = semPub(o); delete c.c; delete c.m; delete c.x; delete c.outros; return JSON.stringify(c); }
+  function ord(v) { if (Array.isArray(v)) return v.map(ord); if (v && typeof v === 'object') { var o = {}; Object.keys(v).sort().forEach(function (k) { o[k] = ord(v[k]); }); return o; } return v; }   // R86: a ordem das chaves não conta
+  function vis(o) { var c = semPub(o); delete c.c; delete c.m; delete c.x; delete c.outros; return JSON.stringify(ord(c)); }
   function estado(im) { if (!im.pub) return ['ras', 'Rascunho']; return vis(im) === vis(im.pub) ? ['ok', 'No site'] : ['ras', 'Mudanças não publicadas']; }
   function fichas(im) {
     var c = im.c || {}, m = im.m || {}, f = [];
@@ -132,7 +159,7 @@ Object.assign(window.ICO14, {
     if (m.frente) f.push(['frente', m.frente + ' m de frente']);
     return f;
   }
-  function itens(im) { return (im.x || []).filter(function (k) { return ICO[k]; }).map(function (k) { return [k, ICO[k][0]]; }).concat((im.outros || []).map(function (o) { return ['mais', o]; })); }
+  function itens(im) { if (Array.isArray(im.ot)) return im.ot.map(function (r) { return [ICO[r.k] ? r.k : 'mais', r.n]; }); return (im.x || []).filter(function (k) { return ICO[k]; }).map(function (k) { return [k, ICO[k][0]]; }).concat((im.outros || []).map(function (o) { return ['mais', o]; })); }
   function htmlFichas(im) { var f = fichas(im); return f.length ? '<div class="fichas">' + f.map(function (a) { return '<span class="ficha">' + ic(a[0]) + esc(a[1]) + '</span>'; }).join('') + '</div>' : ''; }
   function htmlPills(im) { var p = itens(im); return p.length ? '<div class="pills">' + p.map(function (a) { return '<span class="pill">' + ic(a[0], 'p') + esc(a[1]) + '</span>'; }).join('') + '</div>' : ''; }
   function resumo(im) { var f = fichas(im).slice(0, 2).map(function (a) { return a[1]; }); return [nomeTipo(im.tipo), im.cidade].filter(Boolean).join(' · ') + (f.length ? ' — ' + f.join(' · ') : ''); }
@@ -163,7 +190,9 @@ Object.assign(window.ICO14, {
   function foco(i) { if (!NOFOCO) setTimeout(function () { try { i.focus(); } catch (e) {} }, 80); }
   ED.preco = function (r, fim) {
     r.innerHTML = '<div class="fld"><span class="pre">R$</span><input inputmode="numeric" autocomplete="off" placeholder="0" value="' + pontos(ATUAL.preco) + '" aria-label="Preço"><button class="ok" data-k>Pronto</button></div>' +
-      '<div class="dica">' + (ATUAL.final === 'aluguel' ? 'Aluguel por mês. ' : '') + 'No site: <b data-pv>' + (fmtPrecoIm(ATUAL) || '—') + '</b> · Enter também confirma</div>';
+      (ATUAL.final === 'aluguel' ? '<div class="chips" data-per>' + [['mes', 'por mês'], ['dia', 'por dia'], ['ano', 'por ano']].map(function (x) { return '<button class="chip" data-pe="' + x[0] + '" aria-pressed="' + (perDe(ATUAL) === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>' : '') +
+      '<div class="dica">No site: <b data-pv>' + (fmtPrecoIm(ATUAL) || '—') + '</b> · Enter também confirma</div>';
+    r.querySelectorAll('[data-pe]').forEach(function (b) { b.onclick = function () { ATUAL.per = b.dataset.pe; r.querySelectorAll('[data-pe]').forEach(function (o) { o.setAttribute('aria-pressed', o === b); }); r.querySelector('[data-pv]').textContent = fmtPrecoIm(ATUAL) || '—'; mudou(); }; });
     var i = r.querySelector('input');
     i.oninput = function () { var d = i.value.replace(/\D/g, '').slice(0, 10); ATUAL.preco = d ? +d : 0; i.value = pontos(d); r.querySelector('[data-pv]').textContent = fmtPrecoIm(ATUAL) || '—'; mudou(); };
     i.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); fim && fim(); } };
@@ -250,6 +279,71 @@ Object.assign(window.ICO14, {
     }
     desenha();
   };
+  /* ---------- R86: linhas editáveis. Toque no ícone troca; o texto edita ali; ✕ exclui; "+ Adicionar" abre a grade de ícones ---------- */
+  var ICO_CM = ['cama', 'suite', 'banho', 'sofa', 'cozinha', 'lavanderia', 'garagem', 'varanda', 'sacada', 'churras', 'piscina', 'jardim', 'patio', 'armario', 'academia', 'salao',
+    'escritura', 'agua', 'elevador', 'portaria', 'murado', 'esquina', 'frente', 'andar', 'condominio', 'terreno', 'area', 'chave', 'plano', 'predio', 'outro', 'mais'];
+  var NOME_NOVO = { cama: 'Quarto', suite: 'Suíte', banho: 'Banheiro', sofa: 'Sala', cozinha: 'Cozinha', garagem: 'Garagem', mais: '' };
+  function edLinhas(r, chave, comMed, fim, extra) {
+    var pick = null;   // null = lista; 'novo' = escolhendo ícone de um novo; número = trocando o ícone da linha
+    function L() { ATUAL[chave] = ATUAL[chave] || []; return ATUAL[chave]; }
+    function linha(o, j) {
+      var gar = o.k === 'garagem', v = gar ? (o.q || '') : (o.m2 || '');
+      return '<div class="cm-r" data-r="' + j + '"><button class="cm-i" data-ico aria-label="Trocar o ícone de ' + esc(o.n || 'item') + '">' + ic(ICO[o.k] ? o.k : 'mais') + '</button>' +
+        '<div class="cm-t"><input class="cm-n" data-n maxlength="40" value="' + esc(o.n || '') + '" placeholder="Nome" aria-label="Nome">' +
+        '<div class="cm-l2">' + (comMed ? '<span class="cm-m"><input inputmode="decimal" data-m2 maxlength="7" value="' + esc(v) + '" placeholder="—" aria-label="' + (gar ? 'Vagas' : 'Medida em m²') + '"><span>' + (gar ? 'vagas' : 'm²') + '</span></span>' : '') +
+        '<input class="cm-o" data-o maxlength="120" value="' + esc(o.o || '') + '" placeholder="+ observação" aria-label="Observação"></div></div>' +
+        '<button class="cm-x" data-x aria-label="Excluir ' + esc(o.n || 'item') + '">✕</button></div>';
+    }
+    function desenha(focar) {
+      if (pick !== null) {
+        var atual = typeof pick === 'number' ? L()[pick].k : '';
+        r.innerHTML = '<div class="dica" style="margin:0">' + (pick === 'novo' ? 'Escolha o ícone do ' + (comMed ? 'cômodo' : 'item') + ':' : 'Escolha o novo ícone:') + '</div><div class="cm-g">' +
+          ICO_CM.map(function (k) { return '<button data-k="' + k + '" aria-pressed="' + (k === atual) + '">' + ic(k) + '<span>' + ICO[k][0] + '</span></button>'; }).join('') + '</div><button class="lk" data-volta>‹ Voltar à lista</button>';
+        r.querySelectorAll('[data-k]').forEach(function (b) {
+          b.onclick = function () {
+            var k = b.dataset.k;
+            if (pick === 'novo') {
+              var base = NOME_NOVO[k] != null ? NOME_NOVO[k] : ICO[k][0], n = L().filter(function (o) { return o.k === k; }).length;
+              var o = { k: k, n: base ? (n && (k === 'cama' || k === 'banho' || k === 'suite') ? base + ' ' + (n + 1) : base) : '' };
+              if (k === 'garagem') o.q = 1;
+              L().push(o); pick = null; mudou(); desenha(L().length - 1);
+            } else { L()[pick].k = k; if (k === 'garagem' && !L()[pick].q) L()[pick].q = 1; pick = null; mudou(); desenha(); }
+          };
+        });
+        r.querySelector('[data-volta]').onclick = function () { pick = null; desenha(); };
+        return;
+      }
+      r.innerHTML = '<div class="cm-lista">' + (L().length ? L().map(linha).join('') : '<div class="dica" style="margin:0">Nenhum ainda.</div>') + '</div>' +
+        '<button class="cm-add" data-add>+ Adicionar ' + (comMed ? 'cômodo' : 'item') + '</button>' +
+        '<div class="dica">Toque no ícone para trocar e no texto para editar. A observação aparece no site, embaixo do nome.</div>' + (extra ? extra.html() : '');
+      r.querySelectorAll('[data-r]').forEach(function (row) {
+        var j = +row.dataset.r, o = L()[j];
+        row.querySelector('[data-ico]').onclick = function () { pick = j; desenha(); };
+        row.querySelector('[data-n]').oninput = function () { o.n = this.value.trim(); mudou(); };
+        row.querySelector('[data-o]').oninput = function () { var v = this.value.trim(); if (v) o.o = v; else delete o.o; mudou(); };
+        var m2 = row.querySelector('[data-m2]');
+        if (m2) m2.oninput = function () { var d = this.value.replace(/[^\d,]/g, '').slice(0, 7); this.value = d; var v = +d.replace(',', '.') || 0; if (o.k === 'garagem') o.q = Math.max(1, Math.round(v) || 1); else if (v) o.m2 = v; else delete o.m2; mudou(); };
+        row.querySelector('[data-x]').onclick = function () { L().splice(j, 1); mudou(); desenha(); };
+        row.querySelectorAll('input').forEach(function (i) { i.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); i.blur(); } }; });
+      });
+      r.querySelector('[data-add]').onclick = function () { pick = 'novo'; desenha(); };
+      if (extra) extra.liga(r);
+      if (focar != null) { var nn = r.querySelector('[data-r="' + focar + '"] [data-n]'); if (nn) { foco(nn); if (!nn.value) nn.placeholder = 'Escreva o nome'; } }
+    }
+    desenha();
+  }
+  ED.comodos = function (r, fim) {
+    var temCm = (CONT_T[ATUAL.tipo || 'casa'] || CONT).length > 0, ms = meds(ATUAL);
+    var medidas = { html: function () { return (ms.length ? '<h2>Medidas</h2><div>' + ms.map(medida).join('') + '</div>' : ''); }, liga: function (rr) {
+      rr.querySelectorAll('[data-med]').forEach(function (i) {
+        i.oninput = function () { var d = i.value.replace(/\D/g, '').slice(0, 7); ATUAL.m = ATUAL.m || {}; if (d) ATUAL.m[i.dataset.med] = +d; else delete ATUAL.m[i.dataset.med]; if (i.dataset.med === 'cond' || i.dataset.med === 'iptu') i.value = pontos(d); mudou(); };
+        i.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); i.blur(); } };
+      });
+    } };
+    if (!temCm) { r.innerHTML = '<div>' + ms.map(medida).join('') + '</div>'; medidas.liga(r); return; }
+    edLinhas(r, 'cm', true, fim, medidas);
+  };
+  ED.itens = function (r, fim) { edLinhas(r, 'ot', false, fim); };
   function addFotoArquivo(arquivo, depois) {
     var img = new Image(), url = URL.createObjectURL(arquivo);
     img.onload = function () {
@@ -293,7 +387,64 @@ Object.assign(window.ICO14, {
     }
     desenha();
   };
-  var TITULOS = { preco: 'Preço', nome: 'Nome (opcional)', cidade: 'Cidade', tipo: 'Tipo do imóvel', comodos: 'Cômodos e medidas', itens: 'O que o imóvel tem', fotos: 'Fotos' };
+  /* ---------- R86: onde fica (condomínio, loteamento, bairro…), endereço e o mapa ---------- */
+  var ONDE = [['cf', 'Condomínio fechado'], ['ca', 'Condomínio aberto'], ['lot', 'Loteamento'], ['bairro', 'Bairro'], ['outro', 'Outro']];
+  function ondeTxt(im) { var o = im.onde || {}, t = ONDE.filter(function (x) { return x[0] === o.t; })[0]; if (!t) return ''; return t[0] === 'outro' ? (o.n || '') : t[1] + (o.n ? ' · ' + o.n : ''); }
+  ED.onde = function (r) {
+    function desenha() {
+      var o = ATUAL.onde || {};
+      r.innerHTML = '<div class="chips">' + ONDE.map(function (x) { return '<button class="chip" data-ot="' + x[0] + '" aria-pressed="' + (o.t === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>' +
+        (o.t ? '<div class="fld p"><input data-on maxlength="60" value="' + esc(o.n || '') + '" placeholder="' + (o.t === 'bairro' ? 'Nome do bairro' : o.t === 'outro' ? 'Ex.: Beira da lagoa' : 'Nome (ex.: Residencial das Flores)') + '" aria-label="Nome"></div>' +
+          '<div class="fld p"><input data-oe maxlength="120" value="' + esc(o.e || '') + '" placeholder="Endereço do local (opcional)" aria-label="Endereço do local"></div>' +
+          '<div class="dica">Aparece para todos no site, nas informações do imóvel. Use o endereço do condomínio ou do loteamento, não o da casa.</div><button class="lk r" data-otira>Tirar</button>' : '<div class="dica">Vale para qualquer imóvel: casa, apartamento, terreno…</div>');
+      r.querySelectorAll('[data-ot]').forEach(function (b) { b.onclick = function () { ATUAL.onde = ATUAL.onde || {}; ATUAL.onde.t = b.dataset.ot; mudou(); desenha(); var i = r.querySelector('[data-on]'); if (i) foco(i); }; });
+      var n = r.querySelector('[data-on]'); if (n) n.oninput = function () { ATUAL.onde.n = n.value.trim(); mudou(); };
+      var e = r.querySelector('[data-oe]'); if (e) e.oninput = function () { var v = e.value.trim(); if (v) ATUAL.onde.e = v; else delete ATUAL.onde.e; mudou(); };
+      var t = r.querySelector('[data-otira]'); if (t) t.onclick = function () { delete ATUAL.onde; mudou(); desenha(); };
+    }
+    desenha();
+  };
+  ED.end = function (r) {
+    var e = ATUAL.end = ATUAL.end || {}, nm = ATUAL.nomes = ATUAL.nomes || { bairro: true, rua: false, num: false };
+    function sw(k, t) { return '<div class="lin" style="padding:6px 0"><span class="v">' + t + '</span><button class="sw" role="switch" data-nm="' + k + '" aria-checked="' + (!!nm[k]) + '" aria-label="' + t + '"></button></div>'; }
+    r.innerHTML = '<div class="fld p"><input data-e="rua" maxlength="80" value="' + esc(e.rua || '') + '" placeholder="Rua" aria-label="Rua"></div>' +
+      '<div style="display:flex;gap:8px"><div class="fld p" style="width:110px"><input data-e="num" maxlength="10" value="' + esc(e.num || '') + '" placeholder="Nº" aria-label="Número"></div><div class="fld p" style="flex:1"><input data-e="bairro" maxlength="60" value="' + esc(e.bairro || '') + '" placeholder="Bairro" aria-label="Bairro"></div></div>' +
+      sw('bairro', 'Mostrar o bairro no site') + sw('rua', 'Mostrar a rua (só para quem entrou no site)') + sw('num', 'Mostrar o número (só para quem entrou)') +
+      '<div class="dica">Por segurança, a rua e o número só aparecem para quem fez login no site, e só se você marcar. O bairro pode aparecer para todos.</div>';
+    r.querySelectorAll('[data-e]').forEach(function (i) { i.oninput = function () { var v = i.value.trim(); if (v) e[i.dataset.e] = v; else delete e[i.dataset.e]; mudou(); }; i.onkeydown = function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); i.blur(); } }; });
+    r.querySelectorAll('[data-nm]').forEach(function (b) { b.onclick = function () { nm[b.dataset.nm] = !nm[b.dataset.nm]; b.setAttribute('aria-checked', nm[b.dataset.nm]); mudou(); }; });
+  };
+  function mapaDe(c) { try { return window.M15 && window.M15[c] && window.M15[c].img ? window.M15[c] : null; } catch (e) { return null; } }
+  function llDePx(M, x, y) { var n = Math.pow(2, M.Z) * 256, wx = x + M.X0, wy = y + M.Y0; return [+(wx / n * 360 - 180).toFixed(6), +(Math.atan(Math.sinh(Math.PI * (1 - 2 * wy / n))) * 180 / Math.PI).toFixed(6)]; }
+  var MODOS = [['nada', 'Sem a casa'], ['area', 'Área aproximada'], ['pino', 'Ponto exato']];
+  ED.mapa = function (r) {
+    function desenha() {
+      var M = mapaDe(ATUAL.cidade), modo = ATUAL.mapa || (ATUAL.loc && ATUAL.loc.ll ? 'area' : 'nada'), px = ATUAL.px = ATUAL.px || [];
+      var h = '<div class="chips">' + MODOS.map(function (x) { return '<button class="chip" data-mo="' + x[0] + '" aria-pressed="' + (modo === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>';
+      if (M) {
+        var p = ATUAL.loc && ATUAL.loc.ll && window.m15xy ? window.m15xy(M, ATUAL.loc.ll) : null;
+        h += '<div class="mp-box" data-mp><img src="' + esc(M.img) + '" alt="Mapa de ' + esc(ATUAL.cidade) + '" draggable="false">' +
+          (p && modo !== 'nada' ? '<span class="mp-p ' + modo + '" style="left:' + (p[0] / M.W * 100).toFixed(2) + '%;top:' + (p[1] / M.H * 100).toFixed(2) + '%"></span>' : '') +
+          '<span class="mp-d">' + (p ? 'Toque no mapa para mover' : 'Toque no mapa onde fica o imóvel') + '</span></div>';
+      } else h += '<div class="dica">' + (ATUAL.cidade ? 'O mapa de perto de ' + esc(ATUAL.cidade) + ' ainda não está no site (hoje só Santo Antônio da Patrulha). O que tem perto aparece mesmo assim.' : 'Escolha a cidade primeiro.') + '</div>';
+      h += '<h2>Perto do imóvel</h2><div class="cm-lista">' + px.map(function (o, j) {
+        return '<div class="cm-r" data-px="' + j + '"><span class="cm-i">' + ic('outro') + '</span><div class="cm-t"><input class="cm-n" data-pt maxlength="60" value="' + esc(o.t || '') + '" placeholder="Ex.: Mercado, escola, praça" aria-label="Lugar"><div class="cm-l2"><span class="cm-m"><input inputmode="numeric" data-pd maxlength="6" value="' + (o.d || '') + '" placeholder="—" aria-label="Distância em metros"><span>m</span></span></div></div><button class="cm-x" data-pxx aria-label="Excluir">✕</button></div>';
+      }).join('') + '</div><button class="cm-add" data-pxa>+ Lugar perto</button><div class="dica">Quem não entrou no site vê só a faixa da distância (ex.: "até 400 m"), nunca o ponto exato.</div>';
+      r.innerHTML = h;
+      r.querySelectorAll('[data-mo]').forEach(function (b) { b.onclick = function () { ATUAL.mapa = b.dataset.mo; mudou(); desenha(); }; });
+      var box = r.querySelector('[data-mp]');
+      if (box) box.onclick = function (e) { var q = box.getBoundingClientRect(), x = (e.clientX - q.left) / q.width * M.W, y = (e.clientY - q.top) / q.height * M.H; ATUAL.loc = { ll: llDePx(M, x, y) }; if (!ATUAL.mapa || ATUAL.mapa === 'nada') ATUAL.mapa = 'area'; mudou(); desenha(); };
+      r.querySelectorAll('[data-px]').forEach(function (row) {
+        var o = px[+row.dataset.px];
+        row.querySelector('[data-pt]').oninput = function () { o.t = this.value.trim(); mudou(); };
+        row.querySelector('[data-pd]').oninput = function () { var d = this.value.replace(/\D/g, ''); this.value = d; o.d = +d || 0; o.u = 'm'; mudou(); };
+        row.querySelector('[data-pxx]').onclick = function () { px.splice(+row.dataset.px, 1); mudou(); desenha(); };
+      });
+      r.querySelector('[data-pxa]').onclick = function () { px.push({ t: '', d: 0, u: 'm' }); mudou(); desenha(); var i = r.querySelectorAll('[data-pt]'); if (i.length) foco(i[i.length - 1]); };
+    }
+    desenha();
+  };
+  var TITULOS = { preco: 'Preço', nome: 'Nome (opcional)', cidade: 'Cidade', tipo: 'Tipo do imóvel', comodos: 'Cômodos e medidas', itens: 'O que o imóvel tem', fotos: 'Fotos', onde: 'Onde fica', end: 'Endereço', mapa: 'No mapa' };
 
   function folha(qual, arg) {
     var temOk = ['preco', 'nome', 'cidade', 'tipo'].indexOf(qual) < 0;
@@ -308,7 +459,7 @@ Object.assign(window.ICO14, {
   function tabs() {
     var nL = (EST.d.leads || []).length;
     function b(k, t, i, n) { return '<button data-tab="' + k + '"' + (ABA === k ? ' aria-current="page"' : '') + '>' + ic(i) + '<span>' + t + (n ? '<span class="n">' + n + '</span>' : '') + '</span></button>'; }
-    return '<nav class="tabs" aria-label="Painel">' + b('site', 'Site', 'globo') + b('imoveis', 'Imóveis', 'casa2') + b('contatos', 'Contatos', 'conversa', nL) + b('perfil', 'Perfil', 'perfil') + '</nav>';
+    return '<nav class="tabs" aria-label="Painel">' + b('site', 'Site', 'globo') + b('imoveis', 'Imóveis', 'casa2') + b('contatos', 'Contatos', 'conversa', nL) + b('desempenho', 'Desempenho', 'andar') + b('perfil', 'Perfil', 'perfil') + '</nav>';
   }
   function telaLista() {
     return '<div class="wrap"><h1>Imóveis</h1>' + lista().map(function (im, k) {
@@ -324,19 +475,21 @@ Object.assign(window.ICO14, {
   var SIT_L = [['novo', 'Novo'], ['falei', 'Já falei'], ['visita', 'Visita marcada'], ['proposta', 'Proposta'], ['fechado', 'Fechado'], ['perdido', 'Perdido']];
   var VIA_L = { login: 'entrou no site', foto: 'fotos', fotos: 'fotos', fin: 'financiamento', visita: 'pediu visita', vender: 'quer vender', mapa: 'mapa' };
   var TIPO_L = { casa: 'Casa', sobrado: 'Sobrado', apartamento: 'Apartamento', terreno: 'Terreno', sitio: 'Sítio ou chácara', sala: 'Sala comercial', galpao: 'Galpão', outro: 'Outro' };
-  var FILTRO = 'todos';
+  var FILTRO = 'todos', GRUPO = 'compra';   // R86: os dois grupos de contatos
   function sitL(l) { return SIT_L.filter(function (x) { return x[0] === (l.sit || 'novo'); })[0] || SIT_L[0]; }
   function codDe(l) { var im = l.id && lista().filter(function (x) { return x.id === l.id; })[0]; return im && RE_COD.test(im.cod || '') ? im.cod : ''; }
   function quando(t) { return t ? new Date(t).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''; }
   function venderTxt(v) { return v ? [TIPO_L[v.tipo] || v.tipo, v.cidade].filter(Boolean).join(' em ') + (v.obs ? ' — ' + v.obs : '') : ''; }
   function leadsOrdem() { return (EST.d.leads || []).slice().sort(function (a, b) { return (b.t || 0) - (a.t || 0); }); }
   function telaContatos() {
-    var todos = leadsOrdem(), n = {};
+    var tudo = leadsOrdem(), nA = tudo.filter(function (l) { return !!l.vender; }).length, nC = tudo.length - nA;
+    var todos = tudo.filter(function (l) { return GRUPO === 'anuncia' ? !!l.vender : !l.vender; }), n = {};
     todos.forEach(function (l) { var k = sitL(l)[0]; n[k] = (n[k] || 0) + 1; });
     if (FILTRO !== 'todos' && !n[FILTRO]) FILTRO = 'todos';
     var L = todos.filter(function (l) { return FILTRO === 'todos' || sitL(l)[0] === FILTRO; });
-    var h = '<div class="wrap"><div class="ct-top"><h1>Contatos</h1>' + (todos.length ? '<button class="lk" data-csv>Baixar planilha (CSV)</button>' : '') + '</div>';
-    if (!todos.length) return h + '<div class="vazio">Quem pedir informações, pedir visita ou quiser vender pelo site aparece aqui.</div></div>';
+    var h = '<div class="wrap"><div class="ct-top"><h1>Contatos</h1>' + (tudo.length ? '<button class="lk" data-csv>Baixar planilha (CSV)</button>' : '') + '</div>' +
+      '<div class="seg" role="tablist"><button role="tab" data-gr="compra" aria-selected="' + (GRUPO === 'compra') + '">Querem comprar ou alugar <span class="n">' + nC + '</span></button><button role="tab" data-gr="anuncia" aria-selected="' + (GRUPO === 'anuncia') + '">Querem anunciar <span class="n">' + nA + '</span></button></div>';
+    if (!todos.length) return h + '<div class="vazio">' + (GRUPO === 'anuncia' ? 'Quem tocar em "Anunciar meu imóvel" no site aparece aqui, com o tipo, a cidade e o recado.' : 'Quem pedir informações, pedir visita ou entrar no site aparece aqui.') + '</div></div>';
     h += '<div class="chips ct-f" role="group" aria-label="Filtrar contatos">' + [['todos', 'Todos']].concat(SIT_L).filter(function (x) { return x[0] === 'todos' || n[x[0]]; }).map(function (x) {
       return '<button class="chip" data-fl="' + x[0] + '" aria-pressed="' + (FILTRO === x[0]) + '">' + x[1] + ' <span class="n">' + (x[0] === 'todos' ? todos.length : n[x[0]]) + '</span></button>';
     }).join('') + '</div>';
@@ -381,6 +534,7 @@ Object.assign(window.ICO14, {
     } catch (e) { toast('Não consegui baixar aqui.'); }
   }
   function ligaContatos() {
+    TEL.querySelectorAll('[data-gr]').forEach(function (b) { b.onclick = function () { GRUPO = b.dataset.gr; FILTRO = 'todos'; render(); }; });
     TEL.querySelectorAll('[data-fl]').forEach(function (b) { b.onclick = function () { FILTRO = b.dataset.fl; render(); }; });
     var cv = TEL.querySelector('[data-csv]'); if (cv) cv.onclick = csvContatos;
     TEL.querySelectorAll('[data-lead]').forEach(function (box) {
@@ -389,6 +543,40 @@ Object.assign(window.ICO14, {
       se.onchange = function () { mudarLead(l, { sit: se.value }, true); se.blur(); render(); };
       tx.onchange = function () { var v = tx.value.trim(); if (v !== (l.nota || '')) mudarLead(l, { nota: v }); };
     });
+  }
+  /* ---------- R86: Desempenho. Aberturas (contador do servidor, sem dado pessoal) + o que já existe: contatos, visitas pedidas e WhatsApp ---------- */
+  var PERIODO = 30, ABERT = null, ABERT_T = 0;
+  function noPeriodo(t) { return !PERIODO || (t && t >= Date.now() - PERIODO * 864e5); }
+  function carregaAberturas() {
+    if (!srv() || !PONTE.req || Date.now() - ABERT_T < 60000) return;
+    ABERT_T = Date.now();
+    PONTE.req('GET', 'api/painel/desempenho').then(function (r) { if (r && r.ok) { ABERT = r.j.aberturas || []; if (ABA === 'desempenho') render(); } });
+  }
+  function telaDesempenho() {
+    carregaAberturas();
+    var L = (EST.d.leads || []).filter(function (l) { return noPeriodo(l.t); }), C = (EST.d.chamadas || []).filter(function (c) { return noPeriodo(c.t); });
+    var lim = PERIODO ? new Date(Date.now() - PERIODO * 864e5).toISOString().slice(0, 10) : '';
+    var A = (ABERT || []).filter(function (a) { return !lim || a.dia >= lim; });
+    var site = A.filter(function (a) { return !a.id; }).reduce(function (s, a) { return s + a.n; }, 0);
+    var vis = L.filter(function (l) { return l.pedido || (l.via || []).indexOf('visita') >= 0; }).length + (srv() ? 0 : 0);
+    var vend = L.filter(function (l) { return l.vender; }).length;
+    var porIm = {}; lista().forEach(function (im) { porIm[im.id] = { im: im, ab: 0, ct: 0, wa: 0 }; });
+    A.forEach(function (a) { if (a.id && porIm[a.id]) porIm[a.id].ab += a.n; });
+    L.forEach(function (l) { if (l.id && porIm[l.id]) porIm[l.id].ct++; });
+    C.forEach(function (c) { if (c.id && porIm[c.id]) porIm[c.id].wa++; });
+    var linhas = Object.keys(porIm).map(function (k) { return porIm[k]; }).filter(function (x) { return x.ab + x.ct + x.wa; }).sort(function (a, b) { return (b.ab + b.ct + b.wa) - (a.ab + a.ct + a.wa); });
+    var max = Math.max(1, Math.max.apply(0, linhas.map(function (x) { return x.ab; }).concat([1])));
+    var vias = {}; L.forEach(function (l) { (l.via || []).forEach(function (v) { vias[v] = (vias[v] || 0) + 1; }); });
+    var vk = Object.keys(vias).sort(function (a, b) { return vias[b] - vias[a]; }), vmax = Math.max(1, vk.length ? vias[vk[0]] : 1);
+    function kp(n, t) { return '<div class="kp"><b>' + n + '</b><span>' + t + '</span></div>'; }
+    return '<div class="wrap"><h1>Desempenho</h1><div class="seg">' + [[7, '7 dias'], [30, '30 dias'], [0, 'Tudo']].map(function (p) { return '<button data-per="' + p[0] + '" aria-selected="' + (PERIODO === p[0]) + '">' + p[1] + '</button>'; }).join('') + '</div>' +
+      '<div class="kps">' + kp(srv() ? (ABERT ? site : '…') : '—', 'aberturas do site') + kp(vis, 'pedidos de visita') + kp(C.length, 'toques no WhatsApp') + kp(L.length - vend, 'contatos novos') + '</div>' +
+      (vend ? '<div class="dica">' + vend + ' ' + (vend === 1 ? 'pessoa quer' : 'pessoas querem') + ' anunciar com você (Contatos › Querem anunciar).</div>' : '') +
+      '<div class="sec"><div class="t">Por imóvel</div>' + (linhas.length ? linhas.map(function (x) {
+        return '<div class="ds-l"><span class="ds-n">' + esc((x.im.cod ? x.im.cod + ' · ' : '') + (x.im.nome || resumo(x.im) || 'Imóvel')) + '</span><span class="ds-b"><i style="width:' + Math.round(x.ab / max * 100) + '%"></i></span><span class="ds-v">' + x.ab + ' aberturas · ' + x.ct + ' contatos · ' + x.wa + ' WhatsApp</span></div>';
+      }).join('') : '<div class="dica" style="margin:0">Ainda sem números neste período.</div>') + '</div>' +
+      (vk.length ? '<div class="sec"><div class="t">Como chegaram</div>' + vk.map(function (v) { return '<div class="ds-l"><span class="ds-n">' + esc(VIA_L[v] || v) + '</span><span class="ds-b"><i style="width:' + Math.round(vias[v] / vmax * 100) + '%"></i></span><span class="ds-v">' + vias[v] + '</span></div>'; }).join('') + '</div>' : '') +
+      '<div class="dica">' + (srv() ? 'As aberturas são só contadas por dia e por imóvel: não guardam quem abriu (sem cookie).' : 'Prévia: as aberturas só são contadas com o servidor.') + '</div></div>';
   }
   function fnPadrao() { var L = lista(); for (var i = 0; i < L.length; i++) if (L[i].fn) return L[i].fn; return { ent: 20, prazos: [240, 360], tab: 'ambas', bancos: [] }; }
   function telaPerfil() {
@@ -417,7 +605,10 @@ Object.assign(window.ICO14, {
       '<button class="lin" data-f="nome"><span class="v">' + (im.nome ? esc(im.nome) : '<span class="sub">+ Nome (opcional)</span>') + '</span><span class="ch">›</span></button>' +
       '<button class="lin" data-f="tipo">' + ic((TIPOS.filter(function (t) { return t[0] === im.tipo; })[0] || TIPOS[0])[2]) + '<span class="v">' + (nomeTipo(im.tipo) || '<span class="sub">Escolher o tipo</span>') + '</span><span class="ch">›</span></button>' +
       '<button class="lin" data-f="cidade">' + ic('pin') + '<span class="v">' + (esc(im.cidade) || '<span class="sub">+ Cidade</span>') + '</span><span class="ch">›</span></button>' +
-      '<button class="lin" data-f="comodos" style="align-items:flex-start"><span class="v" style="display:flex;flex-direction:column;gap:6px"><span class="k">' + (im.tipo === 'terreno' ? 'Medidas' : 'Cômodos e medidas') + '</span>' + (htmlFichas(im) || '<span class="slot">+ ' + (im.tipo === 'terreno' ? 'Área e frente' : 'Quartos, banheiros, vagas…') + '</span>') + '</span><span class="ch">›</span></button>' +
+      '<button class="lin" data-f="onde">' + ic('condominio') + '<span class="v">' + (ondeTxt(im) ? esc(ondeTxt(im)) : '<span class="sub">+ Onde fica (condomínio, loteamento, bairro)</span>') + '</span><span class="ch">›</span></button>' +
+      '<button class="lin" data-f="end">' + ic('outro') + '<span class="v">' + ((im.end && (im.end.rua || im.end.bairro)) ? esc([im.end.rua ? im.end.rua + (im.end.num ? ', ' + im.end.num : '') : '', im.end.bairro].filter(Boolean).join(' · ')) : '<span class="sub">+ Endereço</span>') + '</span><span class="ch">›</span></button>' +
+      '<button class="lin" data-f="mapa">' + ic('pin') + '<span class="v">' + (im.loc && im.loc.ll && im.mapa !== 'nada' ? (im.mapa === 'pino' ? 'No mapa: ponto exato' : 'No mapa: área aproximada') : '<span class="sub">+ No mapa e o que tem perto</span>') + ((im.px || []).filter(function (o) { return o.t; }).length ? ' <span class="sub">· ' + (im.px || []).filter(function (o) { return o.t; }).length + ' lugar(es) perto</span>' : '') + '</span><span class="ch">›</span></button>' +
+      '<button class="lin" data-f="comodos" style="align-items:flex-start"><span class="v" style="display:flex;flex-direction:column;gap:6px"><span class="k">' + (im.tipo === 'terreno' ? 'Medidas' : 'Cômodos e medidas') + '</span>' + ((im.cm || []).filter(function (o) { return o.o; }).length ? '<span class="sub">' + (im.cm || []).filter(function (o) { return o.o; }).length + ' com observação</span>' : '') + (htmlFichas(im) || '<span class="slot">+ ' + (im.tipo === 'terreno' ? 'Área e frente' : 'Quartos, banheiros, vagas…') + '</span>') + '</span><span class="ch">›</span></button>' +
       '<button class="lin" data-f="itens" style="align-items:flex-start"><span class="v" style="display:flex;flex-direction:column;gap:6px"><span class="k">O que tem</span>' + (htmlPills(im) || '<span class="slot">+ ' + (im.tipo === 'apartamento' ? 'Elevador, sacada…' : im.tipo === 'terreno' ? 'Murado, esquina…' : 'Piscina, pátio…') + '</span>') + '</span><span class="ch">›</span></button>' +
       (im.final === 'aluguel' ? '' : '<div class="lin">' + ic('banco') + '<span class="v">Aceita financiamento</span><button class="sw" role="switch" data-sw aria-checked="' + (!!im.fin) + '" aria-label="Aceita financiamento"></button></div>') +
       '<div class="lin col"><span class="k">Situação</span><span class="chips" data-sit>' + ['disp', 'res', 'vend'].map(function (k) { return '<button class="chip" data-si="' + k + '" aria-pressed="' + (sitDe(im) === k) + '">' + SIT[k] + '</button>'; }).join('') + '</span>' +
@@ -481,14 +672,15 @@ Object.assign(window.ICO14, {
   function render() {
     if (!APP) return; CH = null;
     if (TELA === 'cartao' && ATUAL) { telaCartao(); return; }
-    var corpo = ABA === 'site' ? telaSite() : ABA === 'contatos' ? telaContatos() : ABA === 'perfil' ? telaPerfil() : telaLista();
+    var corpo = ABA === 'site' ? telaSite() : ABA === 'contatos' ? telaContatos() : ABA === 'desempenho' ? telaDesempenho() : ABA === 'perfil' ? telaPerfil() : telaLista();
     TEL.innerHTML = '<div class="main' + (ABA === 'site' ? ' semrol' : '') + '">' + corpo + '</div>' + tabs();
     TEL.querySelectorAll('[data-tab]').forEach(function (b) { b.onclick = function () { ABA = b.dataset.tab; render(); }; });
     TEL.querySelectorAll('[data-abrir]').forEach(function (b) { b.onclick = function () { ATUAL = lista()[+b.dataset.abrir]; ler(ATUAL); NOVO = false; TELA = 'cartao'; render(); }; });
-    var nv = TEL.querySelector('[data-novo]'); if (nv) nv.onclick = function () { ATUAL = { id: 'im' + Date.now().toString(36), cod: proximoCodigo(), final: 'venda', sit: 'disp', tipo: '', cidade: '', preco: 0, nome: '', fin: false, infos: [], ar: [], fotos: [], fn: JSON.parse(JSON.stringify(fnPadrao())), c: {}, m: {}, x: [], outros: [], pub: null }; NOVO = true; TELA = 'cartao'; render(); };
+    var nv = TEL.querySelector('[data-novo]'); if (nv) nv.onclick = function () { ATUAL = { id: 'im' + Date.now().toString(36), cod: proximoCodigo(), final: 'venda', sit: 'disp', tipo: '', cidade: '', preco: 0, nome: '', fin: false, infos: [], ar: [], fotos: [], fn: JSON.parse(JSON.stringify(fnPadrao())), c: {}, m: {}, x: [], outros: [], cm: [], ot: [], pub: null }; NOVO = true; TELA = 'cartao'; render(); };
     var rc = TEL.querySelector('[data-recarga]'); if (rc) rc.onclick = function () { var f = TEL.querySelector('iframe'); if (f) f.src = f.src; };
     if (ABA === 'perfil') ligaPerfil();
     if (ABA === 'contatos') ligaContatos();
+    TEL.querySelectorAll('[data-per]').forEach(function (b) { b.onclick = function () { PERIODO = +b.dataset.per; render(); }; });
   }
 
   function iniciar() {

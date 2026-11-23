@@ -57,10 +57,10 @@ REMENDOS = [
      "var e=g1[a&&(a.tr||a.tipo)]||g1.casa,r=a&&a.infos||[]"),
     ("preço do aluguel por mês, sem preço do m²", "T40",
      "function E8(a,e,r){var n=S8(a),l=E1(a.preco),",
-     'function E8(a,e,r){var n=a.alug?0:S8(a),l=a.alug?"R$ "+(+a.preco).toLocaleString("pt-BR")+"/mês":E1(a.preco),'),
+     'function E8(a,e,r){var n=a.alug?0:S8(a),l=a.alug?"R$ "+(+a.preco).toLocaleString("pt-BR")+(' + P + '.sufixo?PONTE.sufixo(a):\"/mês\"):E1(a.preco),'),   # R86: /mês, /dia ou /ano
     ("preço do aluguel por mês na ficha", "T40",
      "d.textContent=E1(L.preco),d.dataset.fin=L.id,",
-     'd.textContent=L.alug?"R$ "+(+L.preco).toLocaleString("pt-BR")+"/mês":E1(L.preco),d.dataset.fin=L.id,'),
+     'd.textContent=L.alug?"R$ "+(+L.preco).toLocaleString("pt-BR")+(' + P + '.sufixo?PONTE.sufixo(L):\"/mês\"):E1(L.preco),d.dataset.fin=L.id,'),   # R86
     ("filtro de preço não vale para aluguel", "T40",
      'function o6(L){return i.p==="qualquer"||',
      'function o6(L){return!!L.alug||i.p==="qualquer"||'),
