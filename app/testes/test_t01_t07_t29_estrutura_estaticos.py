@@ -136,3 +136,30 @@ def test_compose_de_teste():
 def test_scripts_tem_sintaxe_valida():
     for f in ("backup.sh", "restaurar.sh"):
         assert subprocess.run(["bash", "-n", str(RAIZ / f)]).returncode == 0
+
+
+def test_paginas_pedem_scripts_com_versao_e_cloudflare_nao_guarda(c):
+    """23/11: o Cloudflare guardou o ponte.js do site antigo por horas; a página nova rodou com script velho.
+    Agora o HTML pede ponte.js?v=…, painel/c.js?v=… (muda a cada versão) e script/estilo sem versão não ficam no Cloudflare."""
+    import re
+    inicio, painel, priv = c.get("/").text, c.get("/painel/").text, c.get("/privacidade/").text
+    v = re.search(r"s\.src='ponte\.js\?v=([0-9a-f]{10})'", inicio).group(1)
+    assert f"s.src='ponte.js?v={v}'" in painel and f'src="painel/c.js?v={v}"' in painel and f'href="fontes/fontes.css?v={v}"' in inicio
+    assert f'src="/privacidade/privacidade.js?v={v}"' in priv and "s.src='ponte.js'" not in inicio
+    for url in ("/", "/painel/", "/privacidade/", "/ponte.js", "/painel/c.js", "/ponte.css"):
+        r = c.get(url)
+        assert r.headers["cloudflare-cdn-cache-control"] == "no-store" and r.headers["cache-control"] == "no-cache", url
+    assert c.get(f"/ponte.js?v={v}").status_code == 200
+    r = c.get("/"); assert c.get("/", headers={"If-None-Match": r.headers["etag"]}).status_code == 304
+    assert c.head("/").status_code == 200
+    # o ponte.js e o c.js pegam a versão do próprio endereço para pedir os estilos
+    assert "document.currentScript" in (RAIZ / "site/ponte.js").read_text() and "'ponte.css' + (VER ? '?v=' + VER : '')" in (RAIZ / "site/ponte.js").read_text()
+    assert "painel/c.css' + (" in (RAIZ / "site/painel/c.js").read_text()
+    # muda um arquivo -> muda a versão
+    alvo = RAIZ / "site/ponte.css"; antes = alvo.stat().st_mtime_ns
+    import os
+    os.utime(alvo, ns=(antes, antes + 1_000_000_000))
+    try:
+        assert re.search(r"ponte\.js\?v=([0-9a-f]{10})", c.get("/").text).group(1) != v
+    finally:
+        os.utime(alvo, ns=(antes, antes))

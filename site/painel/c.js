@@ -495,7 +495,7 @@ Object.assign(window.ICO14, {
     if (!window.__EST || !window.__EST.d) return false;
     EST = window.__EST;
     if (new URLSearchParams(location.search).get('completo') === '1') return true; // só para a equipe, sem botão
-    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'painel/c.css'; document.head.appendChild(l);
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'painel/c.css' + ((/[?&]v=([\w-]+)/.exec((document.querySelector('script[src*="painel/c.js"]') || {}).src || '') || [])[1] ? '?v=' + /[?&]v=([\w-]+)/.exec(document.querySelector('script[src*="painel/c.js"]').src)[1] : ''); document.head.appendChild(l);
     APP = document.createElement('div'); APP.id = 'c-app';
     APP.innerHTML = '<div data-tela style="flex:1;display:flex;flex-direction:column;min-height:0"></div><div data-sheet></div>';
     document.body.appendChild(APP); TEL = APP.querySelector('[data-tela]'); SH = APP.querySelector('[data-sheet]');

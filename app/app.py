@@ -1145,6 +1145,42 @@ def arquivo(request, caminho, cache):
 
 NAO = lambda: PlainTextResponse("Não encontrado.", 404)
 
+# Versão dos scripts e estilos nas páginas: o HTML sai com "ponte.js?v=…", "painel/c.js?v=…" etc. Um cache no caminho
+# (Cloudflare, navegador) pode guardar o ponte.js por horas; com o endereço mudando a cada versão, página nova nunca
+# roda com script velho (aconteceu em 23/11: HTML novo + ponte.js do site antigo vindo do cache do Cloudflare).
+ATIVOS = ("ponte.js", "ponte.css", "painel/c.js", "painel/c.css", "privacidade/privacidade.js", "privacidade/privacidade.css", "fontes/fontes.css")
+TROCAS_HTML = (("s.src='ponte.js'", "s.src='ponte.js?v={v}'"), ('src="painel/c.js"', 'src="painel/c.js?v={v}"'),
+               ('href="fontes/fontes.css"', 'href="fontes/fontes.css?v={v}"'), ('href="/fontes/fontes.css"', 'href="/fontes/fontes.css?v={v}"'),
+               ('href="/privacidade/privacidade.css"', 'href="/privacidade/privacidade.css?v={v}"'),
+               ('src="/privacidade/privacidade.js"', 'src="/privacidade/privacidade.js?v={v}"'))
+_HTML = {}
+
+
+def versao_ativos():
+    h = hashlib.sha256()
+    for a in ATIVOS:
+        try:
+            st = (SITE / a).stat()
+            h.update(f"{a}:{st.st_mtime_ns}:{st.st_size};".encode())
+        except OSError:
+            pass
+    return h.hexdigest()[:10]
+
+
+def html_versionado(request, alvo):
+    st, v = alvo.stat(), versao_ativos()
+    chave = (str(alvo), st.st_mtime_ns, st.st_size, v)
+    if _HTML.get(str(alvo), (None,))[0] != chave:
+        t = alvo.read_text(encoding="utf-8")
+        for a, b in TROCAS_HTML:
+            t = t.replace(a, b.format(v=v))
+        _HTML[str(alvo)] = (chave, t.encode("utf-8"), '"' + hashlib.sha256(t.encode("utf-8")).hexdigest()[:20] + '"')
+    _, corpo, etag = _HTML[str(alvo)]
+    h = {"Cache-Control": "no-cache", "ETag": etag, "Cloudflare-CDN-Cache-Control": "no-store"}
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304, headers=h)
+    return Response(b"" if request.method == "HEAD" else corpo, media_type="text/html; charset=utf-8", headers=h)
+
 
 @app.api_route("/api/{resto:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 def api_desconhecida(resto: str):
@@ -1182,7 +1218,12 @@ def site(caminho: str, request: Request):
         return NAO()
     if not alvo.is_file():
         return NAO()
-    return arquivo(request, alvo, CACHE_LONGO if ext in EXT_LONGO else "no-cache")
+    if ext == ".html":
+        return html_versionado(request, alvo)
+    r = arquivo(request, alvo, CACHE_LONGO if ext in EXT_LONGO else "no-cache")
+    if ext in EXT_CURTO:
+        r.headers["Cloudflare-CDN-Cache-Control"] = "no-store"     # o Cloudflare não guarda script/estilo sem versão
+    return r
 
 
 # ---------------- comandos (T09, T20) ----------------

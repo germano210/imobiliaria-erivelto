@@ -22,9 +22,12 @@
     (filhos || []).forEach(function (f) { e.appendChild(typeof f === 'string' ? document.createTextNode(f) : f); });
     return e;
   }
+  // versão vinda do endereço deste script (ponte.js?v=…, posta pelo servidor): o ponte.css vai com a mesma
+  var VER = ((document.currentScript && /[?&]v=([\w-]+)/.exec(document.currentScript.src)) || [])[1] || '';
+  P.ver = VER;
   function css() {
     if (document.getElementById('ponte-css')) return;
-    var l = el('link', { id: 'ponte-css', rel: 'stylesheet', href: 'ponte.css' });
+    var l = el('link', { id: 'ponte-css', rel: 'stylesheet', href: 'ponte.css' + (VER ? '?v=' + VER : '') });
     document.head.appendChild(l);
   }
   function detectar() {
