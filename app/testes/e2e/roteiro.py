@@ -190,6 +190,9 @@ class Roteiro:
             p.locator("#pt-troca").wait_for()
             assert self.api(p, "GET", "api/painel/leads")["j"]["erro"] == "trocar_senha"
             self.foto(p, "01-troca-senha")
+            # recarregar com a senha temporária volta para a troca (antes caía em "Não consegui carregar o painel agora")
+            p.reload(); p.locator("#pt-troca").wait_for()
+            expect(p.locator("body")).not_to_contain_text("Não consegui carregar o painel")
             p.fill("#pt-atual", g["temp"]); p.fill("#pt-nova", SENHA1); p.fill("#pt-rep", SENHA1)
             p.click("#pt-troca button[type=submit]")
             p.locator("#pt-troca").wait_for(state="detached")

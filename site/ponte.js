@@ -846,16 +846,22 @@
     ver(false);
   };
 
+  // mostra o código do erro na tela, para quem for olhar o servidor saber o que procurar (sem dado pessoal)
+  function codigoErro(r) { return ' (erro ' + (r && r.status || 'sem conexão') + (r && r.j && r.j.erro ? ' · ' + String(r.j.erro).slice(0, 40) : '') + ')'; }
   function iniciarPainel() {
     css();
     return req('GET', 'api/painel/sessao').then(function (s0) {
-      if (!s0.ok) { telaErro('Não consegui carregar o painel agora.'); return null; }
+      if (!s0.ok) { telaErro('Não consegui carregar o painel agora.' + codigoErro(s0)); return null; }
       if (!s0.j.logado) return telaLogin().then(function (l) { return l.trocar ? telaTroca(true) : true; }).then(function () { return iniciarPainel(); }).then(function () { return null; });
+      // entrou com a senha temporária e recarregou a página antes de trocar: volta para a troca (antes caía em erro)
+      if (s0.j.trocar) return telaTroca(true).then(function () { return iniciarPainel(); }).then(function () { return null; });
       return req('GET', 'api/painel/estado');
     }).then(function (r) {
       if (!r) return;
       if (r.status === 403 && r.j && r.j.erro === 'aceitar_termo') return telaTermo(r.j.versao).then(function () { return iniciarPainel(); });
-      if (!r.ok) { telaErro('Não consegui carregar o painel agora.'); return; }
+      if (r.status === 403 && r.j && r.j.erro === 'trocar_senha') return telaTroca(true).then(function () { return iniciarPainel(); });
+      if (r.status === 401) return iniciarPainel();   // a sessão caiu no meio do caminho: pede o login de novo
+      if (!r.ok) { telaErro('Não consegui carregar o painel agora.' + codigoErro(r)); return; }
       if (r.j.admin && r.j.admin.trocar) return telaTroca(true).then(function () { return iniciarPainel(); });
       ESTADO = r.j; REV = r.j.rev;
       return carregarContatos().then(function (c) {

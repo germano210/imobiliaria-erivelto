@@ -147,7 +147,12 @@ def abrir():
     p = ConnectionPool(BANCO, min_size=1, max_size=10, open=False, kwargs={"row_factory": dict_row})
     p.open(wait=True, timeout=90)
     POOL = p
-    MIDIA.mkdir(parents=True, exist_ok=True)
+    try:   # a pasta das fotos precisa ser gravável pelo usuário do container (1000); criada pelo Docker, ela nasce do root
+        MIDIA.mkdir(parents=True, exist_ok=True)
+        (MIDIA / ".gravavel").touch(); (MIDIA / ".gravavel").unlink()
+    except PermissionError:
+        sys.exit(f"Sem permissão para gravar as fotos em {MIDIA}. No servidor, na pasta do projeto: "
+                 "sudo mkdir -p dados/midia && sudo chown -R 1000:1000 dados  (depois: docker compose ... restart erivelto)")
     migrar()
 
 
