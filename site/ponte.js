@@ -380,7 +380,17 @@
   }
   function itens86(a) { if (!Array.isArray(a.ot)) return deInfos86(a, false); return (a.ot).filter(function (r) { return r && r.n; }).map(function (r) { return { k: r.k, n: r.n, o: r.o || '' }; }); }
   var vit0 = P.vitrine;
-  P.vitrine = function (e) { var r = vit0 ? vit0(e) : e; (r || []).forEach(function (a) { if (a && a.id) MAP86[a.id] = a; }); return r; };
+  function rotulo86(o) {   // "3 (1 suíte)" → "3 quartos (1 suíte)"; "1" → "1 banheiro"
+    if (!o || typeof o.t !== 'string') return o;
+    var m = /^\s*(\d+)(.*)$/.exec(o.t); if (!m || /[a-zà-ú]/i.test(m[2].replace(/\(.*\)/, ''))) return o;
+    var n = +m[1], w = o.i === 'cama' ? (n === 1 ? 'quarto' : 'quartos') : o.i === 'banho' ? (n === 1 ? 'banheiro' : 'banheiros') : '';
+    return w ? { i: o.i, t: n + ' ' + w + m[2] } : o;
+  }
+  P.vitrine = function (e) {
+    var r = vit0 ? vit0(e) : e;
+    if (P.pagina === 'site') r = (r || []).map(function (a) { if (!a || !Array.isArray(a.infos)) return a; var c = Object.assign({}, a); c.infos = a.infos.map(rotulo86); return c; });
+    (r || []).forEach(function (a) { if (a && a.id) MAP86[a.id] = a; }); return r;
+  };
 
   // contador do Desempenho: o site (1 vez por aba) e cada imóvel aberto (1 vez por aba). Sem cookie, sem dado pessoal.
   var VISTO86 = {};
@@ -394,7 +404,7 @@
 
   // cartão da lista
   function cartao86(art) {
-    if (art.dataset.r86) return; var a = MAP86[art.dataset.id]; if (!a) return;
+    if (art.dataset.r86 || window.innerWidth < 760) return; var a = MAP86[art.dataset.id]; if (!a) return;
     art.dataset.r86 = '1'; art.classList.add('r86c');
     var ov = art.querySelector('.ov7'), nm = art.querySelector('.nm8'), bt = art.querySelector('.bt7'); if (!ov) return;
     var od = onde86(a);
@@ -417,9 +427,9 @@
 
   // ficha do imóvel (o site chama P.botaoVisita ao montar a ficha: é a deixa para completar)
   var bv0 = P.botaoVisita;
-  P.botaoVisita = function (a) { var h = bv0 ? bv0(a) : ''; if (a && a.id) { setTimeout(function () { ficha86(a); }, 0); visto86(a.id); } return h; };
+  P.botaoVisita = function (a) { if (a && a.id) { setTimeout(function () { ficha86(a); }, 0); visto86(a.id); } return ''; };   // John 23/11: um botão só na ficha (sem Pedir visita)
   function ficha86(a0) {
-    var a = MAP86[a0.id] || a0, nv = document.querySelector('.sc12 .nv12'); if (!nv) return;
+    var a = MAP86[a0.id] || a0, nv = document.querySelector('.sc12 .nv12'); if (!nv || window.innerWidth < 760) return;
     var velho = nv.querySelector('.r86-f'); if (velho) velho.remove();
     var od = onde86(a), oe = a.onde && a.onde.e, cm = linhas86(a), ot = itens86(a);
     if (!od && !cm.length && !ot.length) { nv.classList.remove('r86-fo'); return; }
@@ -464,9 +474,10 @@
   function liga86() {
     if (P.pagina !== 'site') return;
     document.documentElement.classList.add('r86');
-    new MutationObserver(ciclo86).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+    new MutationObserver(ciclo86).observe(document.body, { childList: true, subtree: true });   // só quando entram cartões novos (não a cada quadro da rolagem)
+    var sc = document.querySelector('.sc12'); if (sc) new MutationObserver(ciclo86).observe(sc, { attributes: true, attributeFilter: ['class'] });
     window.addEventListener('resize', ciclo86); ciclo86();
-    setInterval(ciclo86, 1200);
+    setInterval(ciclo86, 2500);
   }
 
   /* ---------- PAINEL ---------- */
