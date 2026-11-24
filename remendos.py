@@ -35,6 +35,9 @@ K4_NOVOS = ("sobrado:'<path d=\"M4 10.5 12 4l8 6.5\"/><path d=\"M6 9v11h12V9\"/>
 
 # (nome, tarefa, texto antigo, texto novo). Cada texto antigo aparece UMA vez no artefato.
 REMENDOS = [
+    ("teclado do celular não encolhe o site (o cenário não deforma)", "R86f",
+     '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">',
+     '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-visual">'),
     ("tipos novos e a categoria Para alugar", "T41/T40",
      'terreno:{s:"terreno",p:"terrenos",a:"do",o:"o",n:"Nenhum",S:"Terreno"}},E7=["casa","apartamento","terreno"]',
      'terreno:{s:"terreno",p:"terrenos",a:"do",o:"o",n:"Nenhum",S:"Terreno"}' + G1_NOVOS

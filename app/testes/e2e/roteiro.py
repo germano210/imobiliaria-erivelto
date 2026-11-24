@@ -292,12 +292,14 @@ class Roteiro:
             st.wait_for_url(s.url + "/")
             st.locator(".go12").wait_for(state="visible")
             st.locator(".li12").click()
-            leg = st.locator(".uc12 .pt-legal")
-            expect(leg).to_contain_text("CRECI 63.464")
-            leg.locator("a").first.click()
+            st.locator(".uc12").wait_for(state="visible")
+            assert st.locator(".uc12 .pt-legal").count() == 0, "R86f: o cartão do Login não leva a linha do CRECI"
+            st.keyboard.press("Escape")
+            self.abrir_ficha()
+            st.locator(".nv12 .pt-legal a").first.click()
             st.wait_for_url(s.url + "/privacidade/")
             expect(st.locator("h1")).to_have_text("Aviso de privacidade")
-        self.passo("T05, T04 e T45 (R86e): sem barra de baixo; CRECI 63.464 e links Privacidade e Termos no fim da ficha e no cartão do Login, e os links abrem /privacidade/ e /termos/", rodape)
+        self.passo("T05, T04 e T45 (R86e): sem barra de baixo; CRECI 63.464 e links Privacidade e Termos só no fim da ficha (não no cartão do Login), e os links abrem /privacidade/ e /termos/", rodape)
 
         def whatsapp_sem_numero():
             assert self.api(st, "GET", "api/estado")["j"]["whatsapp_numero"] is None

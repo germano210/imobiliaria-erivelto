@@ -118,8 +118,8 @@
   P.chamada = function (t) { enviarComReenvio('api/chamadas', { id: t.id, nm: t.nm, o: t.o }); };
 
   // T05, T04 e T45: CRECI, links legais (Privacidade, Termos) e "Quero vender" sempre à vista na busca e nos resultados. Some na ficha do imóvel (classe "f5"), que tem botões embaixo.
-  // T05, T04 e T45 · R86e (John 24/11): sai a barra de baixo. CRECI, Privacidade e Termos ficam discretos no fim da ficha
-  // do imóvel e no cartão do Login. "Quero vender" sai (o botão "Anunciar" do topo faz isso). Na prévia entra o link do painel.
+  // T05, T04 e T45 · R86e/R86f (John 24/11): sai a barra de baixo. CRECI, Privacidade e Termos ficam discretos no fim da
+  // ficha do imóvel (no cartão "Pra salvar seus dados" não: John pediu para tirar). "Quero vender" sai (o botão "Anunciar" do topo faz isso). Na prévia entra o link do painel.
   function legal() {
     var r = el('p', { class: 'pt-legal' }, [
       el('span', { texto: 'Erivelto Santos \u00b7 CRECI 63.464 \u00b7 ' }), el('a', { href: 'privacidade/', texto: 'Privacidade' }), el('span', { texto: ' \u00b7 ' }), el('a', { href: 'termos/', texto: 'Termos' })]);
@@ -128,11 +128,21 @@
   }
   function legal86() {
     var nv = document.querySelector('.sc12 .nv12'); if (nv && !nv.querySelector('.pt-legal')) nv.appendChild(legal());
-    var uc = document.querySelector('.uc12'); if (uc && !uc.querySelector('.pt-legal')) uc.appendChild(legal());
+  }
+  // R86f (John 24/11): imóvel sem financiamento (o corretor não cadastrou) não mostra nada de financiamento ao visitante,
+  // nem no cartão "Pra salvar seus dados e disponibilizar" aberto de dentro da ficha dele.
+  function semFin86() {
+    var sc = document.querySelector('.sc12'), uc = document.querySelector('.uc12'); if (!sc || !uc) return;
+    var pp = sc.querySelector('.pp12b'), id = sc.classList.contains('f5') && pp && pp.dataset.fin, a = id && MAP86[id];
+    var esconde = !!(a && !a.fin), ul = uc.querySelector('.ub3'); if (!ul) return;
+    var n = 0;
+    [].forEach.call(ul.children, function (li) { var f = /financ/i.test(li.textContent); li.hidden = f && esconde; if (!li.hidden) n++; });
+    ul.style.setProperty('--n', n);
   }
   function rodape() {
     var v = document.getElementById('pt-rodape'); if (v) v.remove();
-    document.addEventListener('click', function () { setTimeout(legal86, 0); setTimeout(legal86, 300); }, true);
+    function apos() { legal86(); semFin86(); }
+    document.addEventListener('click', function () { setTimeout(apos, 0); setTimeout(apos, 300); }, true);
   }
   /* ---------- T39–T45: o que o site mostra de cada imóvel (o site/index.html chama estas funções; ver remendos.py) ---------- */
   var RE_COD = /^ES-\d{3,5}$/;
@@ -465,20 +475,26 @@
   }
 
   // "Anunciar meu imóvel" ao lado do Login (abre o mesmo formulário do "Quero vender")
+  // R86f (John 24/11): o "Anunciar" fica fixo como o Login: mesmo lugar, mesmo fade, some e volta junto (lido a cada quadro;
+  // só escreve quando algo do Login mudou, então parado não custa nada)
+  var AN86 = '';
   function anunciar86() {
     var sc = document.querySelector('.sc12'), li = sc && sc.querySelector('.li12'); if (!li) return;
     var b = sc.querySelector('.pt-anun');
-    if (!b) { b = el('button', { type: 'button', class: 'pt-anun', 'data-pt-vender': '1' }); b.innerHTML = '<span class="l">Anunciar meu imóvel</span><span class="c">Anunciar</span>'; sc.appendChild(b); }
+    if (!b) { b = el('button', { type: 'button', class: 'pt-anun', 'data-pt-vender': '1' }); b.innerHTML = '<span class="l">Anunciar meu imóvel</span><span class="c">Anunciar</span>'; sc.appendChild(b); AN86 = ''; }
     var s = getComputedStyle(li), q = li.getBoundingClientRect(), qs = sc.getBoundingClientRect();
     var vis = s.display !== 'none' && s.visibility !== 'hidden' && q.width > 0;
+    var chave = vis ? [s.opacity, s.pointerEvents, s.fontSize, s.fontWeight, s.backgroundColor, s.borderTopColor, s.color, q.height, q.top - qs.top, qs.right - q.left].join('|') : 'x';
+    if (chave === AN86 && b.isConnected) return; AN86 = chave;
     b.style.display = vis ? '' : 'none'; if (!vis) return;
-    b.style.opacity = s.opacity; b.style.transform = s.transform === 'none' ? '' : s.transform;   // R86e: entra junto com o Login (mesmo fade)
+    b.style.opacity = s.opacity; b.style.pointerEvents = +s.opacity < 0.05 ? 'none' : s.pointerEvents;
     // John 23/11: a letra do "Anunciar" do mesmo tamanho do "Login" (copia a letra, a altura e o vidro dele)
     b.style.fontSize = s.fontSize; b.style.fontWeight = s.fontWeight; b.style.letterSpacing = s.letterSpacing;
     b.style.height = q.height + 'px'; b.style.background = s.backgroundColor; b.style.borderColor = s.borderTopColor; b.style.color = s.color;
     b.style.top = (q.top - qs.top) + 'px';
     b.style.right = (qs.right - q.left + 8) + 'px';
   }
+  function anQuadro86() { anunciar86(); requestAnimationFrame(anQuadro86); }
   // a lista some por baixo do grid de busca: a área de rolar começa no meio do grid (o grid fica por cima)
   function corte86() {
     var ls = document.querySelector('.sc12 .ls12'), bk = document.querySelector('.sc12 .bk12');
@@ -496,13 +512,29 @@
       anunciar86(); corte86();
     });
   }
+  // R86f (John 24/11): no celular, o teclado não pode encolher o cenário. Enquanto alguém digita, a altura do site fica
+  // travada na de antes do teclado (o teclado passa por cima). Chrome/Android: o meta viewport (interactive-widget) já faz isso.
+  var H86 = { w: 0, h: 0, on: false, els: [] };
+  function alturaBase86() { var w = innerWidth, h = innerHeight; if (Math.abs(w - H86.w) > 40 || !H86.on && h > H86.h || !H86.h) { if (Math.abs(w - H86.w) > 40) H86.h = 0; H86.w = w; if (!H86.on) H86.h = Math.max(H86.h, h); } }
+  function digita86(ev) {
+    var t = ev.target; if (!t || !/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || !matchMedia('(pointer:coarse)').matches || H86.on) return;
+    alturaBase86(); H86.on = true; var sc = document.querySelector('.sc12'), e = sc, h = H86.h + 'px';
+    H86.els = []; while (e && e !== document.documentElement) { var p = getComputedStyle(e).position; if (p === 'fixed' || e === sc) { H86.els.push([e, e.style.height, e.style.bottom]); e.style.setProperty('height', h, 'important'); e.style.setProperty('bottom', 'auto', 'important'); } e = e.parentElement; }
+  }
+  function solta86() {
+    setTimeout(function () {
+      var a = document.activeElement; if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;
+      H86.els.forEach(function (x) { x[0].style.removeProperty('height'); x[0].style.removeProperty('bottom'); if (x[1]) x[0].style.height = x[1]; if (x[2]) x[0].style.bottom = x[2]; }); H86.els = []; H86.on = false; alturaBase86();
+    }, 250);
+  }
   function liga86() {
     if (P.pagina !== 'site') return;
     document.documentElement.classList.add('r86');
     new MutationObserver(ciclo86).observe(document.body, { childList: true, subtree: true });   // só quando entram cartões novos (não a cada quadro da rolagem)
     var sc = document.querySelector('.sc12'); if (sc) new MutationObserver(ciclo86).observe(sc, { attributes: true, attributeFilter: ['class'] });
     window.addEventListener('resize', ciclo86); ciclo86();
-    var k86 = 0; (function f86() { anunciar86(); var l = document.querySelector('.sc12 .li12'); if ((l && +getComputedStyle(l).opacity >= 0.999) || ++k86 > 1200) return anunciar86(); requestAnimationFrame(f86); })();   // R86e: aparece junto com o Login, no mesmo fade
+    alturaBase86(); window.addEventListener('resize', alturaBase86); document.addEventListener('focusin', digita86, true); document.addEventListener('focusout', solta86, true);
+    anQuadro86();   // R86f: o Anunciar acompanha o Login a cada quadro
     setInterval(ciclo86, 2500);
   }
 
