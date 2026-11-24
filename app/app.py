@@ -47,6 +47,7 @@ COOKIE_P, COOKIE_V = "erv_p", "erv_v"
 TIPOS = ("casa", "sobrado", "apartamento", "terreno", "sitio", "sala", "galpao")   # T41: sobrado, sítio/chácara, sala comercial, galpão
 SITUACOES_IMOVEL = ("disp", "res", "vend")    # T39: disponível, reservado, vendido
 FINALIDADES = ("venda", "aluguel")             # T40
+PERIODOS_ALUGUEL = ("dia", "mes", "ano")        # aluguel: como o site mostra o valor (o guardado é sempre o do mês)
 SITUACOES_LEAD = ("novo", "falei", "visita", "proposta", "fechado", "perdido")   # T43
 RE_COD = re.compile(r"ES-\d{3,5}")             # T42: código do imóvel
 PLANOS = {"basico": {"cid": 3, "im": 3}, "fasico": {"cid": 20, "im": 10}, "erivelto": {"cid": None, "im": None}}
@@ -632,6 +633,8 @@ def campo_errado(o):
         return "situação"
     if o.get("final") is not None and o["final"] not in FINALIDADES:
         return "finalidade"
+    if o.get("perAlug") is not None and o["perAlug"] not in PERIODOS_ALUGUEL:
+        return "período do aluguel"
     if o.get("cod") is not None and not (isinstance(o["cod"], str) and RE_COD.fullmatch(o["cod"])):
         return "código"
     for k in ("infos", "px", "ar"):

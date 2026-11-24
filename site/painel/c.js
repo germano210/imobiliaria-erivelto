@@ -52,7 +52,15 @@ Object.assign(window.ICO14, {
   var CIDADES = ['Santo Antônio da Patrulha', 'Osório', 'Taquara', 'Rolante', 'Tramandaí', 'Capão da Canoa', 'Gravataí', 'Caraá'];
 
   /* ---------- formatos ---------- */
-  function fmtPrecoIm(im) { var p = fmtPreco(im.preco); return p && im.final === 'aluguel' ? 'R$ ' + pontos(im.preco) + '/mês' : p; }
+  // aluguel: guarda-se o valor do mês; o site mostra por dia (÷ 30), mês ou ano (× 12), como o corretor escolher (perAlug)
+  var PER_ALUG = [['dia', 'Por dia', '/dia', 1 / 30], ['mes', 'Por mês', '/mês', 1], ['ano', 'Por ano', '/ano', 12]];
+  function perAlug(im) { return PER_ALUG.filter(function (p) { return p[0] === im.perAlug; })[0] || PER_ALUG[1]; }
+  function fmtAlug(im) {
+    if (window.PONTE && PONTE.precoAlug) return PONTE.precoAlug(im);
+    var p = perAlug(im), v = Math.round((+im.preco || 0) * p[3] * 100) / 100;
+    return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 }) + p[2];
+  }
+  function fmtPrecoIm(im) { var p = fmtPreco(im.preco); return p && im.final === 'aluguel' ? fmtAlug(im) : p; }
   function fmtPreco(n) { n = +n || 0; if (!n) return ''; if (n >= 1e6) return 'R$ ' + (n / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + ' mi'; if (n >= 1e3) return 'R$ ' + Math.round(n / 1e3) + ' mil'; return 'R$ ' + n; }
   function pontos(v) { return v ? String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : ''; }
   function nomeTipo(t) { var x = TIPOS.filter(function (a) { return a[0] === t; })[0]; return x ? x[1] : ''; }
@@ -163,7 +171,7 @@ Object.assign(window.ICO14, {
   function foco(i) { if (!NOFOCO) setTimeout(function () { try { i.focus(); } catch (e) {} }, 80); }
   ED.preco = function (r, fim) {
     r.innerHTML = '<div class="fld"><span class="pre">R$</span><input inputmode="numeric" autocomplete="off" placeholder="0" value="' + pontos(ATUAL.preco) + '" aria-label="Preço"><button class="ok" data-k>Pronto</button></div>' +
-      '<div class="dica">' + (ATUAL.final === 'aluguel' ? 'Aluguel por mês. ' : '') + 'No site: <b data-pv>' + (fmtPrecoIm(ATUAL) || '—') + '</b> · Enter também confirma</div>';
+      '<div class="dica">' + (ATUAL.final === 'aluguel' ? 'Digite o valor do aluguel por mês. ' : '') + 'No site: <b data-pv>' + (fmtPrecoIm(ATUAL) || '—') + '</b> · Enter também confirma</div>';
     var i = r.querySelector('input');
     i.oninput = function () { var d = i.value.replace(/\D/g, '').slice(0, 10); ATUAL.preco = d ? +d : 0; i.value = pontos(d); r.querySelector('[data-pv]').textContent = fmtPrecoIm(ATUAL) || '—'; mudou(); };
     i.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); fim && fim(); } };
@@ -414,6 +422,8 @@ Object.assign(window.ICO14, {
       (RE_COD.test(im.cod || '') ? '<div class="lin cod"><span class="k">Código</span><span class="v">' + esc(im.cod) + '</span></div>' : '') +
       '<button class="lin" data-f="preco"><span class="v preco">' + (fmtPrecoIm(im) || '<span class="slot">+ ' + (im.final === 'aluguel' ? 'Aluguel por mês' : 'Preço') + '</span>') + '</span><span class="ch">›</span></button>' +
       '<div class="lin col"><span class="k">Para</span><span class="chips" data-final>' + [['venda', 'Venda'], ['aluguel', 'Aluguel']].map(function (f) { return '<button class="chip" data-fi="' + f[0] + '" aria-pressed="' + ((im.final || 'venda') === f[0]) + '">' + f[1] + '</button>'; }).join('') + '</span></div>' +
+      (im.final === 'aluguel' ? '<div class="lin col"><span class="k">Mostrar o aluguel no site</span><span class="chips" data-per>' + PER_ALUG.map(function (p) { return '<button class="chip" data-pa="' + p[0] + '" aria-pressed="' + (perAlug(im)[0] === p[0]) + '">' + p[1] + '</button>'; }).join('') + '</span>' +
+        '<span class="dica">' + (im.preco ? 'Mês: R$ ' + pontos(im.preco) + ' = ' + fmtAlug({ preco: im.preco, perAlug: 'dia' }) + ' = ' + fmtAlug({ preco: im.preco, perAlug: 'ano' }) + '. ' : '') + 'O valor guardado é o do mês; o dia é o mês ÷ 30 e o ano, o mês × 12.</span></div>' : '') +
       '<button class="lin" data-f="nome"><span class="v">' + (im.nome ? esc(im.nome) : '<span class="sub">+ Nome (opcional)</span>') + '</span><span class="ch">›</span></button>' +
       '<button class="lin" data-f="tipo">' + ic((TIPOS.filter(function (t) { return t[0] === im.tipo; })[0] || TIPOS[0])[2]) + '<span class="v">' + (nomeTipo(im.tipo) || '<span class="sub">Escolher o tipo</span>') + '</span><span class="ch">›</span></button>' +
       '<button class="lin" data-f="cidade">' + ic('pin') + '<span class="v">' + (esc(im.cidade) || '<span class="sub">+ Cidade</span>') + '</span><span class="ch">›</span></button>' +
@@ -439,6 +449,7 @@ Object.assign(window.ICO14, {
       box.querySelectorAll('[data-f]').forEach(function (b) { b.onclick = function () { folha(b.dataset.f); }; });
       var sw = box.querySelector('[data-sw]'); if (sw) sw.onclick = function () { ATUAL.fin = !ATUAL.fin; sw.setAttribute('aria-checked', ATUAL.fin); if (ATUAL.fin && !ATUAL.fn) ATUAL.fn = JSON.parse(JSON.stringify(fnPadrao())); mudou(); };
       box.querySelectorAll('[data-fi]').forEach(function (b) { b.onclick = function () { var f = b.dataset.fi; if ((ATUAL.final || 'venda') === f) return; ATUAL.final = f; if (f === 'aluguel') ATUAL.fin = false; if (ATUAL.tipo) trocarTipo(ATUAL.tipo); mudou(); }; });
+      box.querySelectorAll('[data-pa]').forEach(function (b) { b.onclick = function () { ATUAL.perAlug = b.dataset.pa; mudou(); }; });
       box.querySelectorAll('[data-si]').forEach(function (b) { b.onclick = function () { ATUAL.sit = b.dataset.si; if (ATUAL.sit !== 'vend') delete ATUAL.vendMostra; else if (ATUAL.vendMostra === undefined) ATUAL.vendMostra = false; mudou(); }; });
       var swv = box.querySelector('[data-swv]'); if (swv) swv.onclick = function () { ATUAL.vendMostra = !ATUAL.vendMostra; mudou(); };
       var ap = box.querySelector('[data-apagar]'); if (ap) ap.onclick = function () { apagar(ap); };

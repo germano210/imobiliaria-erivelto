@@ -163,11 +163,18 @@
     if (RE_COD.test(a.cod || '')) s.push('<span class="pt-selo cod">' + a.cod + '</span>');
     return s.length ? '<span class="pt-selos' + (ficha ? ' f' : '') + '">' + s.join('') + '</span>' : '';
   };
+  // Aluguel: o corretor guarda o valor do MÊS e escolhe como o site mostra (perAlug): por dia (mês ÷ 30), mês ou ano (mês × 12).
+  // Centavos só quando a conta não dá inteiro (1100/mês = R$ 36,67/dia): o anúncio vale como oferta, então não arredonda para baixo.
+  var PER_ALUG = { dia: ['/dia', 1 / 30], mes: ['/mês', 1], ano: ['/ano', 12] };
+  P.precoAlug = function (a) {
+    var p = PER_ALUG[a && a.perAlug] || PER_ALUG.mes, v = Math.round((+(a && a.preco) || 0) * p[1] * 100) / 100;
+    return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 }) + p[0];
+  };
   // T42 (código), T40 (aluguel), T39 (reservado/vendido) na mensagem pronta do WhatsApp. Recebe a mensagem que o site montou.
   P.msg = function (a, t) {
     if (!a || typeof t !== 'string') return t;
     if (RE_COD.test(a.cod || '')) t = t.replace(/^(Olá, Erivelto! Vi no seu site [^"]*"[^"]*")/, '$1 (cód. ' + a.cod + ')');
-    if (a.alug) t = t.replace(' o imóvel "', ' o imóvel para alugar "').replace(/, de (R\$.*?), e quero/, ', por R$ ' + (+a.preco || 0).toLocaleString('pt-BR') + '/mês, e quero');
+    if (a.alug) t = t.replace(' o imóvel "', ' o imóvel para alugar "').replace(/, de (R\$.*?), e quero/, ', por ' + P.precoAlug(a) + ', e quero');
     if (a.sit === 'vend') t = t.replace('e quero mais informações.', 'que já foi vendido, e quero um imóvel parecido.');
     else if (a.sit === 'res') t = t.replace('e quero mais informações.', 'que está reservado, e quero mais informações.');
     return t;

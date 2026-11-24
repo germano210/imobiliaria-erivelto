@@ -73,6 +73,7 @@ Antes de começar: crie o usuário (`docker compose exec erivelto python app.py 
 | H2 | Abra um imóvel, toque "Reservado" e "Publicar mudanças"; abra o site | O cartão mostra os selos "Reservado" e o código |
 | H3 | Marque "Vendido" (sem "Mostrar no site como vendido") e publique | O imóvel some do site e continua no painel |
 | H4 | Crie um imóvel "Para: Aluguel", com preço 2500, e publique | No site aparece "Para alugar" e "R$ 2.500/mês"; no filtro "Tipo" aparece "Para alugar"; não tem simulação |
+| H4b | No imóvel de aluguel (preço 1100), toque "Por dia" e depois "Por ano" em "Mostrar o aluguel no site"; publique | O site mostra "R$ 36,67/dia" e depois "R$ 13.200/ano"; a mensagem do WhatsApp usa o mesmo valor |
 | H5 | Crie um sobrado (ou galpão, sala, sítio) e publique | O tipo aparece no filtro "Tipo" do site |
 | H6 | Entre no site como visitante, abra a ficha, "Pedir visita", escolha dia e período | Abre o WhatsApp com a mensagem citando o código, o dia e o período. Em Painel > Contatos: "Pediu visita: …" |
 | H7 | Painel > Contatos: mude a situação e escreva uma anotação; recarregue | Ficam salvas; o filtro por situação mostra o contato |

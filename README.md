@@ -88,7 +88,7 @@ Não há comando para excluir usuário nem para apagar o contato de um visitante
 
 ## O que o corretor faz no painel (T39–T45)
 
-- **Imóvel:** código automático (ES-001, ES-002…), "Para: Venda ou Aluguel" (aluguel: preço por mês, condomínio e IPTU, sem financiamento), situação Disponível, Reservado ou Vendido (vendido sai do site, a não ser que marque "Mostrar no site como vendido"). Tipos: casa, sobrado, apartamento, terreno, sítio ou chácara, sala comercial, galpão. Tudo vale depois de "Publicar".
+- **Imóvel:** código automático (ES-001, ES-002…), "Para: Venda ou Aluguel" (aluguel: digita o valor do mês e escolhe se o site mostra por dia, mês ou ano — 1100/mês = R$ 36,67/dia = R$ 13.200/ano —, com condomínio e IPTU, sem financiamento), situação Disponível, Reservado ou Vendido (vendido sai do site, a não ser que marque "Mostrar no site como vendido"). Tipos: casa, sobrado, apartamento, terreno, sítio ou chácara, sala comercial, galpão. Tudo vale depois de "Publicar".
 - **Contatos:** filtro por situação (novo, já falei, visita marcada, proposta, fechado, perdido), anotação curta, pedidos de visita e de venda, e "Baixar planilha (CSV)".
 - **No site:** selos no cartão e na ficha, a categoria "Para alugar" no filtro de tipo, o botão "Pedir visita" na ficha (dia e período vão na mensagem do WhatsApp) e o link "Quero vender" no pé da página.
 - **Rotas novas:** `PUT /api/painel/leads/<id>` (situação e anotação) e `POST /api/vender` (formulário "Quero vender"; limite de 10 por hora por IP).
