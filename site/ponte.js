@@ -594,6 +594,31 @@
     var i = el('input', { id: id, type: tipo, autocomplete: auto, class: 'pt-in', required: 'required' });
     return { rotulo: el('label', { for: id, class: 'pt-lb', texto: rotulo }), input: i };
   }
+  /* R86j (John 24/11): o fundo do login/troca de senha do painel é o mesmo cenário em loop do site (vídeo t0; com movimento reduzido, só a foto) */
+  function fundoCena(tela) {
+    var f = el('div', { class: 'pt-fundo', 'aria-hidden': 'true' }), por = false, ret = false;
+    try { por = matchMedia('(prefers-reduced-motion:reduce)').matches; } catch (e) {}
+    try { ret = matchMedia('(orientation:portrait) and (max-width:900px)').matches; } catch (e) {}
+    var t = ret ? 'm' : (innerWidth >= 1600 || (window.devicePixelRatio || 1) >= 2) ? '2560' : '1280', n = t === 'm' ? 't0_m_806' : 't0_' + t;
+    f.style.backgroundImage = 'url(t0/' + (t === 'm' ? 't0_poster_m.jpg' : 't0_poster_2560.jpg') + ')';
+    if (!por && document.createElement('video').canPlayType) {
+      var v = document.createElement('video'); v.muted = true; v.defaultMuted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.disablePictureInPicture = true; v.tabIndex = -1;
+      v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('loop', ''); v.setAttribute('aria-hidden', 'true');
+      [['video/webm; codecs="vp9"', 't0/' + n + '.webm'], ['video/mp4', 't0/' + n + '.mp4']].forEach(function (a) { var s = document.createElement('source'); s.type = a[0]; s.src = a[1]; v.appendChild(s); });
+      f.appendChild(v); var go = function () { var p = v.play(); if (p && p.catch) p.catch(function () {}); }; v.addEventListener('canplay', go); go();
+    }
+    tela.insertBefore(f, tela.firstChild);
+  }
+  /* R86j (John 24/11): clicar no branco do cartão da lista também abre a ficha (como o botão "Sobre a casa"); arrastar para rolar não conta */
+  (function () {
+    var d0 = null;
+    document.addEventListener('pointerdown', function (e) { d0 = { x: e.clientX, y: e.clientY }; }, true);
+    document.addEventListener('click', function (e) {
+      var cd = e.target.closest && e.target.closest('.sc12 .cd12'); if (!cd || e.target.closest('a,button,input,select,textarea,label,[role=button]')) return;
+      if (d0 && Math.abs(e.clientX - d0.x) + Math.abs(e.clientY - d0.y) > 10) return;
+      var b = cd.querySelector('.vm12'); if (b) b.click();
+    });
+  })();
   function telaLogin() {
     return new Promise(function (res) {
       css();
@@ -612,7 +637,7 @@
           if (r.ok) { se.input.value = ''; tela.remove(); res(r.j); } else { msg.textContent = mensagemLogin(r); se.input.value = ''; se.input.focus(); }
         });
       };
-      document.body.appendChild(tela);
+      fundoCena(tela); document.body.appendChild(tela);
       em.input.focus();
     });
   }
@@ -639,7 +664,7 @@
           msg.textContent = r.status === 403 ? 'A senha atual não confere.' : r.status === 429 ? 'Muitas tentativas. Espere um pouco.' : r.j && r.j.erro === 'senha_fraca' ? 'Escolha uma senha diferente da atual.' : 'Não foi possível trocar agora.';
         });
       };
-      document.body.appendChild(tela);
+      fundoCena(tela); document.body.appendChild(tela);
       at.input.focus();
     });
   }

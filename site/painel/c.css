@@ -283,3 +283,26 @@ body.c-on{overflow:hidden}
 #c-app .sh .thumbs{flex-wrap:wrap;overflow:visible}
 #c-app .sh .thumbs button{touch-action:none}
 #c-app .frs{margin:0}
+
+/* R86j: desktop = o mesmo app do celular, com as abas num trilho à esquerda e o conteúdo numa coluna central legível */
+@media (min-width:900px){
+  #c-app [data-tela]:has(>nav.tabs){flex-direction:row!important}
+  #c-app nav.tabs{order:-1;flex:none;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:4px;width:248px;max-width:none;margin:0;padding:92px 16px 24px;border-top:0;border-right:1px solid var(--ln);background:#fff;position:relative}
+  #c-app nav.tabs::before{content:"Painel do Erivelto";position:absolute;left:28px;top:30px;font:500 18px/1.2 Poppins,system-ui,sans-serif;color:var(--az)}
+  #c-app nav.tabs::after{content:"Seu site e seus imóveis";position:absolute;left:28px;top:56px;font:400 12.5px/1.2 Poppins,system-ui,sans-serif;color:#8a8780}
+  #c-app nav.tabs button{flex:none;flex-direction:row;justify-content:flex-start;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;font-size:15px;color:#4b5a5f}
+  #c-app nav.tabs button:hover{background:#f3f2ee}
+  #c-app nav.tabs button[aria-current=page]{background:var(--az2);color:var(--az);font-weight:500}
+  #c-app nav.tabs button .ix{width:22px;height:22px}
+  #c-app nav.tabs .n{position:static;margin:0 0 0 auto}
+  #c-app [data-tela]:has(>nav.tabs)>.main{flex:1;width:auto;max-width:none;margin:0;min-width:0}
+  #c-app [data-tela]:not(:has(>nav.tabs)) .main,#c-app [data-tela]:not(:has(>nav.tabs)) .top,#c-app [data-tela]:not(:has(>nav.tabs)) .bar{max-width:680px}
+  #c-app .main:not(.semrol) .wrap{max-width:680px;margin:0 auto;padding:40px 32px 56px;gap:16px}
+  #c-app .main:not(.semrol) .wrap:has(>.item){max-width:1040px;display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));align-items:start}
+  #c-app .main:not(.semrol) .wrap:has(>.item)>h1,#c-app .main:not(.semrol) .wrap:has(>.item)>.novo,#c-app .main:not(.semrol) .wrap:has(>.item)>.vazio{grid-column:1/-1}
+  #c-app h1{font-size:30px}
+  #c-app .sh{max-width:600px}
+  #c-app .fundo{align-items:center}
+  #c-app .sh{border-radius:24px;max-height:88%}
+  #c-app .item:hover{box-shadow:0 12px 30px rgba(1,65,107,.14)}
+}
