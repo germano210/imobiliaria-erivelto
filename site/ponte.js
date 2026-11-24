@@ -433,7 +433,7 @@
 
   // ficha do imóvel (o site chama P.botaoVisita ao montar a ficha: é a deixa para completar)
   var bv0 = P.botaoVisita;
-  P.botaoVisita = function (a) { if (a && a.id) { setTimeout(function () { ficha86(a); fotos86(); legal86(); }, 0); visto86(a.id); } return ''; };
+  P.botaoVisita = function (a) { if (a && a.id) { setTimeout(function () { ficha86(a); fichaCel86(a); fotos86(); legal86(); }, 0); visto86(a.id); } return ''; };
   // John 23/11 (R86c): a foto vira um card, uma por vez, com setas e "1 / N" (PC = A, celular = C)
   var FI86 = 0;
   function tbs86() { return [].slice.call(document.querySelectorAll('.sc12 .th12 .tb12')); }
@@ -459,6 +459,46 @@
     if (!alvo.classList.contains('bl')) FI86 = i;
     alvo.click(); cont86();   // foto bloqueada: o site mostra o mesmo aviso de quando se toca na miniatura
   }, true);   // John 23/11: um botão só na ficha (sem Pedir visita)
+  // R86g (John 24/11, D): ficha no celular = foto no topo com cantos arredondados, preço, resumo em 3 números e abas
+  // Sobre · Cômodos · Onde fica (o mapa do site vai para a aba "Onde fica"; o botão do WhatsApp continua o do site)
+  function fichaCel86(a0) {
+    var a = MAP86[a0.id] || a0, nv = document.querySelector('.sc12 .nv12'); if (!nv || window.innerWidth >= 760) return;
+    var velho = nv.querySelector('.r86-d'); if (velho) { var mp0 = velho.querySelector('.nv24p'); if (mp0) (nv.querySelector('.nv24s') || nv).appendChild(mp0); velho.remove(); }
+    var pills = [].map.call(nv.querySelectorAll('.if8 li'), function (li) { return li.textContent.trim(); }).join(' · ');
+    function num(re) { var m = re.exec(pills); return m ? +m[1] : 0; }
+    var qt = num(/(\d+)\s+quartos?/i), su = num(/(\d+)\s+su[ií]tes?/i), bn = num(/(\d+)\s+banheiros?/i), vg = num(/(\d+)\s+vagas?/i);
+    var res = [];
+    if (qt) res.push(['cama', qt, qt > 1 ? 'quartos' : 'quarto']);
+    if (su) res.push(['suite', su, su > 1 ? 'suítes' : 'suíte']); else if (bn) res.push(['banho', bn, bn > 1 ? 'banheiros' : 'banheiro']);
+    if (vg) res.push(['garagem', vg, vg > 1 ? 'vagas' : 'vaga']);
+    var od = onde86(a), oe = a.onde && a.onde.e, cm = linhas86(a), ot = itens86(a), mapa = nv.querySelector('.nv24p');
+    var abas = [['s', 'Sobre']]; if (cm.length) abas.push(['c', 'Cômodos']); if (mapa || od) abas.push(['o', 'Onde fica']);
+    var h = '<div class="r86-d">' + (res.length ? '<div class="r86-res">' + res.slice(0, 3).map(function (r) { return '<div>' + ic86(r[0]) + '<b>' + r[1] + '</b><small>' + r[2] + '</small></div>'; }).join('') + '</div>' : '') +
+      (abas.length > 1 ? '<div class="r86-tabs" role="tablist">' + abas.map(function (t, i) { return '<button type="button" role="tab" data-r86-tab="' + t[0] + '" aria-selected="' + (i === 0) + '">' + t[1] + '</button>'; }).join('') + '</div>' : '') +
+      '<div class="r86-pn" data-r86-pn="s">' + (ot.length ? '<p class="r86-h">O que tem</p><div class="r86-pls">' + ot.map(function (r) { return '<span class="r86-pl">' + ic86(r.k, 'r86-ic s') + e86(r.n) + '</span>'; }).join('') + '</div>' : '') +
+        (!ot.length && pills ? '<p class="r86-h">O imóvel</p><div class="r86-pls">' + [].map.call(nv.querySelectorAll('.if8 li'), function (li) { return '<span class="r86-pl">' + e86(li.textContent.trim()) + '</span>'; }).join('') + '</div>' : '') + '</div>' +
+      (cm.length ? '<div class="r86-pn" data-r86-pn="c" hidden>' + cm.map(function (r) { return '<div class="r86-row">' + ic86(r.k) + '<b>' + e86(r.n) + (r.o ? '<em>' + e86(r.o) + '</em>' : '') + '</b>' + (r.s ? '<small>' + e86(r.s) + '</small>' : '') + '</div>'; }).join('') + '</div>' : '') +
+      '<div class="r86-pn" data-r86-pn="o" hidden>' + (od ? '<div class="r86-row">' + ic86('condominio') + '<b>' + e86(od) + (oe ? '<em>' + e86(oe) + '</em>' : '') + '</b></div>' : '') + '</div></div>';
+    var nh = nv.querySelector('.nh12'); if (nh) nh.insertAdjacentHTML('afterend', h); else nv.insertAdjacentHTML('afterbegin', h);
+    var box = nv.querySelector('.r86-d'); if (mapa) box.querySelector('[data-r86-pn=o]').appendChild(mapa);
+    nv.classList.add('r86-dd');
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('[data-r86-tab]'); if (!b) return;
+    var box = b.closest('.r86-d'); if (!box) return;
+    box.querySelectorAll('[data-r86-tab]').forEach(function (o) { o.setAttribute('aria-selected', String(o === b)); });
+    box.querySelectorAll('[data-r86-pn]').forEach(function (p) { p.hidden = p.getAttribute('data-r86-pn') !== b.getAttribute('data-r86-tab'); });
+  });
+  // celular: deslizar a foto para o lado troca de foto (usa as mesmas setas, e a foto bloqueada pede para entrar, como antes)
+  (function () {
+    var x0 = null, y0 = 0;
+    document.addEventListener('touchstart', function (e) { var f = e.target.closest && e.target.closest('.sc12 .fp12'); if (!f || e.touches.length !== 1) { x0 = null; return; } x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    document.addEventListener('touchend', function (e) {
+      if (x0 == null) return; var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
+      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      var b = document.querySelector('.sc12 .r86-ar.' + (dx < 0 ? 'n' : 'p')); if (b) b.click();
+    }, { passive: true });
+  })();
   function ficha86(a0) {
     var a = MAP86[a0.id] || a0, nv = document.querySelector('.sc12 .nv12'); if (!nv || window.innerWidth < 760) return;
     var velho = nv.querySelector('.r86-f'); if (velho) velho.remove();
