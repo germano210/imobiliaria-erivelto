@@ -1107,6 +1107,30 @@ def painel_desempenho(u=Depends(admin)):
     return {"aberturas": r}
 
 
+def _viacep(cep: str):
+    """Consulta o ViaCEP do lado do servidor (o navegador não pode: connect-src é 'self'). Separado para os testes trocarem."""
+    import urllib.request
+    with urllib.request.urlopen(f"https://viacep.com.br/ws/{cep}/json/", timeout=6) as r:
+        return json.loads(r.read().decode("utf-8"))
+
+
+@app.get("/api/painel/cep/{cep}")
+def painel_cep(cep: str, request: Request, u=Depends(admin)):
+    """Atalho de endereço do painel: CEP -> rua, bairro, cidade. Só admin; 60 por hora por IP."""
+    c = re.sub(r"\D", "", cep or "")
+    if len(c) != 8:
+        raise Erro(400, erro="invalido", campo="cep")
+    if gasta(chave_lim("cep-ip", ip_de(request)), 60, 3600):
+        raise Erro(429, erro="muitas_tentativas")
+    try:
+        d = _viacep(c)
+    except Exception:
+        raise Erro(502, erro="indisponivel")
+    if not isinstance(d, dict) or d.get("erro"):
+        raise Erro(404, erro="nao_achou")
+    return {"rua": str(d.get("logradouro") or "")[:80], "bairro": str(d.get("bairro") or "")[:60], "cidade": str(d.get("localidade") or "")[:60], "uf": str(d.get("uf") or "")[:2]}
+
+
 @app.get("/api/painel/chamadas")
 def painel_chamadas(u=Depends(admin)):
     r = q("""select (extract(epoch from criado) * 1000)::bigint as t, cidade as c, imovel_id as id, nm, o

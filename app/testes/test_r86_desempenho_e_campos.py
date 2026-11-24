@@ -30,3 +30,17 @@ def test_r86_campos_novos_chegam_ao_site(painel, c):
     i = [x for x in c.get("/api/estado").json()["imoveis"] if x["id"] == "n1"][0]
     for k, v in extra.items():
         assert i[k] == v, k
+
+
+def test_r86_cep_preenche_endereco_so_para_o_painel(painel, c, monkeypatch):
+    import app as erv
+    monkeypatch.setattr(erv, "_viacep", lambda cep: {"logradouro": "Rua Teste", "bairro": "Centro", "localidade": "Osório", "uf": "RS"})
+    assert c.get("/api/painel/cep/95520000").status_code in (401, 403)
+    r = painel.get("/api/painel/cep/95520-000")
+    assert r.status_code == 200 and r.json() == {"rua": "Rua Teste", "bairro": "Centro", "cidade": "Osório", "uf": "RS"}
+    assert painel.get("/api/painel/cep/123").status_code == 400
+    monkeypatch.setattr(erv, "_viacep", lambda cep: {"erro": True})
+    assert painel.get("/api/painel/cep/95520000").status_code == 404
+    def cai(cep): raise OSError("sem rede")
+    monkeypatch.setattr(erv, "_viacep", cai)
+    assert painel.get("/api/painel/cep/95520000").status_code == 502

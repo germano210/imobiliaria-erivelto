@@ -114,11 +114,11 @@ html.r86 .pt-anun{position:absolute;z-index:31;height:40px;padding:0 15px;border
 html.r86 .pt-anun .c{display:none}
 @media (max-width:560px){html.r86 .pt-anun{height:44px;min-width:44px;padding:0 16px;font-size:14px}html.r86 .pt-anun .l{display:none}html.r86 .pt-anun .c{display:inline}}
 /* corte: a área de rolar sobe até o meio do grid de busca (que fica por cima) e o conteúdo começa no mesmo lugar de antes */
-@media (min-width:760px){html.r86 .sc12 .ls12{margin-top:calc(-1 * var(--r86d,0px));padding-top:var(--r86d,0px);box-sizing:border-box}}
+html.r86 .sc12 .ls12{margin-top:calc(-1 * var(--r86d,0px));padding-top:var(--r86d,0px);box-sizing:border-box}   /* John 23/11: também no celular (some só no grid) */
 html.r86 .sc12 .bk12{box-shadow:0 12px 28px rgba(0,0,0,.28)}
 /* cartão B: vidro branco, foto à esquerda, preço/nome/onde/cômodos/botão à direita */
 html.r86 .sc12 .lsi12 .cd12.r86c{display:grid!important;grid-template-columns:minmax(260px,50%) minmax(0,1fr)!important;column-gap:18px;align-items:stretch;padding:12px;height:auto!important;min-height:0!important;margin:0 0 16px!important;
-  background:rgba(255,255,255,.86)!important;-webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4);border:1px solid rgba(255,255,255,.95);border-radius:22px!important;box-shadow:0 10px 30px rgba(0,0,0,.28)!important;color:#13202c;overflow:hidden}
+  background:#fff!important;border:1px solid #fff;border-radius:22px!important;box-shadow:0 10px 30px rgba(0,0,0,.28)!important;color:#13202c;overflow:hidden}
 html.r86 .sc12 .lsi12 .cd12.r86c>.ci12{position:relative!important;inset:auto!important;width:auto!important;height:auto!important;min-height:250px;border-radius:16px;overflow:hidden;grid-row:1}
 html.r86 .sc12 .lsi12 .cd12.r86c>.ci12>img{position:absolute;inset:0;width:100%!important;height:100%!important;object-fit:cover}
 html.r86 .sc12 .lsi12 .cd12.r86c>.ov7{position:static!important;inset:auto!important;width:auto!important;margin:0!important;transform:none!important;grid-row:1;grid-column:2;
@@ -220,21 +220,30 @@ html.r86 .r86-ar.p{left:14px} html.r86 .r86-ar.n{right:14px}
 html.r86 .r86-nf{position:absolute;top:14px;right:14px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff;font:500 12px/1 Poppins,system-ui,sans-serif}
 /* fundo da ficha: a cena desfocada atrás (em vez da tela preta) */
 html.r86 .sc12 .f512{background:rgba(10,14,18,.38)!important;-webkit-backdrop-filter:blur(18px) saturate(1.1);backdrop-filter:blur(18px) saturate(1.1)}
-/* PC = A: a foto é um card com margem; as miniaturas embaixo; as informações num card branco à direita */
+/* PC = A: a foto é um card com margem; as miniaturas embaixo; as informações num card branco à direita. Tudo em --u (cresce e encolhe com a janela, como o resto do site) */
 @media (min-width:760px){
-html.r86 .sc12 .f512 .fp12{left:56px!important;top:100px!important;right:520px!important;bottom:136px!important;border-radius:22px;overflow:hidden;background:#222;box-shadow:0 18px 40px rgba(0,0,0,.35)}
-html.r86 .sc12 .f512 .th12{left:56px!important;bottom:40px!important;top:auto!important}
-html.r86 .sc12 .f512 .th12 .tb12{width:96px!important;height:68px!important;border-radius:12px!important}
-html.r86 .sc12 .nv12{top:100px!important;right:56px!important;bottom:40px!important;left:auto!important;width:430px!important;height:auto!important;border-radius:22px!important;padding:28px 28px 20px!important;box-shadow:0 18px 40px rgba(0,0,0,.3)}
-html.r86 .sc12 .nv12 .np12,html.r86 .sc12 .nv12 .np12 b{font-size:21px!important}
-html.r86 .r86-t b{font-size:13px} html.r86 .r86-t small,html.r86 .r86-t em{font-size:12px}
-html.r86 .r86-ft{font-size:13.5px}
+html.r86 .sc12 .f512 .fp12{left:calc(62*var(--u,1px))!important;top:calc(112*var(--u,1px))!important;right:calc(574*var(--u,1px))!important;bottom:calc(152*var(--u,1px))!important;border-radius:calc(24*var(--u,1px));overflow:hidden;background:#222;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+html.r86 .sc12 .f512 .th12{left:calc(62*var(--u,1px))!important;bottom:calc(44*var(--u,1px))!important;top:auto!important;gap:calc(10*var(--u,1px))!important}
+html.r86 .sc12 .f512 .th12 .tb12{width:calc(108*var(--u,1px))!important;height:calc(76*var(--u,1px))!important;border-radius:calc(13*var(--u,1px))!important}
+html.r86 .sc12 .nv12{top:calc(112*var(--u,1px))!important;right:calc(62*var(--u,1px))!important;bottom:calc(44*var(--u,1px))!important;left:auto!important;width:calc(480*var(--u,1px))!important;height:auto!important;border-radius:calc(24*var(--u,1px))!important;padding:calc(30*var(--u,1px)) calc(30*var(--u,1px)) calc(20*var(--u,1px))!important;box-shadow:0 18px 40px rgba(0,0,0,.3)}
+html.r86 .sc12 .nv12 .np12,html.r86 .sc12 .nv12 .np12 b{font-size:calc(30*var(--u,1px))!important}
+html.r86 .r86-ft{font:600 calc(18*var(--u,1px))/1.2 Poppins,system-ui,sans-serif}
+html.r86 .r86-gr{grid-template-columns:repeat(auto-fill,minmax(calc(132*var(--u,1px)),1fr));gap:calc(10*var(--u,1px))}
+html.r86 .r86-t{padding:calc(14*var(--u,1px)) calc(8*var(--u,1px));border-radius:calc(16*var(--u,1px))}
+html.r86 .r86-t .r86-ic{width:calc(36*var(--u,1px));height:calc(36*var(--u,1px))}
+html.r86 .r86-t b{font-size:calc(18*var(--u,1px))}
+html.r86 .r86-t small{font-size:calc(15.5*var(--u,1px))}
+html.r86 .r86-t em{font-size:calc(13.5*var(--u,1px))}
+html.r86 .r86-fo1 b{font-size:calc(16*var(--u,1px))} html.r86 .r86-fo1 small{font-size:calc(14*var(--u,1px))}
 }
 /* celular = C: um card só (foto com setas em cima, informações embaixo) sobre a cena desfocada */
 @media (max-width:759px){
 html.r86 .sc12 .f512 .fp12{left:12px!important;right:12px!important;top:84px!important;bottom:auto!important;height:38vh!important;border-radius:22px 22px 0 0;overflow:hidden;background:#222}
 html.r86 .sc12 .f512 .th12{left:24px!important;top:calc(84px + 38vh - 58px)!important;bottom:auto!important;z-index:5}
-html.r86 .sc12 .nv12{left:12px!important;right:12px!important;top:calc(84px + 38vh)!important;bottom:12px!important;height:auto!important;border-radius:0 0 22px 22px!important;box-shadow:0 18px 40px rgba(0,0,0,.3)}
+html.r86 .sc12 .nv12{left:12px!important;right:12px!important;top:calc(84px + 38vh)!important;bottom:12px!important;height:auto!important;border-radius:0 0 22px 22px!important;box-shadow:0 18px 40px rgba(0,0,0,.3);overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;padding-bottom:16px!important}
+html.r86 .sc12 .nv12>*{flex:none!important}
+html.r86 .sc12 .nv12 .nv24s,html.r86 .sc12 .nv12 .nv24p{height:auto!important;max-height:none!important;overflow:visible!important}
+html.r86 .sc12 .nv12 .nw12{position:sticky!important;bottom:0!important;left:auto!important;right:auto!important;margin:12px 0 0!important}
 html.r86 .r86-ar{width:34px;height:34px;margin-top:-17px}
 html.r86 .r86-nf{top:12px;right:auto;left:12px}
 /* lista = A: card branco, foto em cima, dados embaixo (lê melhor que vidro) */
@@ -253,4 +262,13 @@ html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .if8 li span{font:400 11.5px/1 Poppins,s
 html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .if8 li svg{color:#003641}
 html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .bt7{order:4;margin:4px 0 0!important;width:100%!important}
 html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .bt7 .vm12.vm12.vm12{width:100%!important;margin:0!important;height:44px!important;border-radius:12px!important;background:#003641!important;font:400 13.5px/1 Poppins,system-ui,sans-serif!important}
+}
+
+/* R86c · botão da ficha com letra menor; lista no celular com letras um pouco menores */
+html.r86 .sc12 .nv12 .nw12,html.r86 .sc12 .nv12 .nw12 *{font-size:13px!important;font-weight:400!important}
+html.r86 .sc12 .nv12 .nw12{height:50px!important;min-height:0!important}
+@media (max-width:759px){
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .bt7 .vm12.vm12.vm12{font-size:12.5px!important;height:42px!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .pv8,html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .pv8 b{font-size:17px!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .nm8{font-size:12px!important}
 }

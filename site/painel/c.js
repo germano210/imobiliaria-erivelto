@@ -204,9 +204,10 @@ Object.assign(window.ICO14, {
     foco(i);
   };
   ED.nome = function (r, fim) {
-    r.innerHTML = '<div class="fld p"><input maxlength="60" placeholder="Ex.: Casa da piscina" value="' + esc(ATUAL.nome || '') + '" aria-label="Nome"><button class="ok" data-k>Pronto</button></div><div class="dica">Opcional. Se ficar vazio, o site mostra o tipo e a cidade.</div>';
+    r.innerHTML = '<div class="fld p"><input maxlength="60" placeholder="Ex.: Casa da piscina" value="' + esc(ATUAL.nome || '') + '" aria-label="Nome"><button class="ok" data-k>Pronto</button></div><div class="dica">Opcional. Se ficar vazio, o site mostra o tipo e a cidade.</div><h2>Frases prontas</h2>' + frasesHtml(FRASES_NOME, 'data-fn');
     var i = r.querySelector('input');
     i.oninput = function () { ATUAL.nome = i.value.trim(); mudou(); };
+    r.querySelectorAll('[data-fn]').forEach(function (b) { b.onclick = function () { i.value = b.dataset.fn; ATUAL.nome = i.value; mudou(); foco(i); }; });
     i.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); fim && fim(); } };
     r.querySelector('[data-k]').onclick = function () { fim && fim(); };
     foco(i);
@@ -215,10 +216,17 @@ Object.assign(window.ICO14, {
     var cs = ((EST.d.mapa && EST.d.mapa.atende) || []).slice(); CIDADES.forEach(function (c) { if (cs.indexOf(c) < 0) cs.push(c); });
     lista().forEach(function (im) { if (im.cidade && cs.indexOf(im.cidade) < 0) cs.push(im.cidade); });
     r.innerHTML = '<div class="fld p"><input placeholder="Escreva a cidade" value="' + esc(ATUAL.cidade || '') + '" aria-label="Cidade"><button class="ok" data-k>Pronto</button></div>' +
-      '<div class="chips">' + cs.map(function (c) { return '<button class="chip" data-c="' + esc(c) + '" aria-pressed="' + (ATUAL.cidade === c) + '">' + esc(c) + '</button>'; }).join('') + '</div>';
+      '<div class="chips">' + cs.map(function (c) { return '<button class="chip" data-c="' + esc(c) + '" aria-pressed="' + (ATUAL.cidade === c) + '">' + esc(c) + '</button>'; }).join('') + '</div><div class="chips" data-sug></div>';
     var i = r.querySelector('input');
     function marca() { r.querySelectorAll('[data-c]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.c === ATUAL.cidade); }); }
-    i.oninput = function () { ATUAL.cidade = i.value.trim(); marca(); mudou(); };
+    function sem(t) { return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+    function sugere() {
+      var q = sem(i.value.trim()), caixa = r.querySelector('[data-sug]');
+      var l = q.length < 2 ? [] : CIDADES_RS.filter(function (c) { return cs.indexOf(c) < 0 && sem(c).indexOf(q) >= 0; }).slice(0, 8);
+      caixa.innerHTML = l.map(function (c) { return '<button class="chip" data-sg="' + esc(c) + '">' + esc(c) + '</button>'; }).join('');
+      caixa.querySelectorAll('[data-sg]').forEach(function (b) { b.onclick = function () { ATUAL.cidade = b.dataset.sg; i.value = b.dataset.sg; mudou(); fim && fim(); }; });
+    }
+    i.oninput = function () { ATUAL.cidade = i.value.trim(); marca(); sugere(); mudou(); };
     i.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); fim && fim(); } };
     r.querySelectorAll('[data-c]').forEach(function (b) { b.onclick = function () { ATUAL.cidade = b.dataset.c; i.value = b.dataset.c; marca(); mudou(); fim && fim(); }; });
     r.querySelector('[data-k]').onclick = function () { fim && fim(); };
@@ -283,6 +291,39 @@ Object.assign(window.ICO14, {
     }
     desenha();
   };
+  /* ---------- R86c: arrastar para ordenar, frases prontas, cidades do RS ---------- */
+  var CIDADES_RS = ['Alvorada', 'Balneário Pinhal', 'Bento Gonçalves', 'Cachoeirinha', 'Campo Bom', 'Canela', 'Canoas', 'Capão da Canoa', 'Capivari do Sul', 'Caraá', 'Caxias do Sul', 'Cidreira', 'Eldorado do Sul', 'Esteio', 'Glorinha', 'Gramado', 'Gravataí', 'Guaíba', 'Imbé', 'Lajeado', 'Maquiné', 'Mostardas', 'Novo Hamburgo', 'Osório', 'Palmares do Sul', 'Parobé', 'Passo Fundo', 'Pelotas', 'Porto Alegre', 'Rio Grande', 'Riozinho', 'Rolante', 'Santa Cruz do Sul', 'Santa Maria', 'Santo Antônio da Patrulha', 'São Leopoldo', 'Sapiranga', 'Sapucaia do Sul', 'Taquara', 'Terra de Areia', 'Torres', 'Tramandaí', 'Três Cachoeiras', 'Viamão', 'Xangri-Lá'];
+  var FRASES_NOME = ['Casa com piscina', 'Casa no centro', 'Pronta para morar', 'Terreno plano', 'Perto do centro', 'Pátio grande', 'Esquina', 'Sobrado novo', 'Aceita financiamento'];
+  var FRASES_OBS = ['pega sol da manhã', 'com armário embutido', 'com closet', 'ventilado', 'ampla', 'recém reformado', 'vista para o pátio', 'com ar-condicionado', 'com churrasqueira'];
+  function frasesHtml(lista, attr) { return '<div class="chips frs">' + lista.map(function (t) { return '<button class="chip" ' + attr + '="' + esc(t) + '">' + esc(t) + '</button>'; }).join('') + '</div>'; }
+  function moveArr(arr, de, para) { if (de === para || de < 0 || para < 0 || de >= arr.length || para >= arr.length) return; arr.splice(para, 0, arr.splice(de, 1)[0]); }
+  // segure o puxador (ou a própria foto) e arraste para outro lugar; ao soltar, a ordem muda. Funciona com dedo e mouse.
+  function arrasta(box, itemSel, gripDe, aoMudar) {
+    var itens = [].slice.call(box.querySelectorAll(itemSel));
+    itens.forEach(function (it) {
+      var g = gripDe(it); if (!g) return; g.style.touchAction = 'none'; g.style.cursor = 'grab';
+      g.addEventListener('pointerdown', function (ev) {
+        if (ev.button != null && ev.button > 0) return;
+        var de = itens.indexOf(it), para = de, sx = ev.clientX, sy = ev.clientY, mexeu = false, alvo = null, rects = itens.map(function (o) { return o.getBoundingClientRect(); });
+        try { g.setPointerCapture(ev.pointerId); } catch (e) { /* segue */ }
+        function mv(e) {
+          var dx = e.clientX - sx, dy = e.clientY - sy;
+          if (!mexeu && Math.abs(dx) + Math.abs(dy) < 8) return;
+          if (!mexeu) { mexeu = true; it.classList.add('arr'); }
+          it.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+          var melhor = de, bd = 1e9;
+          rects.forEach(function (q, k) { var d = Math.hypot(e.clientX - (q.left + q.width / 2), e.clientY - (q.top + q.height / 2)); if (d < bd) { bd = d; melhor = k; } });
+          para = melhor; if (alvo) alvo.classList.remove('alvo'); alvo = para !== de ? itens[para] : null; if (alvo) alvo.classList.add('alvo');
+        }
+        function up() {
+          g.removeEventListener('pointermove', mv); g.removeEventListener('pointerup', up); g.removeEventListener('pointercancel', up);
+          it.classList.remove('arr'); it.style.transform = ''; if (alvo) alvo.classList.remove('alvo');
+          if (mexeu) { var seg = function (c) { c.stopPropagation(); c.preventDefault(); }; g.addEventListener('click', seg, { capture: true, once: true }); setTimeout(function () { g.removeEventListener('click', seg, true); }, 0); if (para !== de) aoMudar(de, para); }
+        }
+        g.addEventListener('pointermove', mv); g.addEventListener('pointerup', up); g.addEventListener('pointercancel', up);
+      });
+    });
+  }
   /* ---------- R86: linhas editáveis. Toque no ícone troca; o texto edita ali; ✕ exclui; "+ Adicionar" abre a grade de ícones ---------- */
   var ICO_CM = ['cama', 'suite', 'banho', 'sofa', 'cozinha', 'lavanderia', 'garagem', 'varanda', 'sacada', 'churras', 'piscina', 'jardim', 'patio', 'armario', 'academia', 'salao',
     'escritura', 'agua', 'elevador', 'portaria', 'murado', 'esquina', 'frente', 'andar', 'condominio', 'terreno', 'area', 'chave', 'plano', 'predio', 'outro', 'mais'];
@@ -292,7 +333,7 @@ Object.assign(window.ICO14, {
     function L() { ATUAL[chave] = ATUAL[chave] || []; return ATUAL[chave]; }
     function linha(o, j) {
       var gar = o.k === 'garagem', v = gar ? (o.q || '') : (o.m2 || '');
-      return '<div class="cm-r" data-r="' + j + '"><button class="cm-i" data-ico aria-label="Trocar o ícone de ' + esc(o.n || 'item') + '">' + ic(ICO[o.k] ? o.k : 'mais') + '</button>' +
+      return '<div class="cm-r" data-r="' + j + '"><button class="cm-gp" data-grip aria-label="Segure e arraste para mudar a ordem" title="Arraste para mudar a ordem">⠿</button><button class="cm-i" data-ico aria-label="Trocar o ícone de ' + esc(o.n || 'item') + '">' + ic(ICO[o.k] ? o.k : 'mais') + '</button>' +
         '<div class="cm-t"><input class="cm-n" data-n maxlength="40" value="' + esc(o.n || '') + '" placeholder="Nome" aria-label="Nome">' +
         '<div class="cm-l2">' + (comMed ? '<span class="cm-m"><input inputmode="decimal" data-m2 maxlength="7" value="' + esc(v) + '" placeholder="—" aria-label="' + (gar ? 'Vagas' : 'Medida em m²') + '"><span>' + (gar ? 'vagas' : 'm²') + '</span></span>' : '') +
         '<input class="cm-o" data-o maxlength="120" value="' + esc(o.o || '') + '" placeholder="+ observação" aria-label="Observação"></div></div>' +
@@ -319,7 +360,15 @@ Object.assign(window.ICO14, {
       }
       r.innerHTML = '<div class="cm-lista">' + (L().length ? L().map(linha).join('') : '<div class="dica" style="margin:0">Nenhum ainda.</div>') + '</div>' +
         '<button class="cm-add" data-add>+ Adicionar ' + (comMed ? 'cômodo' : 'item') + '</button>' +
-        '<div class="dica">Toque no ícone para trocar e no texto para editar. A observação aparece no site, embaixo do nome.</div>' + (extra ? extra.html() : '');
+        '<div class="dica">Segure o ⠿ e arraste para mudar a ordem. Toque no ícone para trocar e no texto para editar. A observação aparece no site, embaixo do nome.</div>' +
+        '<h2>Frases para a observação</h2>' + frasesHtml(FRASES_OBS, 'data-fo') + '<div class="dica">Toque numa frase para pôr na observação que você estava editando (ou na última linha).</div>' + (extra ? extra.html() : '');
+      var ultimoO = null;
+      r.querySelectorAll('[data-o]').forEach(function (i) { i.addEventListener('focus', function () { ultimoO = i; }); });
+      r.querySelectorAll('[data-fo]').forEach(function (b) { b.onclick = function () {
+        var i = ultimoO || [].slice.call(r.querySelectorAll('[data-o]')).pop(); if (!i) { toast('Adicione um item primeiro.'); return; }
+        var o = L()[+i.closest('[data-r]').dataset.r]; var t = b.dataset.fo; o.o = o.o ? (o.o.indexOf(t) >= 0 ? o.o : o.o + ', ' + t) : t; i.value = o.o; mudou();
+      }; });
+      arrasta(r, '[data-r]', function (it) { return it.querySelector('[data-grip]'); }, function (de, para) { moveArr(L(), de, para); mudou(); desenha(); });
       r.querySelectorAll('[data-r]').forEach(function (row) {
         var j = +row.dataset.r, o = L()[j];
         row.querySelector('[data-ico]').onclick = function () { pick = j; desenha(); };
@@ -373,6 +422,8 @@ Object.assign(window.ICO14, {
       r.innerHTML = h;
       function ok() { sel = ATUAL.fotos.length - 1; mudou(); desenha(); }
       r.querySelectorAll('[data-s]').forEach(function (b) { b.onclick = function () { sel = +b.dataset.s; desenha(); }; });
+      if (fs.length > 1) { var dica2 = document.createElement('div'); dica2.className = 'dica'; dica2.style.margin = '0'; dica2.textContent = 'Segure uma foto e arraste para mudar a ordem. A primeira é a capa.'; var tb = r.querySelector('.thumbs'); if (tb) tb.after(dica2); }
+      arrasta(r, '.thumbs [data-s]', function (it) { return it; }, function (de, para) { moveArr(fs, de, para); sel = para; mudou(); desenha(); });
       r.querySelectorAll('[data-a]').forEach(function (b) {
         b.onclick = function () {
           var a = b.dataset.a;
@@ -411,11 +462,24 @@ Object.assign(window.ICO14, {
   ED.end = function (r) {
     var e = ATUAL.end = ATUAL.end || {}, nm = ATUAL.nomes = ATUAL.nomes || { bairro: true, rua: false, num: false };
     function sw(k, t) { return '<div class="lin" style="padding:6px 0"><span class="v">' + t + '</span><button class="sw" role="switch" data-nm="' + k + '" aria-checked="' + (!!nm[k]) + '" aria-label="' + t + '"></button></div>'; }
-    r.innerHTML = '<div class="fld p"><input data-e="rua" maxlength="80" value="' + esc(e.rua || '') + '" placeholder="Rua" aria-label="Rua"></div>' +
-      '<div style="display:flex;gap:8px"><div class="fld p" style="width:110px"><input data-e="num" maxlength="10" value="' + esc(e.num || '') + '" placeholder="Nº" aria-label="Número"></div><div class="fld p" style="flex:1"><input data-e="bairro" maxlength="60" value="' + esc(e.bairro || '') + '" placeholder="Bairro" aria-label="Bairro"></div></div>' +
+    r.innerHTML = '<div class="fld p"><input data-cep inputmode="numeric" maxlength="9" placeholder="CEP (preenche rua, bairro e cidade)" aria-label="CEP"></div><div class="dica" data-cepm style="margin:-4px 0 0">' + (srv() ? 'Digite o CEP e o resto preenche sozinho.' : 'Prévia: o CEP funciona no site no ar.') + '</div>' +
+      '<div class="fld p"><input data-e="rua" maxlength="80" value="' + esc(e.rua || '') + '" placeholder="Rua" aria-label="Rua"></div>' +
+      '<div style="display:flex;gap:8px"><div class="fld p" style="width:96px;flex:none;min-width:0"><input data-e="num" maxlength="10" value="' + esc(e.num || '') + '" placeholder="Nº" aria-label="Número"></div><div class="fld p" style="flex:1;min-width:0"><input data-e="bairro" maxlength="60" value="' + esc(e.bairro || '') + '" placeholder="Bairro" aria-label="Bairro"></div></div>' +
       sw('bairro', 'Mostrar o bairro no site') + sw('rua', 'Mostrar a rua (só para quem entrou no site)') + sw('num', 'Mostrar o número (só para quem entrou)') +
       '<div class="dica">Por segurança, a rua e o número só aparecem para quem fez login no site, e só se você marcar. O bairro pode aparecer para todos.</div>';
     r.querySelectorAll('[data-e]').forEach(function (i) { i.oninput = function () { var v = i.value.trim(); if (v) e[i.dataset.e] = v; else delete e[i.dataset.e]; mudou(); }; i.onkeydown = function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); i.blur(); } }; });
+    var cep = r.querySelector('[data-cep]'), cm2 = r.querySelector('[data-cepm]');
+    cep.oninput = function () {
+      var d = cep.value.replace(/\D/g, '').slice(0, 8); cep.value = d.length > 5 ? d.slice(0, 5) + '-' + d.slice(5) : d;
+      if (d.length !== 8 || !srv() || !window.PONTE || !PONTE.req) return;
+      cm2.textContent = 'Procurando…';
+      PONTE.req('GET', 'api/painel/cep/' + d).then(function (x) {
+        if (!x.ok) { cm2.textContent = x.status === 404 ? 'Não achei esse CEP. Preencha na mão.' : 'Não consegui consultar agora. Preencha na mão.'; return; }
+        var j = x.j || {}; if (j.rua) e.rua = j.rua; else delete e.rua; if (j.bairro) e.bairro = j.bairro; else delete e.bairro; if (j.cidade) ATUAL.cidade = j.cidade;
+        r.querySelector('[data-e=rua]').value = e.rua || ''; r.querySelector('[data-e=bairro]').value = e.bairro || '';
+        cm2.textContent = 'Preenchi' + (j.cidade ? ' (' + j.cidade + ')' : '') + '. Confira e coloque o número.'; mudou(); var n = r.querySelector('[data-e=num]'); if (n) foco(n);
+      });
+    };
     r.querySelectorAll('[data-nm]').forEach(function (b) { b.onclick = function () { nm[b.dataset.nm] = !nm[b.dataset.nm]; b.setAttribute('aria-checked', nm[b.dataset.nm]); mudou(); }; });
   };
   function mapaDe(c) { try { return window.M15 && window.M15[c] && window.M15[c].img ? window.M15[c] : null; } catch (e) { return null; } }
