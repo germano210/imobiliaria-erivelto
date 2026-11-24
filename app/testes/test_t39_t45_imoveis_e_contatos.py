@@ -45,6 +45,29 @@ def test_t40_finalidade(painel, c):
     assert pub["final"] == "aluguel" and pub["preco"] == 2500
 
 
+def test_t40_periodo_do_aluguel(painel, c):
+    """O valor guardado é o do mês; perAlug diz como o site mostra (dia = mês ÷ 30, ano = mês × 12; a conta é no ponte.js)."""
+    assert salvar(painel, imovel(final="aluguel", perAlug="semana")).json()["campo"] == "período do aluguel"
+    for per in ("dia", "mes", "ano"):
+        assert salvar(painel, imovel(final="aluguel", perAlug=per, preco=1100)).status_code == 200, per
+    publicar(painel, imovel("al2", final="aluguel", perAlug="dia", preco=1100, fin=False))
+    assert c.get("/api/estado").json()["imoveis"][0]["perAlug"] == "dia"
+    ponte = (RAIZ / "site/ponte.js").read_text()
+    assert "var PER_ALUG = { dia: ['/dia', 1 / 30], mes: ['/mês', 1], ano: ['/ano', 12] };" in ponte
+
+
+def test_t40_precos_de_aluguel_no_node():
+    """1100/mês = R$ 36,67/dia = R$ 1.100/mês = R$ 13.200/ano (centavos só quando não dá inteiro)."""
+    import shutil, json
+    if not shutil.which("node"):
+        import pytest; pytest.skip("sem node")
+    ponte = (RAIZ / "site/ponte.js").read_text()
+    ini = ponte.index("  var PER_ALUG = {"); fim = ponte.index("  };", ini) + 4
+    js = "var P = {};" + ponte[ini:fim] + ";console.log(JSON.stringify(['dia','mes','ano',undefined].map(function(p){return P.precoAlug({preco:1100, perAlug:p})}).concat([P.precoAlug({preco:3000, perAlug:'dia'})])))"
+    out = json.loads(subprocess.run(["node", "-e", js], capture_output=True, text=True, check=True).stdout)
+    assert out == ["R$ 36,67/dia", "R$ 1.100/mês", "R$ 13.200/ano", "R$ 1.100/mês", "R$ 100/dia"], out
+
+
 # ---------- T41 ----------
 def test_t41_tipos_novos(painel, c):
     assert set(erv.TIPOS) == {"casa", "sobrado", "apartamento", "terreno", "sitio", "sala", "galpao"}

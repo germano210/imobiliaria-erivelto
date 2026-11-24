@@ -424,6 +424,15 @@ class Roteiro:
             assert "RESERVADO" in selos[e["imoveis"][0]["id"]].upper() and cod in selos[e["imoveis"][0]["id"]], selos
             assert selos["alug1"].replace("\n", " ") in ("Para alugar ES-901",), selos
             assert "2.500/mês" in st.locator("article.cd12[data-id=alug1]").inner_text()
+            # o corretor escolhe mostrar o aluguel por dia: 2500/mês = R$ 83,33/dia (no painel, pelas pílulas "Mostrar o aluguel no site")
+            self.recarregar_painel(); self.aba("imoveis")
+            p.locator("#c-app [data-abrir]").filter(has_text="Aluguel").first.click()
+            p.locator('#c-app [data-pa="dia"]').click()
+            expect(p.locator("#c-app [data-f=preco]")).to_contain_text("R$ 83,33/dia")
+            p.locator("#c-app [data-pub]").click()
+            expect(p.locator("#c-app [data-abrir]").filter(has_text="Aluguel").first).to_contain_text("83,33/dia")
+            self.abrir_resultados()
+            assert "R$ 83,33/dia" in st.locator("article.cd12[data-id=alug1]").inner_text()
             self.foto(st, "13b-site-selos")
             # filtro de tipo: "Para alugar" é uma categoria
             st.locator(".fd12[data-f='t']").first.click()

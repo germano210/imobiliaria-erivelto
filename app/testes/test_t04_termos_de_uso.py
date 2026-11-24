@@ -9,7 +9,7 @@ CAMPOS = ["[CPF ou CNPJ do Erivelto]", "[endereço profissional]", "[comarca do 
 
 def test_t04_pagina_servida_sem_indexar(c):
     r = c.get("/termos/")
-    assert r.status_code == 200 and r.text == TERMOS and "text/html" in r.headers["content-type"]
+    assert r.status_code == 200 and re.sub(r"\?v=[0-9a-f]+", "", r.text) == TERMOS and "text/html" in r.headers["content-type"]
     assert "noindex" in r.headers["x-robots-tag"] and "frame-ancestors 'none'" in r.headers["content-security-policy"]
     r = c.get("/termos", follow_redirects=False)
     assert r.status_code == 308 and r.headers["location"] == "/termos/"

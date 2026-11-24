@@ -26,7 +26,7 @@ def test_t03_servidor_so_aceita_a_versao_atual(c):
 
 def test_t03_pagina_tem_as_secoes_o_aviso_de_modelo_e_o_formulario(c):
     r = c.get("/privacidade/")
-    assert r.status_code == 200 and r.text == AVISO
+    assert r.status_code == 200 and re.sub(r"\?v=[0-9a-f]+", "", r.text) == AVISO
     assert "modelo, sem revisão jurídica (pendente: T02)" in AVISO.split("<html")[0]
     for i in ("quem", "dados", "base", "tempo", "quem-ve", "cookies", "seguranca", "direitos", "apagar", "mudancas", "versao"):
         assert f'<h2 id="{i}">' in AVISO, i

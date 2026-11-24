@@ -55,12 +55,12 @@ REMENDOS = [
     ("nome automático usa o tipo de verdade (não 'Para alugar')", "T40",
      "var e=g1[a&&a.tipo]||g1.casa,r=a&&a.infos||[]",
      "var e=g1[a&&(a.tr||a.tipo)]||g1.casa,r=a&&a.infos||[]"),
-    ("preço do aluguel por mês, sem preço do m²", "T40",
+    ("preço do aluguel por dia, mês ou ano, sem preço do m²", "T40",
      "function E8(a,e,r){var n=S8(a),l=E1(a.preco),",
-     'function E8(a,e,r){var n=a.alug?0:S8(a),l=a.alug?(' + P + '.precoAlug?PONTE.precoAlug(a):E1(a.preco)):E1(a.preco),'),   # aluguel por dia, mês ou ano (perAlug)
-    ("preço do aluguel por mês na ficha", "T40",
+     'function E8(a,e,r){var n=a.alug?0:S8(a),l=a.alug?(' + P + '.precoAlug?PONTE.precoAlug(a):E1(a.preco)):E1(a.preco),'),
+    ("preço do aluguel por dia, mês ou ano na ficha", "T40",
      "d.textContent=E1(L.preco),d.dataset.fin=L.id,",
-     'd.textContent=L.alug?(' + P + '.precoAlug?PONTE.precoAlug(L):E1(L.preco)):E1(L.preco),d.dataset.fin=L.id,'),   # perAlug
+     'd.textContent=L.alug?(' + P + '.precoAlug?PONTE.precoAlug(L):E1(L.preco)):E1(L.preco),d.dataset.fin=L.id,'),
     ("filtro de preço não vale para aluguel", "T40",
      'function o6(L){return i.p==="qualquer"||',
      'function o6(L){return!!L.alug||i.p==="qualquer"||'),
