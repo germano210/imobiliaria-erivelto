@@ -127,7 +127,6 @@ class Roteiro:
         st = self.site
         st.goto(self.s.url + "/")
         st.locator(".go12").wait_for(state="visible")
-        expect(st.locator("#pt-rodape")).to_be_visible()
 
     def abrir_resultados(self):
         self.abrir_site()
@@ -279,29 +278,26 @@ class Roteiro:
         self.passo("abre o site em outro navegador e vê o imóvel publicado (cidade, preço e a foto enviada)", site_mostra)
 
         def rodape():
+            # R86e (John 24/11): sem a barra de baixo; CRECI, Privacidade e Termos ficam no fim da ficha e no cartão do Login
             for tela in ("rodape_inicio", "rodape_resultados"):
-                r = g[tela]
-                assert r["visivel"], f"{tela}: a linha não aparece"
-                assert r["texto"] == "Erivelto Santos · Corretor de imóveis · CRECI 63.464 · Privacidade · Termos · Quero vender", r["texto"]
-                assert r["links"] == [["Privacidade", "privacidade/"], ["Termos", "termos/"], ["Quero vender", "#vender"]], r["links"]
-                assert r["link"] == "Privacidade" and r["href"] == "privacidade/" and r["destino"] == s.url + "/privacidade/", r
-                assert r["dentro"] and r["linkPorCima"], f"{tela}: fora da tela ou o link está coberto: {r}"
-                assert not r["cobre"], f"{tela}: a linha cobre {r['cobre']}"
-                assert r["altura"] <= 44, f"{tela}: a linha ficou alta demais ({r['altura']} px)"
-            st.locator(".vm12").first.click()
-            st.locator("a.nw12").wait_for(state="visible")
-            self.espera(lambda: not st.evaluate(RODAPE_JS)["visivel"], msg="na ficha do imóvel a linha deveria sumir (ali ficam os botões)")
-            st.locator(".x12").click()
-            self.espera(lambda: st.evaluate(RODAPE_JS)["visivel"], msg="ao voltar da ficha a linha deveria reaparecer")
-            st.locator("#pt-rodape a").nth(1).click()
+                assert not g[tela]["visivel"], f"{tela}: a barra de baixo não deveria aparecer"
+            self.abrir_ficha()
+            leg = st.locator(".nv12 .pt-legal")
+            expect(leg).to_contain_text("CRECI 63.464")
+            assert [[a.inner_text(), a.get_attribute("href")] for a in leg.locator("a").all()][:2] == [["Privacidade", "privacidade/"], ["Termos", "termos/"]]
+            leg.locator("a").nth(1).click()
             st.wait_for_url(s.url + "/termos/")
             expect(st.locator("h1")).to_have_text("Termos de uso")
             st.locator("a.pv-volta").click()
             st.wait_for_url(s.url + "/")
-            st.locator("#pt-rodape a").first.click()
+            st.locator(".go12").wait_for(state="visible")
+            st.locator(".li12").click()
+            leg = st.locator(".uc12 .pt-legal")
+            expect(leg).to_contain_text("CRECI 63.464")
+            leg.locator("a").first.click()
             st.wait_for_url(s.url + "/privacidade/")
             expect(st.locator("h1")).to_have_text("Aviso de privacidade")
-        self.passo("T05, T04 e T45: linha com nome, CRECI 63.464 e links Privacidade, Termos e Quero vender visível na busca e nos resultados, sem cobrir botão; os links abrem /privacidade/ e /termos/", rodape)
+        self.passo("T05, T04 e T45 (R86e): sem barra de baixo; CRECI 63.464 e links Privacidade e Termos no fim da ficha e no cartão do Login, e os links abrem /privacidade/ e /termos/", rodape)
 
         def whatsapp_sem_numero():
             assert self.api(st, "GET", "api/estado")["j"]["whatsapp_numero"] is None
@@ -421,8 +417,8 @@ class Roteiro:
             ids = st.evaluate("[...document.querySelectorAll('article.cd12')].map(a => a.dataset.id)")
             assert sorted(ids) == sorted([e["imoveis"][0]["id"], "alug1"]), ids                     # o vendido escondido não aparece
             selos = st.evaluate("Object.fromEntries([...document.querySelectorAll('article.cd12')].map(a => [a.dataset.id, a.querySelector('.pt-selos') ? a.querySelector('.pt-selos').innerText.replace(/\\s+/g, ' ') : '']))")
-            assert "RESERVADO" in selos[e["imoveis"][0]["id"]].upper() and cod in selos[e["imoveis"][0]["id"]], selos
-            assert selos["alug1"].replace("\n", " ") in ("Para alugar ES-901",), selos
+            assert "RESERVADO" in selos[e["imoveis"][0]["id"]].upper() and cod not in selos[e["imoveis"][0]["id"]], selos   # R86e: o código fica só no painel
+            assert selos["alug1"].replace("\n", " ").strip() in ("Para alugar",), selos
             assert "2.500/mês" in st.locator("article.cd12[data-id=alug1]").inner_text()
             # o corretor escolhe mostrar o aluguel por dia: 2500/mês = R$ 83,33/dia (no painel, pelas pílulas "Mostrar o aluguel no site")
             self.recarregar_painel(); self.aba("imoveis")
@@ -440,37 +436,28 @@ class Roteiro:
             assert any(o.startswith("Para alugar") for o in opcoes) and any(o.startswith("Casa") for o in opcoes), opcoes
             assert not any(o.startswith("Galpão") for o in opcoes), opcoes
             st.keyboard.press("Escape"); st.mouse.click(5, 5)
-            # T44: pedir visita na ficha do imóvel reservado (o visitante entrou no site no passo 9)
+            # T44 · R86b (John 23/11): a ficha tem um botão só (WhatsApp); o "Pedir visita" saiu do site
             self.abrir_ficha()
-            st.locator(".pt-visita").click()
-            st.locator("#pt-visita .pt-chip").nth(1).click()          # amanhã
-            st.locator("#pt-visita .pt-chip[data-v=tarde]").click()
-            with ctx_v.expect_page() as nova:
-                st.locator("#pt-visita-ir").click()
-            aba = nova.value; aba.wait_for_load_state()
-            msg = parse_qs(urlsplit(aba.url).query)["text"][0]; aba.close()
-            assert "(cód. " + cod + ")" in msg and "que está reservado, e quero marcar uma visita amanhã" in msg and "à tarde." in msg, msg
-            self.espera(lambda: (s.sql("select pedido from leads where pedido is not null") or [{}])[0].get("pedido", "").startswith("amanhã"),
-                        msg="a visita pedida não chegou ao contato")
-            # T45: quero vender (outro navegador, sem login)
+            assert st.locator(".pt-visita:visible").count() == 0
+            # T45 · R86e: quero vender pelo botão "Anunciar" do topo (outro navegador, sem login); o tipo é uma lista
             o = self.pagina(self.contexto(), "outro")
-            o.goto(s.url + "/"); o.locator("#pt-rodape a[data-pt-vender]").click()
-            o.locator("#pt-vender .pt-chip[data-v=terreno]").click()
+            o.goto(s.url + "/"); o.locator(".pt-anun").click()
+            o.select_option("#pt-v-tipo", "terreno")
             o.fill("#pt-v-cidade", "Rolante"); o.fill("#pt-v-nome", "Pedro Lima"); o.fill("#pt-v-wa", "(51) 98888-7777")
             expect(o.locator("#pt-v-enviar")).to_be_disabled()
             o.check("#pt-v-aceite"); o.click("#pt-v-enviar")
             expect(o.locator("#pt-v-ok")).to_contain_text("O Erivelto vai falar com você")
             assert s.sql("select vender from leads where vender is not null")[0]["vender"]["cidade"] == "Rolante"
-            # T43: no painel, o contato da visita muda de situação e ganha anotação; a planilha sai com os dois
+            # T43: no painel (grupo "Querem anunciar"), o contato muda de situação e ganha anotação; a planilha sai com os dois
             self.recarregar_painel(); self.aba("contatos")
-            caixa = p.locator("#c-app .lead", has_text="Pediu visita")
-            expect(caixa).to_contain_text(cod)
+            p.locator("#c-app [data-gr=anuncia]").click()
+            caixa = p.locator("#c-app .lead", has_text="Quer vender")
+            expect(caixa).to_contain_text("Terreno em Rolante")
             caixa.locator("[data-sit-l]").select_option("visita")
             self.espera(lambda: s.sql("select count(*) as n from leads where situacao = 'visita'")[0]["n"] == 1, msg="a situação não foi salva")
-            caixa = p.locator("#c-app .lead", has_text="Pediu visita")
+            caixa = p.locator("#c-app .lead", has_text="Quer vender")
             caixa.locator("[data-nota-l]").fill("Confirmar no sábado"); p.locator("#c-app h1").click()
             self.espera(lambda: s.sql("select count(*) as n from leads where nota = 'Confirmar no sábado'")[0]["n"] == 1, msg="a anotação não foi salva")
-            expect(p.locator("#c-app .lead", has_text="Quer vender")).to_contain_text("Terreno em Rolante")
             with p.expect_download() as d:
                 p.locator("#c-app [data-csv]").click()
             csv = open(d.value.path(), encoding="utf-8-sig").read()
@@ -482,7 +469,7 @@ class Roteiro:
             expect(o.locator("#pv-msg")).to_have_text("Pronto: seus dados foram apagados.")
             assert s.sql("select count(*) as n from leads where vender is not null")[0]["n"] == 0
             o.context.close()
-        self.passo("T39–T45: reservado e código no site; vendido escondido; aluguel na categoria Para alugar; pedir visita; quero vender; situação, anotação e planilha dos contatos", tarefas_39_45)
+        self.passo("T39–T45: reservado no site (código só no painel); vendido escondido; aluguel na categoria Para alugar; um botão na ficha; quero vender pelo Anunciar; situação, anotação e planilha dos contatos", tarefas_39_45)
 
         def privacidade():
             st.goto(s.url + "/privacidade/")

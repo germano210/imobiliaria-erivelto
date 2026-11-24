@@ -118,17 +118,21 @@
   P.chamada = function (t) { enviarComReenvio('api/chamadas', { id: t.id, nm: t.nm, o: t.o }); };
 
   // T05, T04 e T45: CRECI, links legais (Privacidade, Termos) e "Quero vender" sempre à vista na busca e nos resultados. Some na ficha do imóvel (classe "f5"), que tem botões embaixo.
+  // T05, T04 e T45 · R86e (John 24/11): sai a barra de baixo. CRECI, Privacidade e Termos ficam discretos no fim da ficha
+  // do imóvel e no cartão do Login. "Quero vender" sai (o botão "Anunciar" do topo faz isso). Na prévia entra o link do painel.
+  function legal() {
+    var r = el('p', { class: 'pt-legal' }, [
+      el('span', { texto: 'Erivelto Santos \u00b7 CRECI 63.464 \u00b7 ' }), el('a', { href: 'privacidade/', texto: 'Privacidade' }), el('span', { texto: ' \u00b7 ' }), el('a', { href: 'termos/', texto: 'Termos' })]);
+    if (!P.srv) { r.appendChild(el('span', { texto: ' \u00b7 ' })); r.appendChild(el('a', { href: 'painel/', texto: 'Painel (prévia)' })); }
+    return r;
+  }
+  function legal86() {
+    var nv = document.querySelector('.sc12 .nv12'); if (nv && !nv.querySelector('.pt-legal')) nv.appendChild(legal());
+    var uc = document.querySelector('.uc12'); if (uc && !uc.querySelector('.pt-legal')) uc.appendChild(legal());
+  }
   function rodape() {
-    if (document.getElementById('pt-rodape')) return;
-    var r = el('div', { id: 'pt-rodape', class: 'pt-rodape' }, [
-      el('span', { texto: 'Erivelto Santos \u00b7 Corretor de imóveis \u00b7 CRECI 63.464 \u00b7 ' }), el('a', { href: 'privacidade/', texto: 'Privacidade' }), el('span', { texto: ' \u00b7 ' }), el('a', { href: 'termos/', texto: 'Termos' }),
-      el('span', { texto: ' \u00b7 ' }), el('a', { href: '#vender', 'data-pt-vender': '1', texto: 'Quero vender' })]);
-    if (!P.srv) { r.appendChild(el('span', { texto: ' \u00b7 ' })); r.appendChild(el('a', { href: 'painel/', texto: 'Painel (prévia)' })); }   // R86: na prévia (sem servidor) o painel abre daqui
-    document.body.appendChild(r);
-    var sc = document.querySelector('.sc12');
-    function ver() { r.hidden = !!(sc && sc.classList.contains('f5')); }
-    if (sc && window.MutationObserver) new MutationObserver(ver).observe(sc, { attributes: true, attributeFilter: ['class'] });
-    ver();
+    var v = document.getElementById('pt-rodape'); if (v) v.remove();
+    document.addEventListener('click', function () { setTimeout(legal86, 0); setTimeout(legal86, 300); }, true);
   }
   /* ---------- T39–T45: o que o site mostra de cada imóvel (o site/index.html chama estas funções; ver remendos.py) ---------- */
   var RE_COD = /^ES-\d{3,5}$/;
@@ -161,7 +165,7 @@
     if (a.sit === 'vend') s.push('<span class="pt-selo vend">Vendido</span>');
     else if (a.sit === 'res') s.push('<span class="pt-selo res">Reservado</span>');
     if (a.alug) s.push('<span class="pt-selo alug">Para alugar</span>');
-    if (RE_COD.test(a.cod || '')) s.push('<span class="pt-selo cod">' + a.cod + '</span>');
+    // R86e (John 24/11): o código ES-… não aparece no site; fica só no painel
     return s.length ? '<span class="pt-selos' + (ficha ? ' f' : '') + '">' + s.join('') + '</span>' : '';
   };
   // Aluguel: o corretor guarda o valor do MÊS e escolhe como o site mostra (perAlug): por dia (mês ÷ 30), mês ou ano (mês × 12).
@@ -407,25 +411,19 @@
     var ov = art.querySelector('.ov7'), nm = art.querySelector('.nm8'), bt = art.querySelector('.bt7'); if (!ov) return;
     var od = onde86(a);
     if (od && nm) nm.insertAdjacentHTML('afterend', '<p class="r86-onde">' + ic86('condominio', 'r86-ic s') + '<span>' + e86(od) + '</span></p>');
+    // R86e (John 24/11): sem "Ver cômodos +"; os cômodos e o que o imóvel tem aparecem direto no cartão, em 2 linhas de pílulas
     var cm = linhas86(a), ot = itens86(a);
-    if ((cm.length || ot.length) && bt) {
-      bt.insertAdjacentHTML('afterbegin', '<button type="button" class="r86-mais" data-r86-mais aria-expanded="false">Ver cômodos <span aria-hidden="true">+</span></button>');
-      art.insertAdjacentHTML('beforeend', '<div class="r86-gav" hidden>' +
-        (cm.length ? '<div class="r86-cms">' + cm.map(function (r) { return '<div class="r86-cm">' + ic86(r.k) + '<span><b>' + e86(r.n) + '</b>' + (r.s ? '<small>' + e86(r.s) + '</small>' : '') + (r.o ? '<em>' + e86(r.o) + '</em>' : '') + '</span></div>'; }).join('') + '</div>' : '') +
-        (ot.length ? '<div class="r86-ots">' + ot.map(function (r) { return '<span class="r86-ot">' + ic86(r.k, 'r86-ic s') + e86(r.n) + '</span>'; }).join('') + '</div>' : '') + '</div>');
+    if (cm.length || ot.length) {
+      var pil = function (r) { return '<span class="r86-pl">' + ic86(r.k, 'r86-ic s') + e86(r.n) + (r.s ? ' <small>' + e86(r.s) + '</small>' : '') + '</span>'; };
+      var h = (cm.length ? '<div class="r86-lin"><span class="r86-lr">Cômodos</span><div class="r86-pls">' + cm.map(pil).join('') + '</div></div>' : '') +
+        (ot.length ? '<div class="r86-lin"><span class="r86-lr">O que tem</span><div class="r86-pls">' + ot.map(pil).join('') + '</div></div>' : '');
+      ov.insertAdjacentHTML('beforeend', '<div class="r86-info">' + h + '</div>'); art.classList.add('r86-tem');
     }
   }
-  document.addEventListener('click', function (ev) {
-    var b = ev.target.closest && ev.target.closest('[data-r86-mais]'); if (!b) return;
-    ev.preventDefault(); ev.stopPropagation();
-    var art = b.closest('.cd12'), g = art && art.querySelector('.r86-gav'); if (!g) return;
-    var ab = g.hidden; g.hidden = !ab; art.classList.toggle('r86-ab', ab); b.setAttribute('aria-expanded', String(ab));
-    b.innerHTML = ab ? 'Fechar <span aria-hidden="true">−</span>' : 'Ver cômodos <span aria-hidden="true">+</span>';
-  }, true);
 
   // ficha do imóvel (o site chama P.botaoVisita ao montar a ficha: é a deixa para completar)
   var bv0 = P.botaoVisita;
-  P.botaoVisita = function (a) { if (a && a.id) { setTimeout(function () { ficha86(a); fotos86(); }, 0); visto86(a.id); } return ''; };
+  P.botaoVisita = function (a) { if (a && a.id) { setTimeout(function () { ficha86(a); fotos86(); legal86(); }, 0); visto86(a.id); } return ''; };
   // John 23/11 (R86c): a foto vira um card, uma por vez, com setas e "1 / N" (PC = A, celular = C)
   var FI86 = 0;
   function tbs86() { return [].slice.call(document.querySelectorAll('.sc12 .th12 .tb12')); }
@@ -472,8 +470,9 @@
     var b = sc.querySelector('.pt-anun');
     if (!b) { b = el('button', { type: 'button', class: 'pt-anun', 'data-pt-vender': '1' }); b.innerHTML = '<span class="l">Anunciar meu imóvel</span><span class="c">Anunciar</span>'; sc.appendChild(b); }
     var s = getComputedStyle(li), q = li.getBoundingClientRect(), qs = sc.getBoundingClientRect();
-    var vis = s.display !== 'none' && s.visibility !== 'hidden' && +s.opacity > 0.05 && q.width > 0;
+    var vis = s.display !== 'none' && s.visibility !== 'hidden' && q.width > 0;
     b.style.display = vis ? '' : 'none'; if (!vis) return;
+    b.style.opacity = s.opacity; b.style.transform = s.transform === 'none' ? '' : s.transform;   // R86e: entra junto com o Login (mesmo fade)
     // John 23/11: a letra do "Anunciar" do mesmo tamanho do "Login" (copia a letra, a altura e o vidro dele)
     b.style.fontSize = s.fontSize; b.style.fontWeight = s.fontWeight; b.style.letterSpacing = s.letterSpacing;
     b.style.height = q.height + 'px'; b.style.background = s.backgroundColor; b.style.borderColor = s.borderTopColor; b.style.color = s.color;
@@ -503,6 +502,7 @@
     new MutationObserver(ciclo86).observe(document.body, { childList: true, subtree: true });   // só quando entram cartões novos (não a cada quadro da rolagem)
     var sc = document.querySelector('.sc12'); if (sc) new MutationObserver(ciclo86).observe(sc, { attributes: true, attributeFilter: ['class'] });
     window.addEventListener('resize', ciclo86); ciclo86();
+    var k86 = 0; (function f86() { anunciar86(); var l = document.querySelector('.sc12 .li12'); if ((l && +getComputedStyle(l).opacity >= 0.999) || ++k86 > 1200) return anunciar86(); requestAnimationFrame(f86); })();   // R86e: aparece junto com o Login, no mesmo fade
     setInterval(ciclo86, 2500);
   }
 
@@ -903,34 +903,43 @@
   }
   function enviar(blob) { return req('POST', 'api/painel/fotos', blob); }
   function msgEnvio(r) { return r.status === 415 ? 'Esse arquivo não é uma foto válida.' : r.status === 413 ? 'A foto ficou grande demais.' : r.status === 401 ? 'A sessão terminou. Entre de novo.' : r.status === 429 ? 'Muitas fotos seguidas. Espere alguns minutos.' : 'Não consegui enviar a foto. Tente de novo.'; }
+  // R86e (John 24/11): várias fotos de uma vez. Cada uma passa pela mesma conferência e envio, uma depois da outra.
   P.escolherFoto = function (cb) {
-    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.hidden = true; inp.id = 'pt-foto';
+    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = true; inp.hidden = true; inp.id = 'pt-foto';
     inp.onchange = function () {
-      var arq = inp.files && inp.files[0]; inp.remove(); if (!arq) return;
-      if (arq.size > 40 * 1024 * 1024) { aviso('A foto é grande demais (máx. 40 MB).', 'erro'); return; }
-      aviso('Conferindo a foto…');
-      P.prepararFoto(arq).then(function (pr) {
-        var a = document.getElementById('pt-aviso'); if (a) a.remove();
-        return (pr.avisos.length ? perguntar(pr.avisos, pr.lado < FOTO.MIN_LADO) : Promise.resolve(true)).then(function (usar) {
-          if (!usar) { if (pr.im.close) pr.im.close(); return; }
-          aviso('Enviando a foto…');
-          if (pr.lado < FOTO.MIN_LADO) pr = P.ampliar(pr);
-          return P.gerarTamanhos(pr).then(function (t) {
-            if (pr.im.close) pr.im.close();
-            return enviar(t.s.b).then(function (r1) {
-              if (!r1.ok) { aviso(msgEnvio(r1), 'erro'); return; }
-              var foto = { s: r1.j.s, w: t.s.w };
-              if (pr.ampliada) { foto.ampliada = true; foto.lado_original = pr.lado_original; }
-              var fim = function () { var a2 = document.getElementById('pt-aviso'); if (a2) a2.remove(); cb(foto); };
-              if (!t.g) return fim();
-              return enviar(t.g.b).then(function (r2) {
-                if (r2.ok) { foto.g = r2.j.s; foto.gw = t.g.w; }
-                fim(); // sem a grande, o site usa a de 1280 px
+      var arqs = [].slice.call(inp.files || []); inp.remove(); if (!arqs.length) return;
+      var n = arqs.length, i = 0;
+      function rot(t) { return n > 1 ? t + ' (' + (i + 1) + ' de ' + n + ')' : t; }
+      function proxima() {
+        if (i >= n) return;
+        var arq = arqs[i];
+        function segue() { i++; proxima(); }
+        if (arq.size > 40 * 1024 * 1024) { aviso(rot('A foto é grande demais (máx. 40 MB).'), 'erro'); setTimeout(segue, 1500); return; }
+        aviso(rot('Conferindo a foto…'));
+        P.prepararFoto(arq).then(function (pr) {
+          var a = document.getElementById('pt-aviso'); if (a) a.remove();
+          return (pr.avisos.length ? perguntar(pr.avisos, pr.lado < FOTO.MIN_LADO) : Promise.resolve(true)).then(function (usar) {
+            if (!usar) { if (pr.im.close) pr.im.close(); return; }
+            aviso(rot('Enviando a foto…'));
+            if (pr.lado < FOTO.MIN_LADO) pr = P.ampliar(pr);
+            return P.gerarTamanhos(pr).then(function (t) {
+              if (pr.im.close) pr.im.close();
+              return enviar(t.s.b).then(function (r1) {
+                if (!r1.ok) { aviso(msgEnvio(r1), 'erro'); return; }
+                var foto = { s: r1.j.s, w: t.s.w };
+                if (pr.ampliada) { foto.ampliada = true; foto.lado_original = pr.lado_original; }
+                var fim = function () { var a2 = document.getElementById('pt-aviso'); if (a2) a2.remove(); cb(foto); };
+                if (!t.g) return fim();
+                return enviar(t.g.b).then(function (r2) {
+                  if (r2.ok) { foto.g = r2.j.s; foto.gw = t.g.w; }
+                  fim(); // sem a grande, o site usa a de 1280 px
+                });
               });
             });
           });
-        });
-      }).catch(function () { aviso('Não consegui ler essa foto. Tente outra.', 'erro'); });
+        }).catch(function () { aviso(rot('Não consegui ler essa foto. Tente outra.'), 'erro'); }).then(segue);
+      }
+      proxima();
     };
     document.body.appendChild(inp); inp.click();
   };

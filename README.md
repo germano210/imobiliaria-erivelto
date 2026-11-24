@@ -139,3 +139,9 @@ python3 remendos.py --conferir                                                  
 Atualizar depois de um `git pull`: `docker compose -f compose.producao.yaml up -d --build`. Nunca rodar `down -v` em produção: apaga o banco.
 
 Pendências conhecidas: T02 (revisão jurídica do aviso de privacidade, do termo do painel e dos termos de uso, que hoje são modelos); campos entre colchetes em `site/termos/index.html`; perguntas sobre as mídias (`PUBLICAR.md`).
+
+### R86e (24/11) · pedidos do John
+- Site: o código ES-… não aparece mais (fica só no painel); sem "Ver cômodos +": cômodos e "O que tem" aparecem direto no cartão da lista (PC); sem a barra de baixo: CRECI, Privacidade e Termos ficam no fim da ficha e no cartão do Login ("Quero vender" saiu: o "Anunciar" faz isso); o "Anunciar" entra junto com o Login, no mesmo fade.
+- Painel: sem o "flic" do painel antigo ao abrir; "Adicionar foto" aceita várias fotos de uma vez (servidor e prévia); CEP preenche rua, bairro e cidade (`GET /api/painel/cep/{cep}`, o servidor consulta o ViaCEP; o navegador não pode por causa do connect-src 'self'); cidades do RS sugeridas; frases prontas; arrastar para ordenar fotos, cômodos e itens.
+- Testes: `testes/test_t03…` e o roteiro e2e passaram a conferir a regra nova do rodapé, do código e do "Anunciar" (19/19 no celular e no PC).
+- Para o servidor: o CEP precisa de saída para https://viacep.com.br (porta 443). Sem ela, o painel avisa "Não consegui consultar agora" e a pessoa preenche na mão.

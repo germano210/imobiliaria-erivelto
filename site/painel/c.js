@@ -397,7 +397,7 @@ Object.assign(window.ICO14, {
     edLinhas(r, 'cm', true, fim, medidas);
   };
   ED.itens = function (r, fim) { edLinhas(r, 'ot', false, fim); };
-  function addFotoArquivo(arquivo, depois) {
+  function addFotoArquivo(arquivo, depois, erro) {
     var img = new Image(), url = URL.createObjectURL(arquivo);
     img.onload = function () {
       var lado = 1280, k = Math.min(1, lado / Math.max(img.naturalWidth, img.naturalHeight));
@@ -405,7 +405,7 @@ Object.assign(window.ICO14, {
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
       ATUAL.fotos = ATUAL.fotos || []; ATUAL.fotos.push({ s: c.toDataURL('image/jpeg', 0.82), a: '', d: false, w: c.width }); depois();
     };
-    img.onerror = function () { toast('Não consegui ler essa foto.'); };
+    img.onerror = function () { toast('Não consegui ler essa foto.'); if (erro) erro(); };
     img.src = url;
   }
   ED.fotos = function (r, idx) {
@@ -437,7 +437,7 @@ Object.assign(window.ICO14, {
       r.querySelectorAll('[data-ex]').forEach(function (b) { b.onclick = function () { ATUAL.fotos = ATUAL.fotos || []; ATUAL.fotos.push({ s: b.dataset.ex, a: b.querySelector('img').alt, d: false }); ok(); }; });
       r.querySelector('[data-add]').onclick = function () {
         if (srv() && PONTE.escolherFoto) { PONTE.escolherFoto(function (foto) { ATUAL.fotos = ATUAL.fotos || []; foto.a = foto.a || ''; foto.d = false; ATUAL.fotos.push(foto); ok(); }); return; }
-        var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.onchange = function () { if (inp.files && inp.files[0]) addFotoArquivo(inp.files[0], ok); }; inp.click();
+        var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = true; inp.onchange = function () { var l = [].slice.call(inp.files || []); (function vai() { var f = l.shift(); if (f) addFotoArquivo(f, function () { ok(); vai(); }, vai); })(); }; inp.click();   // R86e: várias de uma vez
       };
     }
     desenha();
@@ -557,7 +557,7 @@ Object.assign(window.ICO14, {
     var L = todos.filter(function (l) { return FILTRO === 'todos' || sitL(l)[0] === FILTRO; });
     var h = '<div class="wrap"><div class="ct-top"><h1>Contatos</h1>' + (tudo.length ? '<button class="lk" data-csv>Baixar planilha (CSV)</button>' : '') + '</div>' +
       '<div class="seg" role="tablist"><button role="tab" data-gr="compra" aria-selected="' + (GRUPO === 'compra') + '">Querem comprar ou alugar <span class="n">' + nC + '</span></button><button role="tab" data-gr="anuncia" aria-selected="' + (GRUPO === 'anuncia') + '">Querem anunciar <span class="n">' + nA + '</span></button></div>';
-    if (!todos.length) return h + '<div class="vazio">' + (GRUPO === 'anuncia' ? 'Quem tocar em "Anunciar meu imóvel" no site aparece aqui, com o tipo, a cidade e o recado.' : 'Quem pedir informações, pedir visita ou entrar no site aparece aqui.') + '</div></div>';
+    if (!todos.length) return h + '<div class="vazio">' + (GRUPO === 'anuncia' ? 'Quem tocar em "Anunciar meu imóvel" no site aparece aqui, com o tipo, a cidade e o recado.' : 'Quem pedir informações ou entrar pelo site aparece aqui.') + '</div></div>';
     h += '<div class="chips ct-f" role="group" aria-label="Filtrar contatos">' + [['todos', 'Todos']].concat(SIT_L).filter(function (x) { return x[0] === 'todos' || n[x[0]]; }).map(function (x) {
       return '<button class="chip" data-fl="' + x[0] + '" aria-pressed="' + (FILTRO === x[0]) + '">' + x[1] + ' <span class="n">' + (x[0] === 'todos' ? todos.length : n[x[0]]) + '</span></button>';
     }).join('') + '</div>';
@@ -759,7 +759,8 @@ Object.assign(window.ICO14, {
     EST = window.__EST;
     if (new URLSearchParams(location.search).get('completo') === '1') return true; // só para a equipe, sem botão
     var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'painel/c.css' + ((/[?&]v=([\w-]+)/.exec((document.querySelector('script[src*="painel/c.js"]') || {}).src || '') || [])[1] ? '?v=' + /[?&]v=([\w-]+)/.exec(document.querySelector('script[src*="painel/c.js"]').src)[1] : ''); document.head.appendChild(l);
-    APP = document.createElement('div'); APP.id = 'c-app';
+    APP = document.createElement('div'); APP.id = 'c-app'; APP.className = 'c-esp';
+    l.onload = l.onerror = function () { APP.classList.remove('c-esp'); }; setTimeout(function () { if (APP) APP.classList.remove('c-esp'); }, 4000);
     APP.innerHTML = '<div data-tela style="flex:1;display:flex;flex-direction:column;min-height:0"></div><div data-sheet></div>';
     document.body.appendChild(APP); TEL = APP.querySelector('[data-tela]'); SH = APP.querySelector('[data-sheet]');
     document.body.classList.add('c-on');
@@ -772,5 +773,10 @@ Object.assign(window.ICO14, {
     render();
     return true;
   }
-  var n = 0, tm = setInterval(function () { if (iniciar() || ++n > 600) clearInterval(tm); }, 100);
+  // R86e (John 24/11): sem "flic" do painel antigo. O antigo fica escondido desde já; o novo só aparece com o c.css carregado.
+  var completo = new URLSearchParams(location.search).get('completo') === '1';
+  var EV = document.createElement('style'); EV.id = 'c-sem-flic';
+  EV.textContent = completo ? '' : '#pn12host{visibility:hidden}body.c-on .pn15{display:none}#c-app.c-esp{visibility:hidden}';
+  (document.head || document.documentElement).appendChild(EV);
+  var n = 0, tm = setInterval(function () { if (iniciar() || ++n > 600) { clearInterval(tm); if (!APP) EV.textContent = ''; } }, 100);   // sem o novo (erro): volta o antigo
 })();

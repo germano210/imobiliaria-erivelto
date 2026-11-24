@@ -68,9 +68,11 @@ def test_t03_apagar_leva_tudo_que_o_aviso_diz(c, painel):
 
 
 def test_t05_rodape_com_creci_e_link_privacidade_no_ponte():
-    assert "CRECI 63.464" in PONTE and "href: 'privacidade/', texto: 'Privacidade'" in PONTE and "id: 'pt-rodape'" in PONTE
+    # R86e (John 24/11): sem a barra de baixo; a linha com CRECI e os links fica no fim da ficha (.nv12) e no cartão do Login (.uc12)
+    assert "CRECI 63.464" in PONTE and "href: 'privacidade/', texto: 'Privacidade'" in PONTE and "class: 'pt-legal'" in PONTE
     assert "href: 'termos/', texto: 'Termos'" in PONTE      # T04
-    assert ".pt-rodape{" in (RAIZ / "site/ponte.css").read_text()
+    assert "querySelector('.sc12 .nv12')" in PONTE and "querySelector('.uc12')" in PONTE
+    assert ".pt-legal{" in (RAIZ / "site/ponte.css").read_text()
 
 
 def test_t23_modo_servidor_nao_usa_numero_padrao(c, painel):
