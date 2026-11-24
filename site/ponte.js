@@ -416,7 +416,7 @@
 
   // cartão da lista
   function cartao86(art) {
-    if (art.dataset.r86 || window.innerWidth < 760) return; var a = MAP86[art.dataset.id]; if (!a) return;
+    if (art.dataset.r86 || !pc86()) return; var a = MAP86[art.dataset.id]; if (!a) return;
     art.dataset.r86 = '1'; art.classList.add('r86c');
     var ov = art.querySelector('.ov7'), nm = art.querySelector('.nm8'), bt = art.querySelector('.bt7'); if (!ov) return;
     var od = onde86(a);
@@ -462,7 +462,7 @@
   // R86g (John 24/11, D): ficha no celular = foto no topo com cantos arredondados, preço, resumo em 3 números e abas
   // Sobre · Cômodos · Onde fica (o mapa do site vai para a aba "Onde fica"; o botão do WhatsApp continua o do site)
   function fichaCel86(a0) {
-    var a = MAP86[a0.id] || a0, nv = document.querySelector('.sc12 .nv12'); if (!nv || window.innerWidth >= 760) return;
+    var a = MAP86[a0.id] || a0, nv = document.querySelector('.sc12 .nv12'); if (!nv || pc86()) return;
     var velho = nv.querySelector('.r86-d'); if (velho) { var mp0 = velho.querySelector('.nv24p'); if (mp0) (nv.querySelector('.nv24s') || nv).appendChild(mp0); velho.remove(); }
     var pills = [].map.call(nv.querySelectorAll('.if8 li'), function (li) { return li.textContent.trim(); }).join(' · ');
     function num(re) { var m = re.exec(pills); return m ? +m[1] : 0; }
@@ -500,7 +500,7 @@
     }, { passive: true });
   })();
   function ficha86(a0) {
-    var a = MAP86[a0.id] || a0, nv = document.querySelector('.sc12 .nv12'); if (!nv || window.innerWidth < 760) return;
+    var a = MAP86[a0.id] || a0, nv = document.querySelector('.sc12 .nv12'); if (!nv || !pc86()) return;
     var velho = nv.querySelector('.r86-f'); if (velho) velho.remove();
     var od = onde86(a), oe = a.onde && a.onde.e, cm = linhas86(a), ot = itens86(a);
     if (!od && !cm.length && !ot.length) { nv.classList.remove('r86-fo'); return; }
@@ -555,6 +555,10 @@
   // R86f (John 24/11): no celular, o teclado não pode encolher o cenário. Enquanto alguém digita, a altura do site fica
   // travada na de antes do teclado (o teclado passa por cima). Chrome/Android: o meta viewport (interactive-widget) já faz isso.
   var H86 = { w: 0, h: 0, on: false, els: [] };
+  /* R86h: modo PC x celular = a mesma conta do site (classe dk do .sc12; antes de existir, a proporção da janela) */
+  function pc86() { var s = document.querySelector('.sc12'); if (s) return s.classList.contains('dk'); return innerWidth > Math.max(innerHeight, H86.h || 0) * .75; }
+  function modo86() { var pc = pc86(), r = document.documentElement.classList; if (r.contains('r86pc') !== pc) r.toggle('r86pc', pc); if (r.contains('r86mo') === pc) r.toggle('r86mo', !pc); }
+  (function m86() { modo86(); requestAnimationFrame(m86); })();
   function alturaBase86() { var w = innerWidth, h = innerHeight; if (Math.abs(w - H86.w) > 40 || !H86.on && h > H86.h || !H86.h) { if (Math.abs(w - H86.w) > 40) H86.h = 0; H86.w = w; if (!H86.on) H86.h = Math.max(H86.h, h); } }
   function digita86(ev) {
     var t = ev.target; if (!t || !/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || !matchMedia('(pointer:coarse)').matches || H86.on) return;

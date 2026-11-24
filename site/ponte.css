@@ -179,13 +179,13 @@ html.r86 .sc12 .nv12 .pt-visita{background:#003641;color:#fff;border-color:#0036
 html.r86 .sc12 .lsi12 .cd12.r86c .pt-selo{font-size:12.5px!important;padding:4px 10px!important}
 html.r86 .sc12 .rs12 p{font-size:13px!important;line-height:1.35!important}
 /* R86 · ficha no PC: a coluna rola inteira e os 2 botões ficam presos embaixo (Pedir visita + WhatsApp) */
-@media (min-width:760px){
-html.r86 .sc12 .nv12{overflow-y:auto!important;display:flex!important;flex-direction:column}
-html.r86 .sc12 .nv12>*{flex:none!important}
-html.r86 .sc12 .nv12 .nv24s{height:auto!important;max-height:none!important;overflow:visible!important;padding-bottom:14px}
-html.r86 .sc12 .nv12 .nv24p{height:auto!important;max-height:none!important;overflow:visible!important}
-html.r86 .sc12 .nv12 .pt-visita{display:none!important;order:9;position:sticky;bottom:88px;z-index:3;align-self:stretch;margin:auto 0 0;height:52px;border-radius:14px;font:500 16px/1 Poppins,system-ui,sans-serif;box-shadow:0 -18px 0 10px #fff,0 30px 0 10px #fff}
-html.r86 .sc12 .nv12 .nw12{order:10;position:static!important;left:auto!important;right:auto!important;bottom:auto!important;margin:auto 0 24px!important;width:auto!important;flex:none}
+@media all{
+html.r86.r86pc .sc12 .nv12{overflow-y:auto!important;display:flex!important;flex-direction:column}
+html.r86.r86pc .sc12 .nv12>*{flex:none!important}
+html.r86.r86pc .sc12 .nv12 .nv24s{height:auto!important;max-height:none!important;overflow:visible!important;padding-bottom:14px}
+html.r86.r86pc .sc12 .nv12 .nv24p{height:auto!important;max-height:none!important;overflow:visible!important}
+html.r86.r86pc .sc12 .nv12 .pt-visita{display:none!important;order:9;position:sticky;bottom:88px;z-index:3;align-self:stretch;margin:auto 0 0;height:52px;border-radius:14px;font:500 16px/1 Poppins,system-ui,sans-serif;box-shadow:0 -18px 0 10px #fff,0 30px 0 10px #fff}
+html.r86.r86pc .sc12 .nv12 .nw12{order:10;position:static!important;left:auto!important;right:auto!important;bottom:auto!important;margin:auto 0 24px!important;width:auto!important;flex:none}
 }
 
 /* ===== R86c (23/11 noite) · John: ficha no PC = A (foto em card, uma por vez, setas), ficha no celular = C (um card só sobre a cena), lista no celular = A (card branco), Anunciar igual ao Login, resultado com letra menor e casa maior ===== */
@@ -221,56 +221,56 @@ html.r86 .r86-nf{position:absolute;top:14px;right:14px;padding:4px 10px;border-r
 /* fundo da ficha: a cena desfocada atrás (em vez da tela preta) */
 html.r86 .sc12 .f512{background:rgba(10,14,18,.38)!important;-webkit-backdrop-filter:blur(18px) saturate(1.1);backdrop-filter:blur(18px) saturate(1.1)}
 /* PC = A: a foto é um card com margem; as miniaturas embaixo; as informações num card branco à direita. Tudo em --u (cresce e encolhe com a janela, como o resto do site) */
-@media (min-width:760px){
-html.r86 .sc12 .f512 .fp12{left:calc(62*var(--u,1px))!important;top:calc(112*var(--u,1px))!important;right:calc(574*var(--u,1px))!important;bottom:calc(152*var(--u,1px))!important;border-radius:calc(24*var(--u,1px));overflow:hidden;background:#222;box-shadow:0 18px 40px rgba(0,0,0,.35)}
-html.r86 .sc12 .f512 .th12{left:calc(62*var(--u,1px))!important;bottom:calc(44*var(--u,1px))!important;top:auto!important;gap:calc(10*var(--u,1px))!important}
-html.r86 .sc12 .f512 .th12 .tb12{width:calc(108*var(--u,1px))!important;height:calc(76*var(--u,1px))!important;border-radius:calc(13*var(--u,1px))!important}
-html.r86 .sc12 .nv12{top:calc(112*var(--u,1px))!important;right:calc(62*var(--u,1px))!important;bottom:calc(44*var(--u,1px))!important;left:auto!important;width:calc(480*var(--u,1px))!important;height:auto!important;border-radius:calc(24*var(--u,1px))!important;padding:calc(30*var(--u,1px)) calc(30*var(--u,1px)) calc(20*var(--u,1px))!important;box-shadow:0 18px 40px rgba(0,0,0,.3)}
-html.r86 .sc12 .nv12 .np12,html.r86 .sc12 .nv12 .np12 b{font-size:calc(30*var(--u,1px))!important}
-html.r86 .r86-ft{font:600 calc(18*var(--u,1px))/1.2 Poppins,system-ui,sans-serif}
-html.r86 .r86-gr{grid-template-columns:repeat(auto-fill,minmax(calc(132*var(--u,1px)),1fr));gap:calc(10*var(--u,1px))}
-html.r86 .r86-t{padding:calc(14*var(--u,1px)) calc(8*var(--u,1px));border-radius:calc(16*var(--u,1px))}
-html.r86 .r86-t .r86-ic{width:calc(36*var(--u,1px));height:calc(36*var(--u,1px))}
-html.r86 .r86-t b{font-size:calc(18*var(--u,1px))}
-html.r86 .r86-t small{font-size:calc(15.5*var(--u,1px))}
-html.r86 .r86-t em{font-size:calc(13.5*var(--u,1px))}
-html.r86 .r86-fo1 b{font-size:calc(16*var(--u,1px))} html.r86 .r86-fo1 small{font-size:calc(14*var(--u,1px))}
+@media all{
+html.r86.r86pc .sc12 .f512 .fp12{left:calc(62*var(--u,1px))!important;top:calc(112*var(--u,1px))!important;right:calc(574*var(--u,1px))!important;bottom:calc(152*var(--u,1px))!important;border-radius:calc(24*var(--u,1px));overflow:hidden;background:#222;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+html.r86.r86pc .sc12 .f512 .th12{left:calc(62*var(--u,1px))!important;bottom:calc(44*var(--u,1px))!important;top:auto!important;gap:calc(10*var(--u,1px))!important}
+html.r86.r86pc .sc12 .f512 .th12 .tb12{width:calc(108*var(--u,1px))!important;height:calc(76*var(--u,1px))!important;border-radius:calc(13*var(--u,1px))!important}
+html.r86.r86pc .sc12 .nv12{top:calc(112*var(--u,1px))!important;right:calc(62*var(--u,1px))!important;bottom:calc(44*var(--u,1px))!important;left:auto!important;width:calc(480*var(--u,1px))!important;height:auto!important;border-radius:calc(24*var(--u,1px))!important;padding:calc(30*var(--u,1px)) calc(30*var(--u,1px)) calc(20*var(--u,1px))!important;box-shadow:0 18px 40px rgba(0,0,0,.3)}
+html.r86.r86pc .sc12 .nv12 .np12,html.r86.r86pc .sc12 .nv12 .np12 b{font-size:calc(30*var(--u,1px))!important}
+html.r86.r86pc .r86-ft{font:600 calc(18*var(--u,1px))/1.2 Poppins,system-ui,sans-serif}
+html.r86.r86pc .r86-gr{grid-template-columns:repeat(auto-fill,minmax(calc(132*var(--u,1px)),1fr));gap:calc(10*var(--u,1px))}
+html.r86.r86pc .r86-t{padding:calc(14*var(--u,1px)) calc(8*var(--u,1px));border-radius:calc(16*var(--u,1px))}
+html.r86.r86pc .r86-t .r86-ic{width:calc(36*var(--u,1px));height:calc(36*var(--u,1px))}
+html.r86.r86pc .r86-t b{font-size:calc(18*var(--u,1px))}
+html.r86.r86pc .r86-t small{font-size:calc(15.5*var(--u,1px))}
+html.r86.r86pc .r86-t em{font-size:calc(13.5*var(--u,1px))}
+html.r86.r86pc .r86-fo1 b{font-size:calc(16*var(--u,1px))} html.r86.r86pc .r86-fo1 small{font-size:calc(14*var(--u,1px))}
 }
 /* celular = C: um card só (foto com setas em cima, informações embaixo) sobre a cena desfocada */
-@media (max-width:759px){
-html.r86 .sc12 .f512 .fp12{left:12px!important;right:12px!important;top:84px!important;bottom:auto!important;height:38vh!important;border-radius:22px 22px 0 0;overflow:hidden;background:#222}
-html.r86 .sc12 .f512 .th12{left:24px!important;top:calc(84px + 38vh - 58px)!important;bottom:auto!important;z-index:5}
-html.r86 .sc12 .nv12{left:12px!important;right:12px!important;top:calc(84px + 38vh)!important;bottom:12px!important;height:auto!important;border-radius:0 0 22px 22px!important;box-shadow:0 18px 40px rgba(0,0,0,.3);overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;padding-bottom:16px!important}
-html.r86 .sc12 .nv12>*{flex:none!important}
-html.r86 .sc12 .nv12 .nv24s,html.r86 .sc12 .nv12 .nv24p{height:auto!important;max-height:none!important;overflow:visible!important}
-html.r86 .sc12 .nv12 .nw12{position:sticky!important;bottom:0!important;left:auto!important;right:auto!important;margin:12px 0 0!important}
-html.r86 .r86-ar{width:34px;height:34px;margin-top:-17px}
-html.r86 .r86-nf{top:12px;right:auto;left:12px}
+@media all{
+html.r86.r86mo .sc12 .f512 .fp12{left:12px!important;right:12px!important;top:84px!important;bottom:auto!important;height:38vh!important;border-radius:22px 22px 0 0;overflow:hidden;background:#222}
+html.r86.r86mo .sc12 .f512 .th12{left:24px!important;top:calc(84px + 38vh - 58px)!important;bottom:auto!important;z-index:5}
+html.r86.r86mo .sc12 .nv12{left:12px!important;right:12px!important;top:calc(84px + 38vh)!important;bottom:12px!important;height:auto!important;border-radius:0 0 22px 22px!important;box-shadow:0 18px 40px rgba(0,0,0,.3);overflow-y:auto!important;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;padding-bottom:16px!important}
+html.r86.r86mo .sc12 .nv12>*{flex:none!important}
+html.r86.r86mo .sc12 .nv12 .nv24s,html.r86.r86mo .sc12 .nv12 .nv24p{height:auto!important;max-height:none!important;overflow:visible!important}
+html.r86.r86mo .sc12 .nv12 .nw12{position:sticky!important;bottom:0!important;left:auto!important;right:auto!important;margin:12px 0 0!important}
+html.r86.r86mo .r86-ar{width:34px;height:34px;margin-top:-17px}
+html.r86.r86mo .r86-nf{top:12px;right:auto;left:12px}
 /* lista = A: card branco, foto em cima, dados embaixo (lê melhor que vidro) */
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8{background:#fff!important;border-radius:20px!important;overflow:hidden;height:auto!important;box-shadow:0 10px 28px rgba(0,0,0,.28)!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8>.ci12{height:210px!important;border-radius:0!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8>.ci12>img{height:100%!important;object-fit:cover}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8>.ov7{position:static!important;inset:auto!important;transform:none!important;width:auto!important;margin:0!important;display:flex!important;flex-direction:column;gap:7px;padding:14px 14px 14px!important;background:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;border-radius:0!important;color:#13202c!important;text-shadow:none!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .pr8{order:1;margin:0!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .pv8,html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .pv8 b{font:600 19px/1.1 Poppins,system-ui,sans-serif!important;color:#13202c!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .ov7 .nm8,html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .ov7 .nm8 *{text-align:left!important;justify-content:flex-start!important;align-self:stretch!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .bt7 .vm12 *{font-size:inherit!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .nm8{order:2;margin:0!important;font:400 12.5px/1.3 Poppins,system-ui,sans-serif!important;color:#5b6470!important;text-align:left!important;white-space:normal!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .if8{order:3;position:static!important;inset:auto!important;transform:none!important;display:flex!important;flex-wrap:wrap;gap:6px;margin:0!important;padding:0!important;width:auto!important;overflow:visible!important;background:none!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .if8 li{background:#f3f2ee!important;border:0!important;border-radius:999px!important;padding:5px 9px!important;color:#1f2b30!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;height:auto!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .if8 li span{font:400 11.5px/1 Poppins,system-ui,sans-serif!important;color:#1f2b30!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .if8 li svg{color:#003641}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .bt7{order:4;margin:4px 0 0!important;width:100%!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .bt7 .vm12.vm12.vm12{width:100%!important;margin:0!important;height:44px!important;border-radius:12px!important;background:#003641!important;font:400 13.5px/1 Poppins,system-ui,sans-serif!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8{background:#fff!important;border-radius:20px!important;overflow:hidden;height:auto!important;box-shadow:0 10px 28px rgba(0,0,0,.28)!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8>.ci12{height:210px!important;border-radius:0!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8>.ci12>img{height:100%!important;object-fit:cover}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8>.ov7{position:static!important;inset:auto!important;transform:none!important;width:auto!important;margin:0!important;display:flex!important;flex-direction:column;gap:7px;padding:14px 14px 14px!important;background:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;border-radius:0!important;color:#13202c!important;text-shadow:none!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .pr8{order:1;margin:0!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .pv8,html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .pv8 b{font:600 19px/1.1 Poppins,system-ui,sans-serif!important;color:#13202c!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .ov7 .nm8,html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .ov7 .nm8 *{text-align:left!important;justify-content:flex-start!important;align-self:stretch!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .bt7 .vm12 *{font-size:inherit!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .nm8{order:2;margin:0!important;font:400 12.5px/1.3 Poppins,system-ui,sans-serif!important;color:#5b6470!important;text-align:left!important;white-space:normal!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .if8{order:3;position:static!important;inset:auto!important;transform:none!important;display:flex!important;flex-wrap:wrap;gap:6px;margin:0!important;padding:0!important;width:auto!important;overflow:visible!important;background:none!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .if8 li{background:#f3f2ee!important;border:0!important;border-radius:999px!important;padding:5px 9px!important;color:#1f2b30!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;height:auto!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .if8 li span{font:400 11.5px/1 Poppins,system-ui,sans-serif!important;color:#1f2b30!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .if8 li svg{color:#003641}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .bt7{order:4;margin:4px 0 0!important;width:100%!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .bt7 .vm12.vm12.vm12{width:100%!important;margin:0!important;height:44px!important;border-radius:12px!important;background:#003641!important;font:400 13.5px/1 Poppins,system-ui,sans-serif!important}
 }
 
 /* R86c · botão da ficha com letra menor; lista no celular com letras um pouco menores */
 html.r86 .sc12 .nv12 .nw12,html.r86 .sc12 .nv12 .nw12 *{font-size:13px!important;font-weight:400!important}
 html.r86 .sc12 .nv12 .nw12{height:50px!important;min-height:0!important}
-@media (max-width:759px){
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .bt7 .vm12.vm12.vm12{font-size:12.5px!important;height:42px!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .pv8,html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .pv8 b{font-size:17px!important}
-html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .nm8{font-size:12px!important}
+@media all{
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .bt7 .vm12.vm12.vm12{font-size:12.5px!important;height:42px!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .pv8,html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .pv8 b{font-size:17px!important}
+html.r86.r86mo .sc12:not(.dk) .lsi12 .cd12.c8 .nm8{font-size:12px!important}
 }
 
 /* ===== R86e (24/11) · John: sem código ES-…, sem "Ver cômodos +", cômodos e "o que tem" à vista no cartão; sem a barra de baixo ===== */
@@ -290,42 +290,49 @@ html.r86 .r86-pl .r86-ic.s{width:15px;height:15px}
 .sc12 .nv12 .pt-legal{flex:none!important;margin:16px 0 4px}
 
 /* ===== R86g (24/11) · John escolheu D para a ficha no celular: foto no topo com cantos arredondados, resumo em 3 números e abas ===== */
-@media (max-width:759px){
-html.r86 .sc12 .f512{background:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-html.r86 .sc12.f5 .hd12{opacity:0!important;pointer-events:none!important}
-html.r86 .sc12 .f512 .fp12{left:0!important;right:0!important;top:0!important;bottom:auto!important;height:42vh!important;min-height:290px;border-radius:0 0 30px 30px!important;box-shadow:none!important}
-html.r86 .sc12 .f512 .fp12 .fx12{width:100%!important;height:100%!important;object-fit:cover}
-html.r86 .sc12 .f512 .th12{display:none!important}
-html.r86 .sc12 .x12{top:calc(14px + env(safe-area-inset-top))!important;left:14px!important;right:auto!important;width:40px!important;height:40px!important;border-radius:50%!important;background:rgba(255,255,255,.92)!important;color:#13202c!important;box-shadow:0 2px 12px rgba(0,0,0,.15)!important;z-index:30}
-html.r86 .sc12 .x12 svg{stroke:#13202c!important}
-html.r86 .r86-nf{top:calc(22px + env(safe-area-inset-top))!important;right:14px!important;left:auto!important}
-html.r86 .r86-ar{width:36px;height:36px;margin-top:-18px}
-html.r86 .sc12 .nv12{left:0!important;right:0!important;top:max(42vh,290px)!important;bottom:0!important;height:auto!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;padding:18px 20px 16px!important;overflow-y:auto!important}
-html.r86 .sc12 .nv12 .nh12{padding:0!important;margin:0!important;width:auto!important}
-html.r86 .sc12 .nv12 .np12,html.r86 .sc12 .nv12 .np12 b{font:600 26px/1.1 Poppins,system-ui,sans-serif!important;color:#13202c!important;letter-spacing:-.01em}
-html.r86 .sc12 .nv12 .nh12 small{font:400 13.5px/1.35 Poppins,system-ui,sans-serif!important;color:#5f6970!important}
-html.r86 .sc12 .nv12.r86-dd .if8{display:none!important}
-html.r86 .sc12 .nv12.r86-dd .nv24s{margin:0!important;padding:0!important}
-html.r86 .r86-d{display:flex;flex-direction:column}
-html.r86 .r86-res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
-html.r86 .r86-res>div{border-radius:16px;background:#f4f3ef;padding:13px 6px;text-align:center}
-html.r86 .r86-res .r86-ic{width:22px;height:22px;margin:0 auto 7px;display:block}
-html.r86 .r86-res b{display:block;font:600 16px/1 Poppins,system-ui,sans-serif;color:#13202c}
-html.r86 .r86-res small{display:block;margin-top:4px;font:400 11.5px/1.2 Poppins,system-ui,sans-serif;color:#5f6970}
-html.r86 .r86-tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;margin-top:16px;padding:4px;border-radius:14px;background:#f4f3ef}
-html.r86 .r86-tabs button{height:40px;border:0;border-radius:11px;background:none;font:500 13px/1 Poppins,system-ui,sans-serif;color:#5f6970;cursor:pointer}
-html.r86 .r86-tabs button[aria-selected=true]{background:#fff;color:#13202c;box-shadow:0 2px 8px rgba(0,0,0,.08)}
-html.r86 .r86-pn{padding-top:4px}
-html.r86 .r86-pn[hidden]{display:none!important}
-html.r86 .r86-h{margin:18px 0 10px;font:600 15px/1.2 Poppins,system-ui,sans-serif;color:#13202c}
-html.r86 .r86-d .r86-pls{gap:8px}
-html.r86 .r86-d .r86-pl{height:38px;padding:0 14px 0 12px;font-size:13.5px;background:#f4f3ef}
-html.r86 .r86-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #f0eee8}
-html.r86 .r86-row:last-child{border-bottom:0}
-html.r86 .r86-row b{flex:1;font:500 14px/1.25 Poppins,system-ui,sans-serif;color:#13202c}
-html.r86 .r86-row b em{display:block;font:400 12px/1.3 Poppins,system-ui,sans-serif;font-style:normal;color:#8C471C}
-html.r86 .r86-row small{font:400 13px/1.2 Poppins,system-ui,sans-serif;color:#5f6970}
-html.r86 .r86-pn .nv24p{margin-top:14px!important;height:auto!important;border-radius:16px;overflow:hidden}
-html.r86 .sc12 .nv12 .nw12{position:sticky!important;bottom:0!important;margin:18px 0 0!important;height:54px!important;border-radius:16px!important;background:#003641!important;box-shadow:0 8px 20px rgba(0,54,65,.25)!important}
-html.r86 .sc12 .nv12 .pt-legal{margin:14px 0 4px}
+@media all{
+html.r86.r86mo .sc12 .f512{background:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html.r86.r86mo .sc12.f5 .hd12{opacity:0!important;pointer-events:none!important}
+html.r86.r86mo .sc12 .f512 .fp12{left:0!important;right:0!important;top:0!important;bottom:auto!important;height:42vh!important;min-height:290px;border-radius:0 0 30px 30px!important;box-shadow:none!important}
+html.r86.r86mo .sc12 .f512 .fp12 .fx12{width:100%!important;height:100%!important;object-fit:cover}
+html.r86.r86mo .sc12 .f512 .th12{display:none!important}
+html.r86.r86mo .sc12 .x12{top:calc(14px + env(safe-area-inset-top))!important;left:14px!important;right:auto!important;width:40px!important;height:40px!important;border-radius:50%!important;background:rgba(255,255,255,.92)!important;color:#13202c!important;box-shadow:0 2px 12px rgba(0,0,0,.15)!important;z-index:30}
+html.r86.r86mo .sc12 .x12 svg{stroke:#13202c!important;width:20px!important;height:20px!important}
+html.r86.r86mo .sc12 .x12{box-sizing:border-box;padding:0!important;display:grid!important;place-items:center}
+html.r86.r86mo .r86-nf{top:calc(22px + env(safe-area-inset-top))!important;right:14px!important;left:auto!important}
+html.r86.r86mo .r86-ar{width:36px;height:36px;margin-top:-18px}
+html.r86.r86mo .sc12 .nv12{left:0!important;right:0!important;top:max(42vh,290px)!important;bottom:0!important;height:auto!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;padding:18px 20px 16px!important;overflow-y:auto!important}
+html.r86.r86mo .sc12 .nv12 .nh12{padding:0!important;margin:0!important;width:auto!important}
+html.r86.r86mo .sc12 .nv12 .np12,html.r86.r86mo .sc12 .nv12 .np12 b{font:600 26px/1.1 Poppins,system-ui,sans-serif!important;color:#13202c!important;letter-spacing:-.01em}
+html.r86.r86mo .sc12 .nv12 .nh12 small{font:400 13.5px/1.35 Poppins,system-ui,sans-serif!important;color:#5f6970!important}
+html.r86.r86mo .sc12 .nv12.r86-dd .if8{display:none!important}
+html.r86.r86mo .sc12 .nv12.r86-dd .nv24s{margin:0!important;padding:0!important}
+html.r86.r86mo .r86-d{display:flex;flex-direction:column}
+html.r86.r86mo .r86-res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+html.r86.r86mo .r86-res>div{border-radius:16px;background:#f4f3ef;padding:13px 6px;text-align:center}
+html.r86.r86mo .r86-res .r86-ic{width:22px;height:22px;margin:0 auto 7px;display:block}
+html.r86.r86mo .r86-res b{display:block;font:600 16px/1 Poppins,system-ui,sans-serif;color:#13202c}
+html.r86.r86mo .r86-res small{display:block;margin-top:4px;font:400 11.5px/1.2 Poppins,system-ui,sans-serif;color:#5f6970}
+html.r86.r86mo .r86-tabs{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;margin-top:16px;padding:4px;border-radius:14px;background:#f4f3ef}
+html.r86.r86mo .r86-tabs button{height:40px;border:0;border-radius:11px;background:none;font:500 13px/1 Poppins,system-ui,sans-serif;color:#5f6970;cursor:pointer}
+html.r86.r86mo .r86-tabs button[aria-selected=true]{background:#fff;color:#13202c;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+html.r86.r86mo .r86-pn{padding-top:4px}
+html.r86.r86mo .r86-pn[hidden]{display:none!important}
+html.r86.r86mo .r86-h{margin:18px 0 10px;font:600 15px/1.2 Poppins,system-ui,sans-serif;color:#13202c}
+html.r86.r86mo .r86-d .r86-pls{gap:8px}
+html.r86.r86mo .r86-d .r86-pl{height:38px;padding:0 14px 0 12px;font-size:13.5px;background:#f4f3ef}
+html.r86.r86mo .r86-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #f0eee8}
+html.r86.r86mo .r86-row:last-child{border-bottom:0}
+html.r86.r86mo .r86-row b{flex:1;font:500 14px/1.25 Poppins,system-ui,sans-serif;color:#13202c}
+html.r86.r86mo .r86-row b em{display:block;font:400 12px/1.3 Poppins,system-ui,sans-serif;font-style:normal;color:#8C471C}
+html.r86.r86mo .r86-row small{font:400 13px/1.2 Poppins,system-ui,sans-serif;color:#5f6970}
+html.r86.r86mo .r86-pn .nv24p{margin-top:14px!important;height:auto!important;border-radius:16px;overflow:hidden}
+html.r86.r86mo .sc12 .nv12 .nw12{position:sticky!important;bottom:0!important;margin:18px 0 0!important;height:54px!important;border-radius:16px!important;background:#003641!important;box-shadow:0 8px 20px rgba(0,54,65,.25)!important}
+html.r86.r86mo .sc12 .nv12 .pt-legal{margin:14px 0 4px}
 }
+
+/* R86h: sem barra de rolagem visível (continua rolando com roda/dedo) */
+html.r86 .sc12 .nv12,html.r86 .sc12 .ls12,html.r86 .sc12 .lsi12,html.r86 .sc12 .nv12 *{scrollbar-width:none;-ms-overflow-style:none}
+html.r86 .sc12 .nv12::-webkit-scrollbar,html.r86 .sc12 .ls12::-webkit-scrollbar,html.r86 .sc12 .lsi12::-webkit-scrollbar,html.r86 .sc12 .nv12 *::-webkit-scrollbar{display:none;width:0;height:0}
+html.r86 .pt-tela,html.r86 .an-tela{scrollbar-width:none}
+html.r86 .pt-tela::-webkit-scrollbar,html.r86 .an-tela::-webkit-scrollbar{display:none}
