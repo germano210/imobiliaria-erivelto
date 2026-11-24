@@ -281,35 +281,33 @@
 
   /* ---------- T45: "Quero vender meu imóvel" (formulário curto; cai nos contatos do painel) ---------- */
   var TIPOS_VENDER = [['casa', 'Casa'], ['apartamento', 'Apartamento'], ['terreno', 'Terreno'], ['sobrado', 'Sobrado'], ['sitio', 'Sítio ou chácara'], ['sala', 'Sala comercial'], ['galpao', 'Galpão'], ['outro', 'Outro']];
+  // John 23/11 (R86c, A): mesmo cartão do Login, poucos campos, o tipo vira uma lista (não 8 pílulas soltas)
   P.telaVender = function () {
     css();
-    var tipo = null;
-    var g = el('div', { class: 'pt-chips', role: 'radiogroup', 'aria-label': 'Tipo do imóvel' });
-    TIPOS_VENDER.forEach(function (t) {
-      var b = el('button', { type: 'button', class: 'pt-chip', role: 'radio', 'aria-checked': 'false', 'data-v': t[0], texto: t[1] });
-      b.onclick = function () { tipo = t[0]; g.querySelectorAll('.pt-chip').forEach(function (o) { o.setAttribute('aria-checked', String(o === b)); }); ver(); };
-      g.appendChild(b);
-    });
-    var cid = el('input', { class: 'pt-in', id: 'pt-v-cidade', maxlength: '80', autocomplete: 'address-level2', 'aria-label': 'Cidade do imóvel', placeholder: 'Ex.: Santo Antônio da Patrulha' });
-    var obs = el('textarea', { class: 'pt-in pt-area', id: 'pt-v-obs', maxlength: '300', rows: '3', 'aria-label': 'Conte um pouco (opcional)', placeholder: 'Ex.: 3 quartos, pátio grande, perto do centro' });
-    var nome = el('input', { class: 'pt-in', id: 'pt-v-nome', maxlength: '60', autocomplete: 'name', 'aria-label': 'Seu nome', placeholder: 'Seu nome' });
-    var wa = el('input', { class: 'pt-in', id: 'pt-v-wa', type: 'tel', inputmode: 'tel', maxlength: '25', autocomplete: 'tel', 'aria-label': 'Seu WhatsApp', placeholder: 'Seu WhatsApp com DDD' });
-    var ace = el('label', { class: 'pt-chk' }); ace.innerHTML = '<input type="checkbox" id="pt-v-aceite"><span>Li e aceito o <a href="privacidade/" target="_blank" rel="noopener">aviso de privacidade</a></span>';
-    var msg = el('p', { class: 'pt-msg', 'aria-live': 'polite' });
-    var env = el('button', { type: 'button', class: 'pt-btn pri', id: 'pt-v-enviar', disabled: 'disabled', texto: 'Enviar' });
-    var fe = el('button', { type: 'button', class: 'pt-btn', texto: 'Fechar' });
-    var corpo = el('div', { class: 'pt-cartao pt-largo' }, [
-      el('h1', { class: 'pt-t', id: 'pt-v-t', texto: 'Quero vender meu imóvel' }),
-      el('p', { class: 'pt-p', texto: 'Conte o básico. O Erivelto fala com você pelo WhatsApp para combinar uma avaliação. Enviar não é contrato nem compromisso.' }),
-      el('p', { class: 'pt-lb', texto: 'Tipo' }), g, el('p', { class: 'pt-lb', texto: 'Cidade' }), cid, el('p', { class: 'pt-lb', texto: 'Conte um pouco (opcional)' }), obs,
-      el('p', { class: 'pt-lb', texto: 'Seu nome' }), nome, el('p', { class: 'pt-lb', texto: 'Seu WhatsApp' }), wa, ace, msg, env, fe]);
-    var tela = el('div', { class: 'pt-tela', id: 'pt-vender', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'pt-v-t' }, [corpo]);
+    var X = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    var tipo = el('select', { class: 'an-in', id: 'pt-v-tipo', 'aria-label': 'Tipo do imóvel' });
+    tipo.innerHTML = '<option value="">Tipo do imóvel</option>' + TIPOS_VENDER.map(function (t) { return '<option value="' + t[0] + '">' + t[1] + '</option>'; }).join('');
+    var cid = el('input', { class: 'an-in', id: 'pt-v-cidade', maxlength: '80', autocomplete: 'address-level2', 'aria-label': 'Cidade do imóvel', placeholder: 'Cidade do imóvel' });
+    var nome = el('input', { class: 'an-in', id: 'pt-v-nome', maxlength: '60', autocomplete: 'name', 'aria-label': 'Seu nome', placeholder: 'Seu nome' });
+    var wa = el('input', { class: 'an-in', id: 'pt-v-wa', type: 'tel', inputmode: 'tel', maxlength: '25', autocomplete: 'tel', 'aria-label': 'Seu WhatsApp', placeholder: 'Seu WhatsApp' });
+    var ace = el('label', { class: 'an-chk' }); ace.innerHTML = '<input type="checkbox" id="pt-v-aceite"><span>Li e aceito o <a href="privacidade/" target="_blank" rel="noopener">aviso de privacidade</a></span>';
+    var msg = el('p', { class: 'an-msg', 'aria-live': 'polite' });
+    var env = el('button', { type: 'button', class: 'an-bt', id: 'pt-v-enviar', disabled: 'disabled', texto: 'Enviar' });
+    var fe = el('button', { type: 'button', class: 'an-x', 'aria-label': 'Fechar' }); fe.innerHTML = X;
+    var corpo = el('div', { class: 'an-card' }, [fe,
+      el('p', { class: 'an-t', id: 'pt-v-t', texto: 'Anunciar meu imóvel' }),
+      el('p', { class: 'an-s', texto: 'O Erivelto fala com você pelo WhatsApp.' }),
+      tipo, cid, nome, wa, ace, msg, env]);
+    var tela = el('div', { class: 'an-tela', id: 'pt-vender', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'pt-v-t' }, [corpo]);
     var chk = ace.querySelector('input');
-    function dados() { return { tipo: tipo, cidade: cid.value.trim(), obs: obs.value.trim(), nome: nome.value.trim(), whatsapp: wa.value.trim() }; }
+    function dados() { return { tipo: tipo.value, cidade: cid.value.trim(), obs: '', nome: nome.value.trim(), whatsapp: wa.value.trim() }; }
     function ver() { var d = dados(); env.disabled = !(d.tipo && d.cidade.length >= 2 && d.nome.length >= 2 && waDig(d.whatsapp).length >= 10 && chk.checked); }
-    [cid, obs, nome, wa].forEach(function (i) { i.oninput = ver; }); chk.onchange = ver;
-    fe.onclick = function () { tela.remove(); };
-    function pronto(texto) { corpo.innerHTML = ''; corpo.appendChild(el('h1', { class: 'pt-t', id: 'pt-v-t', texto: 'Recebido' })); corpo.appendChild(el('p', { class: 'pt-p', id: 'pt-v-ok', texto: texto })); var f2 = el('button', { type: 'button', class: 'pt-btn pri', texto: 'Fechar' }); f2.onclick = function () { tela.remove(); }; corpo.appendChild(f2); f2.focus(); }
+    [cid, nome, wa].forEach(function (i) { i.oninput = ver; }); tipo.onchange = ver; chk.onchange = ver;
+    function fechar() { tela.remove(); document.removeEventListener('keydown', esc); }
+    function esc(ev) { if (ev.key === 'Escape') fechar(); }
+    document.addEventListener('keydown', esc);
+    fe.onclick = fechar; tela.addEventListener('click', function (ev) { if (ev.target === tela) fechar(); });
+    function pronto(texto) { corpo.innerHTML = ''; corpo.appendChild(fe); corpo.appendChild(el('p', { class: 'an-t', id: 'pt-v-t', texto: 'Recebido' })); corpo.appendChild(el('p', { class: 'an-s', id: 'pt-v-ok', texto: texto })); var f2 = el('button', { type: 'button', class: 'an-bt', texto: 'Fechar' }); f2.onclick = fechar; corpo.appendChild(f2); f2.focus(); }
     env.onclick = function () {
       var d = dados(); if (env.disabled) return;
       if (!P.srv) {
@@ -323,7 +321,7 @@
         msg.textContent = r.status === 400 && r.j && r.j.campo === 'cidade' ? 'Confira a cidade.' : msgConta(r); env.disabled = false;
       });
     };
-    document.body.appendChild(tela); var b0 = g.querySelector('.pt-chip'); if (b0) b0.focus();
+    document.body.appendChild(tela); tipo.focus();
   };
   document.addEventListener('click', function (ev) {
     var a = ev.target.closest && ev.target.closest('[data-pt-vender]'); if (!a) return;
@@ -427,7 +425,32 @@
 
   // ficha do imóvel (o site chama P.botaoVisita ao montar a ficha: é a deixa para completar)
   var bv0 = P.botaoVisita;
-  P.botaoVisita = function (a) { if (a && a.id) { setTimeout(function () { ficha86(a); }, 0); visto86(a.id); } return ''; };   // John 23/11: um botão só na ficha (sem Pedir visita)
+  P.botaoVisita = function (a) { if (a && a.id) { setTimeout(function () { ficha86(a); fotos86(); }, 0); visto86(a.id); } return ''; };
+  // John 23/11 (R86c): a foto vira um card, uma por vez, com setas e "1 / N" (PC = A, celular = C)
+  var FI86 = 0;
+  function tbs86() { return [].slice.call(document.querySelectorAll('.sc12 .th12 .tb12')); }
+  function fotos86() {
+    var fp = document.querySelector('.sc12 .fp12'); if (!fp) return;
+    FI86 = 0; var n = tbs86().length, box = fp.querySelector('.r86-fa');
+    if (!box) {
+      box = el('div', { class: 'r86-fa' });
+      box.innerHTML = '<button type="button" class="r86-ar p" data-r86-ar="-1" aria-label="Foto anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>' +
+        '<button type="button" class="r86-ar n" data-r86-ar="1" aria-label="Próxima foto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button><span class="r86-nf" aria-live="polite"></span>';
+      fp.appendChild(box);
+    }
+    box.hidden = n < 2; cont86();
+  }
+  function cont86() { var n = tbs86().length, c = document.querySelector('.sc12 .r86-nf'); if (c) c.textContent = (FI86 + 1) + ' / ' + n; }
+  document.addEventListener('click', function (ev) {
+    var t = ev.target.closest && ev.target.closest('.sc12 .th12 .tb12');
+    if (t && !t.classList.contains('bl')) { FI86 = Math.max(0, tbs86().indexOf(t)); setTimeout(cont86, 0); return; }
+    var b = ev.target.closest && ev.target.closest('[data-r86-ar]'); if (!b) return;
+    ev.preventDefault(); ev.stopPropagation();
+    var l = tbs86(), n = l.length; if (n < 2) return;
+    var i = (FI86 + (+b.getAttribute('data-r86-ar')) + n) % n, alvo = l[i];
+    if (!alvo.classList.contains('bl')) FI86 = i;
+    alvo.click(); cont86();   // foto bloqueada: o site mostra o mesmo aviso de quando se toca na miniatura
+  }, true);   // John 23/11: um botão só na ficha (sem Pedir visita)
   function ficha86(a0) {
     var a = MAP86[a0.id] || a0, nv = document.querySelector('.sc12 .nv12'); if (!nv || window.innerWidth < 760) return;
     var velho = nv.querySelector('.r86-f'); if (velho) velho.remove();
@@ -451,8 +474,11 @@
     var s = getComputedStyle(li), q = li.getBoundingClientRect(), qs = sc.getBoundingClientRect();
     var vis = s.display !== 'none' && s.visibility !== 'hidden' && +s.opacity > 0.05 && q.width > 0;
     b.style.display = vis ? '' : 'none'; if (!vis) return;
-    b.style.top = (q.top - qs.top + (q.height - b.offsetHeight) / 2) + 'px';
-    b.style.right = (qs.right - q.left + 10) + 'px';
+    // John 23/11: a letra do "Anunciar" do mesmo tamanho do "Login" (copia a letra, a altura e o vidro dele)
+    b.style.fontSize = s.fontSize; b.style.fontWeight = s.fontWeight; b.style.letterSpacing = s.letterSpacing;
+    b.style.height = q.height + 'px'; b.style.background = s.backgroundColor; b.style.borderColor = s.borderTopColor; b.style.color = s.color;
+    b.style.top = (q.top - qs.top) + 'px';
+    b.style.right = (qs.right - q.left + 8) + 'px';
   }
   // a lista some por baixo do grid de busca: a área de rolar começa no meio do grid (o grid fica por cima)
   function corte86() {

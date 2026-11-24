@@ -117,22 +117,22 @@ html.r86 .pt-anun .c{display:none}
 @media (min-width:760px){html.r86 .sc12 .ls12{margin-top:calc(-1 * var(--r86d,0px));padding-top:var(--r86d,0px);box-sizing:border-box}}
 html.r86 .sc12 .bk12{box-shadow:0 12px 28px rgba(0,0,0,.28)}
 /* cartão B: vidro branco, foto à esquerda, preço/nome/onde/cômodos/botão à direita */
-html.r86 .sc12 .lsi12 .cd12.r86c{display:grid!important;grid-template-columns:minmax(210px,36%) minmax(0,1fr)!important;column-gap:18px;align-items:stretch;padding:12px;height:auto!important;min-height:0!important;margin:0 0 16px!important;
+html.r86 .sc12 .lsi12 .cd12.r86c{display:grid!important;grid-template-columns:minmax(260px,50%) minmax(0,1fr)!important;column-gap:18px;align-items:stretch;padding:12px;height:auto!important;min-height:0!important;margin:0 0 16px!important;
   background:rgba(255,255,255,.86)!important;-webkit-backdrop-filter:blur(22px) saturate(1.4);backdrop-filter:blur(22px) saturate(1.4);border:1px solid rgba(255,255,255,.95);border-radius:22px!important;box-shadow:0 10px 30px rgba(0,0,0,.28)!important;color:#13202c;overflow:hidden}
-html.r86 .sc12 .lsi12 .cd12.r86c>.ci12{position:relative!important;inset:auto!important;width:auto!important;height:auto!important;min-height:210px;border-radius:16px;overflow:hidden;grid-row:1}
+html.r86 .sc12 .lsi12 .cd12.r86c>.ci12{position:relative!important;inset:auto!important;width:auto!important;height:auto!important;min-height:250px;border-radius:16px;overflow:hidden;grid-row:1}
 html.r86 .sc12 .lsi12 .cd12.r86c>.ci12>img{position:absolute;inset:0;width:100%!important;height:100%!important;object-fit:cover}
 html.r86 .sc12 .lsi12 .cd12.r86c>.ov7{position:static!important;inset:auto!important;width:auto!important;margin:0!important;transform:none!important;grid-row:1;grid-column:2;
   display:flex!important;flex-direction:column;gap:9px;padding:8px 6px 4px 0!important;background:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;color:#13202c!important;text-shadow:none!important;border-radius:0!important}
 html.r86 .sc12 .lsi12 .cd12.r86c .pr8{order:1;margin:0!important}
-html.r86 .sc12 .lsi12 .cd12.r86c .pv8,html.r86 .sc12 .lsi12 .cd12.r86c .pv8 b{font:600 26px/1.1 Poppins,system-ui,sans-serif!important;color:#13202c!important;letter-spacing:-.01em}
-html.r86 .sc12 .lsi12 .cd12.r86c .nm8{order:2;margin:0!important;font:500 16px/1.3 Poppins,system-ui,sans-serif!important;color:#13202c!important;white-space:normal!important;overflow:visible!important}
-html.r86 .sc12 .lsi12 .cd12.r86c .r86-onde{order:3;display:flex;gap:6px;align-items:center;margin:0;font:400 14px/1.3 Poppins,system-ui,sans-serif;color:#3a4650}
+html.r86 .sc12 .lsi12 .cd12.r86c .pv8,html.r86 .sc12 .lsi12 .cd12.r86c .pv8 b{font:600 20px/1.1 Poppins,system-ui,sans-serif!important;color:#13202c!important;letter-spacing:-.01em}
+html.r86 .sc12 .lsi12 .cd12.r86c .nm8{order:2;margin:0!important;font:400 13.5px/1.3 Poppins,system-ui,sans-serif!important;color:#13202c!important;white-space:normal!important;overflow:visible!important}
+html.r86 .sc12 .lsi12 .cd12.r86c .r86-onde{order:3;display:flex;gap:6px;align-items:center;margin:0;font:400 12.5px/1.3 Poppins,system-ui,sans-serif;color:#3a4650}
 html.r86 .sc12 .lsi12 .cd12.r86c .if8{order:4;position:static!important;display:flex!important;flex-wrap:wrap;gap:6px;margin:0!important;padding:0!important;background:none!important;overflow:visible!important;width:auto!important}
-html.r86 .sc12 .lsi12 .cd12.r86c .if8 li{background:rgba(255,255,255,.9)!important;border:1px solid rgba(0,54,65,.12);border-radius:999px!important;padding:5px 11px!important;font:500 14px/1 Poppins,system-ui,sans-serif!important;color:#1f2b30!important;box-shadow:none!important;height:auto!important;display:inline-flex!important;align-items:center;gap:6px}
-html.r86 .sc12 .lsi12 .cd12.r86c .if8 li svg{width:18px!important;height:18px!important;color:#003641}
+html.r86 .sc12 .lsi12 .cd12.r86c .if8 li{background:rgba(255,255,255,.9)!important;border:1px solid rgba(0,54,65,.12);border-radius:999px!important;padding:5px 10px!important;font:400 12px/1 Poppins,system-ui,sans-serif!important;color:#1f2b30!important;box-shadow:none!important;height:auto!important;display:inline-flex!important;align-items:center;gap:6px}
+html.r86 .sc12 .lsi12 .cd12.r86c .if8 li svg{width:14px!important;height:14px!important;color:#003641}
 html.r86 .sc12 .lsi12 .cd12.r86c .bt7{order:5;margin-top:auto!important;display:flex!important;gap:8px;align-items:stretch;width:100%}
-html.r86 .sc12 .lsi12 .cd12.r86c .vm12{margin:0!important;height:48px!important;border-radius:13px!important;background:#003641!important;font:500 15px/1 Poppins,system-ui,sans-serif!important;flex:1}
-html.r86 .sc12 .lsi12 .cd12.r86c .r86-mais{flex:none;height:48px;padding:0 16px;border-radius:13px;border:1px solid rgba(0,54,65,.35);background:rgba(255,255,255,.9);color:#003641;font:500 14px/1 Poppins,system-ui,sans-serif;cursor:pointer;white-space:nowrap}
+html.r86 .sc12 .lsi12 .cd12.r86c .vm12{margin:0!important;height:42px!important;border-radius:12px!important;background:#003641!important;font:400 13.5px/1 Poppins,system-ui,sans-serif!important;flex:1}
+html.r86 .sc12 .lsi12 .cd12.r86c .r86-mais{flex:none;height:42px;padding:0 14px;border-radius:12px;border:1px solid rgba(0,54,65,.35);background:rgba(255,255,255,.9);color:#003641;font:400 13px/1 Poppins,system-ui,sans-serif;cursor:pointer;white-space:nowrap}
 html.r86 .sc12 .lsi12 .cd12.r86c .pt-selos{z-index:3}
 html.r86 .sc12 .lsi12 .cd12.r86c .ch7,html.r86 .sc12 .lsi12 .cd12.r86c .pl12{display:none!important}
 html.r86 .r86-ic{width:22px;height:22px;flex:none;color:#003641}
@@ -148,7 +148,7 @@ html.r86 .r86-cm em,html.r86 .r86-t em{display:block;font:400 13px/1.3 Poppins,s
 html.r86 .r86-ots{display:flex;flex-wrap:wrap;gap:6px}
 html.r86 .r86-ot{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.92);border:1px solid rgba(0,54,65,.12);border-radius:999px;padding:6px 12px;font:500 14px/1 Poppins,system-ui,sans-serif;color:#1f2b30}
 /* ficha (D): onde fica e os cômodos/itens em quadrados com ícone grande; letras maiores */
-html.r86 .sc12 .nv12 .np12,html.r86 .sc12 .nv12 .np12 b{font-size:26px!important;font-weight:600!important}
+html.r86 .sc12 .nv12 .np12,html.r86 .sc12 .nv12 .np12 b{font-size:22px!important;font-weight:600!important}
 html.r86 .sc12 .nv12 .nh12 small{font-size:14px!important;white-space:normal!important}
 html.r86 .sc12 .nv12.r86-fo .if8.ns8{display:none!important}
 html.r86 .r86-f{display:flex;flex-direction:column;gap:10px;margin:4px 0 14px}
@@ -177,7 +177,7 @@ html.r86 .sc12 .nv12 .pt-visita{background:#003641;color:#fff;border-color:#0036
 #pt-visita .pt-chip[aria-checked=true]{background:#003641;border-color:#003641;color:#fff}
 #pt-visita .pt-btn.pri{background:#003641}
 html.r86 .sc12 .lsi12 .cd12.r86c .pt-selo{font-size:12.5px!important;padding:4px 10px!important}
-html.r86 .sc12 .rs12 p{font-size:15px!important;line-height:1.35!important}
+html.r86 .sc12 .rs12 p{font-size:13px!important;line-height:1.35!important}
 /* R86 · ficha no PC: a coluna rola inteira e os 2 botões ficam presos embaixo (Pedir visita + WhatsApp) */
 @media (min-width:760px){
 html.r86 .sc12 .nv12{overflow-y:auto!important;display:flex!important;flex-direction:column}
@@ -186,4 +186,71 @@ html.r86 .sc12 .nv12 .nv24s{height:auto!important;max-height:none!important;over
 html.r86 .sc12 .nv12 .nv24p{height:auto!important;max-height:none!important;overflow:visible!important}
 html.r86 .sc12 .nv12 .pt-visita{display:none!important;order:9;position:sticky;bottom:88px;z-index:3;align-self:stretch;margin:auto 0 0;height:52px;border-radius:14px;font:500 16px/1 Poppins,system-ui,sans-serif;box-shadow:0 -18px 0 10px #fff,0 30px 0 10px #fff}
 html.r86 .sc12 .nv12 .nw12{order:10;position:static!important;left:auto!important;right:auto!important;bottom:auto!important;margin:auto 0 24px!important;width:auto!important;flex:none}
+}
+
+/* ===== R86c (23/11 noite) · John: ficha no PC = A (foto em card, uma por vez, setas), ficha no celular = C (um card só sobre a cena), lista no celular = A (card branco), Anunciar igual ao Login, resultado com letra menor e casa maior ===== */
+/* Anunciar: o vidro, a letra e a altura vêm do Login (ponte.js copia); aqui só a forma de pílula */
+html.r86 .pt-anun{height:auto;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.14);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-family:Poppins,system-ui,sans-serif;line-height:1}
+@media (max-width:560px){html.r86 .pt-anun{min-width:0;padding:0 14px;font-size:inherit}}
+/* tela Anunciar = cartão do Login */
+.an-tela{position:fixed;inset:0;z-index:2147483200;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.55);overflow:auto}
+.an-card{position:relative;width:364px;max-width:100%;box-sizing:border-box;background:#fff;border-radius:28px;padding:30px 30px 32px;display:flex;flex-direction:column;gap:10px;font-family:Poppins,system-ui,sans-serif;color:#111}
+.an-x{position:absolute;top:12px;right:14px;width:40px;height:40px;border:0;background:none;padding:10px;cursor:pointer;color:#111}
+.an-x svg{width:100%;height:100%;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;fill:none}
+.an-t{margin:4px 0 0;text-align:center;font:400 14.2px/1.15 Poppins,system-ui,sans-serif;color:#111}
+.an-s{margin:0 0 8px;text-align:center;font:400 11.6px/1.35 Poppins,system-ui,sans-serif;color:#5b6470}
+.an-in{display:block;width:100%;box-sizing:border-box;height:55px;border:0;border-radius:16.8px;background:#eeedea;padding:0 22px;font:400 12.5px/1 Poppins,system-ui,sans-serif;color:#111;outline:none;-webkit-appearance:none;appearance:none}
+.an-in::placeholder{color:#8a8f94}
+select.an-in{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 18px center;background-size:16px;color:#111}
+select.an-in:invalid,select.an-in option[value=""]{color:#8a8f94}
+.an-in:focus{box-shadow:0 0 0 2px #003641}
+.an-chk{display:flex;gap:8px;align-items:center;margin:2px 4px;font:400 11.6px/1.35 Poppins,system-ui,sans-serif;color:#3a4650}
+.an-chk input{width:16px;height:16px;accent-color:#003641;flex:none}
+.an-chk a{color:#003641}
+.an-msg{margin:0;min-height:0;text-align:center;font:400 11.6px/1.3 Poppins,system-ui,sans-serif;color:#8C471C}
+.an-msg:empty{display:none}
+.an-bt{height:55px;margin-top:8px;border:0;border-radius:999px;background:#003641;color:#fff;font:400 12.5px/1 Poppins,system-ui,sans-serif;cursor:pointer}
+.an-bt:disabled{background:#adadad;color:#e9e9e9;cursor:default}
+/* setas e "1 / N" na foto (PC e celular) */
+html.r86 .r86-fa{position:absolute;inset:0;z-index:4;pointer-events:none}
+html.r86 .r86-fa[hidden]{display:none}
+html.r86 .r86-ar{pointer-events:auto;position:absolute;top:50%;width:40px;height:40px;margin-top:-20px;border:0;border-radius:50%;background:rgba(255,255,255,.92);color:#13202c;display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.18);padding:0}
+html.r86 .r86-ar svg{width:18px;height:18px;stroke:currentColor;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+html.r86 .r86-ar.p{left:14px} html.r86 .r86-ar.n{right:14px}
+html.r86 .r86-nf{position:absolute;top:14px;right:14px;padding:4px 10px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff;font:500 12px/1 Poppins,system-ui,sans-serif}
+/* fundo da ficha: a cena desfocada atrás (em vez da tela preta) */
+html.r86 .sc12 .f512{background:rgba(10,14,18,.38)!important;-webkit-backdrop-filter:blur(18px) saturate(1.1);backdrop-filter:blur(18px) saturate(1.1)}
+/* PC = A: a foto é um card com margem; as miniaturas embaixo; as informações num card branco à direita */
+@media (min-width:760px){
+html.r86 .sc12 .f512 .fp12{left:56px!important;top:100px!important;right:520px!important;bottom:136px!important;border-radius:22px;overflow:hidden;background:#222;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+html.r86 .sc12 .f512 .th12{left:56px!important;bottom:40px!important;top:auto!important}
+html.r86 .sc12 .f512 .th12 .tb12{width:96px!important;height:68px!important;border-radius:12px!important}
+html.r86 .sc12 .nv12{top:100px!important;right:56px!important;bottom:40px!important;left:auto!important;width:430px!important;height:auto!important;border-radius:22px!important;padding:28px 28px 20px!important;box-shadow:0 18px 40px rgba(0,0,0,.3)}
+html.r86 .sc12 .nv12 .np12,html.r86 .sc12 .nv12 .np12 b{font-size:21px!important}
+html.r86 .r86-t b{font-size:13px} html.r86 .r86-t small,html.r86 .r86-t em{font-size:12px}
+html.r86 .r86-ft{font-size:13.5px}
+}
+/* celular = C: um card só (foto com setas em cima, informações embaixo) sobre a cena desfocada */
+@media (max-width:759px){
+html.r86 .sc12 .f512 .fp12{left:12px!important;right:12px!important;top:84px!important;bottom:auto!important;height:38vh!important;border-radius:22px 22px 0 0;overflow:hidden;background:#222}
+html.r86 .sc12 .f512 .th12{left:24px!important;top:calc(84px + 38vh - 58px)!important;bottom:auto!important;z-index:5}
+html.r86 .sc12 .nv12{left:12px!important;right:12px!important;top:calc(84px + 38vh)!important;bottom:12px!important;height:auto!important;border-radius:0 0 22px 22px!important;box-shadow:0 18px 40px rgba(0,0,0,.3)}
+html.r86 .r86-ar{width:34px;height:34px;margin-top:-17px}
+html.r86 .r86-nf{top:12px;right:auto;left:12px}
+/* lista = A: card branco, foto em cima, dados embaixo (lê melhor que vidro) */
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8{background:#fff!important;border-radius:20px!important;overflow:hidden;height:auto!important;box-shadow:0 10px 28px rgba(0,0,0,.28)!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8>.ci12{height:210px!important;border-radius:0!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8>.ci12>img{height:100%!important;object-fit:cover}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8>.ov7{position:static!important;inset:auto!important;transform:none!important;width:auto!important;margin:0!important;display:flex!important;flex-direction:column;gap:7px;padding:14px 14px 14px!important;background:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important;border-radius:0!important;color:#13202c!important;text-shadow:none!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .pr8{order:1;margin:0!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .pv8,html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .pv8 b{font:600 19px/1.1 Poppins,system-ui,sans-serif!important;color:#13202c!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .ov7 .nm8,html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .ov7 .nm8 *{text-align:left!important;justify-content:flex-start!important;align-self:stretch!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .bt7 .vm12 *{font-size:inherit!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .nm8{order:2;margin:0!important;font:400 12.5px/1.3 Poppins,system-ui,sans-serif!important;color:#5b6470!important;text-align:left!important;white-space:normal!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .if8{order:3;position:static!important;inset:auto!important;transform:none!important;display:flex!important;flex-wrap:wrap;gap:6px;margin:0!important;padding:0!important;width:auto!important;overflow:visible!important;background:none!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .if8 li{background:#f3f2ee!important;border:0!important;border-radius:999px!important;padding:5px 9px!important;color:#1f2b30!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;height:auto!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .if8 li span{font:400 11.5px/1 Poppins,system-ui,sans-serif!important;color:#1f2b30!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .if8 li svg{color:#003641}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .bt7{order:4;margin:4px 0 0!important;width:100%!important}
+html.r86 .sc12:not(.dk) .lsi12 .cd12.c8 .bt7 .vm12.vm12.vm12{width:100%!important;margin:0!important;height:44px!important;border-radius:12px!important;background:#003641!important;font:400 13.5px/1 Poppins,system-ui,sans-serif!important}
 }
