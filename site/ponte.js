@@ -440,7 +440,7 @@
   function tbs86() { return [].slice.call(document.querySelectorAll('.sc12 .th12 .tb12')); }
   function fotos86() {
     var fp = document.querySelector('.sc12 .fp12'); if (!fp) return;
-    FI86 = 0; var n = tbs86().length, box = fp.querySelector('.r86-fa');
+    var n = tbs86().length + 1, box = fp.querySelector('.r86-fa');
     if (!box) {
       box = el('div', { class: 'r86-fa' });
       box.innerHTML = '<button type="button" class="r86-ar p" data-r86-ar="-1" aria-label="Foto anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>' +
@@ -449,16 +449,18 @@
     }
     box.hidden = n < 2; cont86();
   }
-  function cont86() { var n = tbs86().length, c = document.querySelector('.sc12 .r86-nf'); if (c) c.textContent = (FI86 + 1) + ' / ' + n; }
+  // R86k: as miniaturas não incluem a foto aberta; o total é miniaturas + 1 e a posição é o índice que falta
+  function pos86() { var l = tbs86(), n = l.length + 1, tem = {}; l.forEach(function (t) { tem[+t.dataset.i] = 1; }); for (var i = 0; i < n; i++) if (!tem[i]) return { i: i, n: n, l: l }; return { i: 0, n: n, l: l }; }
+  function cont86() { var p = pos86(), c = document.querySelector('.sc12 .r86-nf'); if (c) c.textContent = (p.i + 1) + ' / ' + p.n; }
   document.addEventListener('click', function (ev) {
     var t = ev.target.closest && ev.target.closest('.sc12 .th12 .tb12');
-    if (t && !t.classList.contains('bl')) { FI86 = Math.max(0, tbs86().indexOf(t)); setTimeout(cont86, 0); return; }
+    if (t && !t.classList.contains('bl')) { setTimeout(cont86, 0); return; }
     var b = ev.target.closest && ev.target.closest('[data-r86-ar]'); if (!b) return;
     ev.preventDefault(); ev.stopPropagation();
-    var l = tbs86(), n = l.length; if (n < 2) return;
-    var i = (FI86 + (+b.getAttribute('data-r86-ar')) + n) % n, alvo = l[i];
-    if (!alvo.classList.contains('bl')) FI86 = i;
-    alvo.click(); cont86();   // foto bloqueada: o site mostra o mesmo aviso de quando se toca na miniatura
+    var p = pos86(); if (p.n < 2) return;
+    var ii = (p.i + (+b.getAttribute('data-r86-ar')) + p.n) % p.n, alvo = p.l.filter(function (t) { return +t.dataset.i === ii; })[0];
+    if (!alvo) return;   // foto travada: o clique na miniatura mostra o mesmo aviso de entrar
+    alvo.click(); setTimeout(cont86, 0);   // foto bloqueada: o site mostra o mesmo aviso de quando se toca na miniatura
   }, true);   // John 23/11: um botão só na ficha (sem Pedir visita)
   // R86g (John 24/11, D): ficha no celular = foto no topo com cantos arredondados, preço, resumo em 3 números e abas
   // Sobre · Cômodos · Onde fica (o mapa do site vai para a aba "Onde fica"; o botão do WhatsApp continua o do site)
@@ -559,7 +561,23 @@
   /* R86h: modo PC x celular = a mesma conta do site (classe dk do .sc12; antes de existir, a proporção da janela) */
   function pc86() { var s = document.querySelector('.sc12'); if (s) return s.classList.contains('dk'); return innerWidth > Math.max(innerHeight, H86.h || 0) * .75; }
   function modo86() { var pc = pc86(), r = document.documentElement.classList; if (r.contains('r86pc') !== pc) r.toggle('r86pc', pc); if (r.contains('r86mo') === pc) r.toggle('r86mo', !pc); }
-  (function m86() { modo86(); requestAnimationFrame(m86); })();
+  /* R86k (John/Erivelto 25/11, iPhone): no celular o bloco de busca sobe para logo abaixo do topo (nome + Anunciar/Login),
+     e o começo da lista sobe junto (o corte continua no meio do bloco, que agora está mais alto) */
+  function sobe86() {
+    var sc = document.querySelector('.sc12'); if (!sc) return;
+    var up = 0;
+    if (!pc86()) {
+      var bk = sc.querySelector('.bk12'), hd = sc.querySelector('.hd12'), li = sc.querySelector('.li12');
+      if (bk && hd) {
+        var at = parseFloat(sc.style.getPropertyValue('--r86up')) || 0, top0 = bk.getBoundingClientRect().top + at;
+        var base = Math.max(hd.getBoundingClientRect().bottom, li ? li.getBoundingClientRect().bottom : 0);
+        if (base > 0 && top0 > 0) up = Math.max(0, Math.round(top0 - (base + 12)));
+      }
+    }
+    var cur = parseFloat(sc.style.getPropertyValue('--r86up')) || 0;
+    if (Math.abs(cur - up) > 1) sc.style.setProperty('--r86up', up + 'px');
+  }
+  (function m86() { modo86(); sobe86(); requestAnimationFrame(m86); })();
   function alturaBase86() { var w = innerWidth, h = innerHeight; if (Math.abs(w - H86.w) > 40 || !H86.on && h > H86.h || !H86.h) { if (Math.abs(w - H86.w) > 40) H86.h = 0; H86.w = w; if (!H86.on) H86.h = Math.max(H86.h, h); } }
   function digita86(ev) {
     var t = ev.target; if (!t || !/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || !matchMedia('(pointer:coarse)').matches || H86.on) return;

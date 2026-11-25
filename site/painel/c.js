@@ -410,12 +410,16 @@ Object.assign(window.ICO14, {
     img.onerror = function () { toast('Não consegui ler essa foto.'); if (erro) erro(); };
     img.src = url;
   }
+  /* R86k (John 25/11): o corretor escolhe, foto por foto, o que aparece sem login. Sem escolha: as 3 primeiras livres, da 4ª em diante só com login */
+  function livre86(f, j) { return f && typeof f.l === 'boolean' ? f.l : j < 3; }
+  var CAD86 = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
   ED.fotos = function (r, idx) {
     var sel = Math.min(idx || 0, Math.max(0, (ATUAL.fotos || []).length - 1));
     function desenha() {
       var fs = ATUAL.fotos || [], h = '';
       if (fs.length) {
-        h += '<div class="fv"><img src="' + esc(fs[sel].s) + '" alt=""></div><div class="thumbs" style="padding:0">' + fs.map(function (f, j) { return '<button data-s="' + j + '" class="' + (j === sel ? 'on' : '') + '" aria-label="Foto ' + (j + 1) + '"><img src="' + esc(f.s) + '" alt=""></button>'; }).join('') + '</div>' +
+        h += '<div class="fv' + (livre86(fs[sel], sel) ? '' : ' trava') + '"><img src="' + esc(fs[sel].s) + '" alt="">' + (livre86(fs[sel], sel) ? '' : '<span class="cad">' + CAD86 + 'Só depois do login</span>') + '</div><div class="thumbs" style="padding:0">' + fs.map(function (f, j) { var lv = livre86(f, j); return '<button data-s="' + j + '" class="' + (j === sel ? 'on' : '') + (lv ? '' : ' trava') + '" aria-label="Foto ' + (j + 1) + (lv ? '' : ', só depois do login') + '"><img src="' + esc(f.s) + '" alt="">' + (lv ? '' : '<span class="cad">' + CAD86 + '</span>') + '</button>'; }).join('') + '</div>' +
+          '<div class="lin col fl86"><span class="k">Quem vê esta foto</span><span class="chips" data-livre>' + [['1', 'Todos'], ['0', 'Só depois do login']].map(function (o) { return '<button class="chip" data-l="' + o[0] + '" aria-pressed="' + (livre86(fs[sel], sel) === (o[0] === '1')) + '">' + o[1] + '</button>'; }).join('') + '</span><span class="dica" style="margin:0">' + fs.filter(livre86).length + ' de ' + fs.length + ' fotos aparecem sem login. As outras aparecem borradas e liberam quando o visitante entra.</span></div>' +
           '<div class="facs"><button data-a="capa"' + (sel ? '' : ' disabled style="opacity:.5"') + '>' + (sel ? 'Usar como capa' : 'É a capa') + '</button><button data-a="esq">◀ Mover</button><button data-a="dir">Mover ▶</button><button data-a="tirar" class="r">Tirar</button></div>';
       }
       h += '<button class="btn sec" data-add>+ Adicionar foto</button>';
@@ -436,6 +440,7 @@ Object.assign(window.ICO14, {
           mudou(); desenha();
         };
       });
+      r.querySelectorAll('[data-l]').forEach(function (b) { b.onclick = function () { if (!fs[sel]) return; var v = b.dataset.l === '1'; fs.forEach(function (f, j) { if (typeof f.l !== 'boolean') f.l = livre86(f, j); }); fs[sel].l = v; mudou(); desenha(); }; });
       r.querySelectorAll('[data-ex]').forEach(function (b) { b.onclick = function () { ATUAL.fotos = ATUAL.fotos || []; ATUAL.fotos.push({ s: b.dataset.ex, a: b.querySelector('img').alt, d: false }); ok(); }; });
       r.querySelector('[data-add]').onclick = function () {
         if (srv() && PONTE.escolherFoto) { PONTE.escolherFoto(function (foto) { ATUAL.fotos = ATUAL.fotos || []; foto.a = foto.a || ''; foto.d = false; ATUAL.fotos.push(foto); ok(); }); return; }
@@ -694,7 +699,7 @@ Object.assign(window.ICO14, {
   function cartao() {
     var im = ATUAL, fs = im.fotos || [];
     return '<div class="card">' + (fs[0] ? '<button data-foto="0" style="display:block;width:100%"><img class="capa" src="' + esc(fs[0].s) + '" alt="Capa"></button>' : '<button class="capa0" data-foto="0">' + ic('foto', 'g') + '+ Fotos</button>') +
-      (fs.length ? '<div class="thumbs">' + fs.map(function (f, j) { return '<button data-foto="' + j + '" aria-label="Foto ' + (j + 1) + '"><img src="' + esc(f.s) + '" alt=""></button>'; }).join('') + '<button class="add" data-foto="' + fs.length + '" aria-label="Adicionar foto">+</button></div>' : '') +
+      (fs.length ? '<div class="thumbs">' + fs.map(function (f, j) { var lv = livre86(f, j); return '<button data-foto="' + j + '"' + (lv ? '' : ' class="trava"') + ' aria-label="Foto ' + (j + 1) + (lv ? '' : ', só depois do login') + '"><img src="' + esc(f.s) + '" alt="">' + (lv ? '' : '<span class="cad">' + CAD86 + '</span>') + '</button>'; }).join('') + '<button class="add" data-foto="' + fs.length + '" aria-label="Adicionar foto">+</button></div>' : '') +
       '<div class="campos">' +
       (RE_COD.test(im.cod || '') ? '<div class="lin cod"><span class="k">Código</span><span class="v">' + esc(im.cod) + '</span></div>' : '') +
       '<button class="lin" data-f="preco"><span class="v preco">' + (fmtPrecoIm(im) || '<span class="slot">+ ' + (im.final === 'aluguel' ? 'Aluguel por mês' : 'Preço') + '</span>') + '</span><span class="ch">›</span></button>' +

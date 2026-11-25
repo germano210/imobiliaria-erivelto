@@ -627,6 +627,8 @@ def campo_errado(o):
             return "fotos"
         if f.get("g") is not None and not (isinstance(f["g"], str) and RE_FOTO.fullmatch(f["g"])):
             return "fotos"
+        if f.get("l") is not None and not isinstance(f["l"], bool):   # R86k: foto livre (True) ou só com login (False)
+            return "fotos"
     for k in ("end", "nomes", "loc", "fn"):
         if o.get(k) is not None and not isinstance(o[k], dict):
             return k

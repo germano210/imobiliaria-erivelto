@@ -35,6 +35,15 @@ K4_NOVOS = ("sobrado:'<path d=\"M4 10.5 12 4l8 6.5\"/><path d=\"M6 9v11h12V9\"/>
 
 # (nome, tarefa, texto antigo, texto novo). Cada texto antigo aparece UMA vez no artefato.
 REMENDOS = [
+    ("fotos livres: o corretor escolhe no painel (foto.l); sem escolha, 3 livres e borra da 4ª", "R86k",
+     'function s4(L){return L>=2&&!o.lib}',
+     'function s4(L){if(o.lib)return!1;var m=v1&&J1(v1.id),f=m&&m.fotos&&m.fotos[L];return f&&typeof f.l==="boolean"?!f.l:L>=3}'),
+    ("miniaturas da ficha: todas as fotos (antes só 4)", "R86k",
+     'R.innerHTML=L.fotos.slice(0,4).map(function(M,B){',
+     'R.innerHTML=L.fotos.map(function(M,B){'),
+    ("cartão de entrar: mostra as fotos que estão travadas para este imóvel", "R86k",
+     'Q=B&&B.fotos.length>=3?B.fotos.slice(2,4):[]',
+     'Q=B?B.fotos.filter(function(x,i){return x&&(typeof x.l==="boolean"?!x.l:i>=3)}).slice(0,2):[]'),
     ("teclado do celular não encolhe o site (o cenário não deforma)", "R86f",
      '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">',
      '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-visual">'),

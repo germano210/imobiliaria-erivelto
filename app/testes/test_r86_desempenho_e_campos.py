@@ -44,3 +44,12 @@ def test_r86_cep_preenche_endereco_so_para_o_painel(painel, c, monkeypatch):
     def cai(cep): raise OSError("sem rede")
     monkeypatch.setattr(erv, "_viacep", cai)
     assert painel.get("/api/painel/cep/95520000").status_code == 502
+
+
+def test_r86k_foto_livre_tem_que_ser_booleano():
+    import app as A
+    base = {"id": "x1", "tipo": "casa", "cidade": "Santo Antônio da Patrulha", "preco": 1}
+    ok = dict(base, fotos=[{"s": "midia/a.webp", "l": True}, {"s": "midia/b.webp", "l": False}, {"s": "midia/c.webp"}])
+    ruim = dict(base, fotos=[{"s": "midia/a.webp", "l": "sim"}])
+    assert A.campo_errado(ruim) == "fotos"
+    assert A.campo_errado(ok) != "fotos"

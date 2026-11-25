@@ -350,3 +350,9 @@ html.r86 .pt-tela::-webkit-scrollbar,html.r86 .an-tela::-webkit-scrollbar{displa
 .pt-tela:has(.pt-fundo) .pt-btn{border-radius:99px;min-height:52px}
 .pt-tela:has(.pt-fundo) .pt-btn.pri{background:#003641;border-color:#003641;color:#fff;margin-top:10px}
 .pt-tela:has(.pt-fundo) .pt-in:focus-visible,.pt-tela:has(.pt-fundo) .pt-btn:focus-visible{outline:2px solid #003641;outline-offset:2px}
+
+/* R86k (25/11): celular, bloco de busca e começo da lista mais altos (valor --r86up calculado em ponte.js) */
+html.r86.r86mo .sc12 .bk12{translate:0 calc(-1 * var(--r86up,0px))}
+html.r86.r86mo .sc12 .ls12{padding-top:max(0px,calc(var(--r86d,0px) - var(--r86up,0px)))}
+/* "Li e aceito": mais um pouco para baixo (John 25/11: A, 26 px) */
+.ak12{margin:26px 0 18px}
