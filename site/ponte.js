@@ -434,13 +434,22 @@
 
   // ficha do imóvel (o site chama P.botaoVisita ao montar a ficha: é a deixa para completar)
   var bv0 = P.botaoVisita;
-  P.botaoVisita = function (a) { if (a && a.id) { setTimeout(function () { ficha86(a); fichaCel86(a); fotos86(); legal86(); }, 0); visto86(a.id); } return ''; };
+  P.botaoVisita = function (a) { if (a && a.id) { guardaRolagem86(a); setTimeout(function () { ficha86(a); fichaCel86(a); fotos86(); legal86(); }, 0); visto86(a.id); } return ''; };
+  /* R86l (John 25/11): ao trocar de foto o site refaz o cartão de informações e a rolagem dele voltava ao topo (o mapa "pulava para cima").
+     Ao clicar em seta/miniatura/tecla guardamos a rolagem; durante 700 ms, a cada quadro, devolvemos se ela caiu. */
+  var SV86 = { n: 0, t: 0 };
+  function nv86() { return document.querySelector('.sc12.f5 .nv12'); }
+  function marca86() { var nv = nv86(); SV86.n = nv ? nv.scrollTop : 0; SV86.t = Date.now() + 700; }
+  function guardaRolagem86() { /* mantido por compatibilidade com o gancho; a guarda roda no laço */ }
+  function volta86() { if (Date.now() > SV86.t || !SV86.n) return; var nv = nv86(); if (nv && nv.scrollTop < SV86.n - 1) nv.scrollTop = SV86.n; }
+  document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.sc12 .th12 .tb12, .sc12 [data-r86-ar], .sc12 .r86-ar')) marca86(); }, true);
+  document.addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') marca86(); }, true);
   // John 23/11 (R86c): a foto vira um card, uma por vez, com setas e "1 / N" (PC = A, celular = C)
   var FI86 = 0;
   function tbs86() { return [].slice.call(document.querySelectorAll('.sc12 .th12 .tb12')); }
   function fotos86() {
     var fp = document.querySelector('.sc12 .fp12'); if (!fp) return;
-    var n = tbs86().length + 1, box = fp.querySelector('.r86-fa');
+    var n = tbs86().length, box = fp.querySelector('.r86-fa');
     if (!box) {
       box = el('div', { class: 'r86-fa' });
       box.innerHTML = '<button type="button" class="r86-ar p" data-r86-ar="-1" aria-label="Foto anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>' +
@@ -449,12 +458,12 @@
     }
     box.hidden = n < 2; cont86();
   }
-  // R86k: as miniaturas não incluem a foto aberta; o total é miniaturas + 1 e a posição é o índice que falta
-  function pos86() { var l = tbs86(), n = l.length + 1, tem = {}; l.forEach(function (t) { tem[+t.dataset.i] = 1; }); for (var i = 0; i < n; i++) if (!tem[i]) return { i: i, n: n, l: l }; return { i: 0, n: n, l: l }; }
+  // R86l (John 25/11): a fila de miniaturas fica parada (todas as fotos, mesma ordem); a aberta tem a classe 'on'
+  function pos86() { var l = tbs86(), i = 0; l.forEach(function (t) { if (t.classList.contains('on')) i = +t.dataset.i; }); return { i: i, n: l.length, l: l }; }
   function cont86() { var p = pos86(), c = document.querySelector('.sc12 .r86-nf'); if (c) c.textContent = (p.i + 1) + ' / ' + p.n; }
   document.addEventListener('click', function (ev) {
     var t = ev.target.closest && ev.target.closest('.sc12 .th12 .tb12');
-    if (t && !t.classList.contains('bl')) { setTimeout(cont86, 0); return; }
+    if (t) { if (!t.classList.contains('bl')) setTimeout(cont86, 0); return; }
     var b = ev.target.closest && ev.target.closest('[data-r86-ar]'); if (!b) return;
     ev.preventDefault(); ev.stopPropagation();
     var p = pos86(); if (p.n < 2) return;
@@ -577,7 +586,27 @@
     var cur = parseFloat(sc.style.getPropertyValue('--r86up')) || 0;
     if (Math.abs(cur - up) > 1) sc.style.setProperty('--r86up', up + 'px');
   }
-  (function m86() { modo86(); sobe86(); requestAnimationFrame(m86); })();
+  /* R86l (John 25/11): em telas mais baixas o bloco de busca passava do fim da tela e o mapa ficava para fora, sem rolar.
+     O mapa encolhe até caber (mínimo 180 px); se mesmo assim não couber, o bloco ganha rolagem por dentro. */
+  var NAT86 = { k: '', h: 0 };
+  function mapa86() {
+    var sc = document.querySelector('.sc12'); if (!sc) return;
+    var bk = sc.querySelector('.bk12'), mw = bk && bk.querySelector('.mw12'), mh = '', bh = '', rola = false;
+    if (bk && mw && !pc86()) {
+      var rm = mw.getBoundingClientRect(), rb = bk.getBoundingClientRect();
+      if (rm.top > 0 && rm.height > 0 && getComputedStyle(bk).visibility !== 'hidden') {
+        var vh = (H86.on && H86.h) ? H86.h : innerHeight, pad = Math.max(0, rb.bottom - rm.bottom), livre = Math.floor(vh - rm.top - pad - 14);
+        var cur = sc.style.getPropertyValue('--r86mh'), chave = innerWidth + 'x' + vh;
+        if (!cur || NAT86.k !== chave) NAT86 = { k: chave, h: rm.height };   /* altura natural do mapa (sem limite), para não ficar oscilando */
+        if (livre < NAT86.h - 1) mh = Math.max(180, livre) + 'px';
+        if (livre < 180) { rola = true; bh = Math.max(160, Math.floor(vh - rb.top - 12)) + 'px'; }
+      }
+    }
+    if ((sc.style.getPropertyValue('--r86mh') || '') !== mh) { mh ? sc.style.setProperty('--r86mh', mh) : sc.style.removeProperty('--r86mh'); }
+    if ((sc.style.getPropertyValue('--r86bh') || '') !== bh) { bh ? sc.style.setProperty('--r86bh', bh) : sc.style.removeProperty('--r86bh'); }
+    if (bk && bk.classList.contains('r86-rola') !== rola) bk.classList.toggle('r86-rola', rola);
+  }
+  (function m86() { volta86(); modo86(); sobe86(); mapa86(); requestAnimationFrame(m86); })();
   function alturaBase86() { var w = innerWidth, h = innerHeight; if (Math.abs(w - H86.w) > 40 || !H86.on && h > H86.h || !H86.h) { if (Math.abs(w - H86.w) > 40) H86.h = 0; H86.w = w; if (!H86.on) H86.h = Math.max(H86.h, h); } }
   function digita86(ev) {
     var t = ev.target; if (!t || !/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || !matchMedia('(pointer:coarse)').matches || H86.on) return;
