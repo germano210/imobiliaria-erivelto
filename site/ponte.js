@@ -729,6 +729,30 @@
       at.input.focus();
     });
   }
+  // R86o (John 25/11): trocar o e-mail de login pelo painel (a rota PUT /api/painel/email já existia, sem tela). Pede a senha atual.
+  function telaEmail() {
+    css();
+    var em = campo('E-mail novo', 'pt-email-novo', 'email', 'username'), se = campo('Senha atual', 'pt-email-senha', 'password', 'current-password');
+    var msg = el('p', { class: 'pt-msg', role: 'alert' }), btn = el('button', { type: 'submit', class: 'pt-btn pri', texto: 'Trocar o e-mail' });
+    var c = el('button', { type: 'button', class: 'pt-btn', texto: 'Cancelar' });
+    var f = el('form', { class: 'pt-cartao', novalidate: 'novalidate' }, [el('h1', { class: 'pt-t', texto: 'Trocar e-mail de login' }),
+      el('p', { class: 'pt-p', texto: (EMAIL ? 'Hoje: ' + EMAIL + '. ' : '') + 'Depois de trocar, entre com o e-mail novo. A senha continua a mesma.' }), em.rotulo, em.input, se.rotulo, se.input, msg, btn, c]);
+    var tela = el('div', { class: 'pt-tela', id: 'pt-email-t' }, [f]);
+    c.onclick = function () { tela.remove(); };
+    f.onsubmit = function (ev) {
+      ev.preventDefault(); msg.textContent = '';
+      var v = em.input.value.trim().toLowerCase();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v)) { msg.textContent = 'Confira o e-mail.'; return; }
+      if (EMAIL && v === EMAIL.toLowerCase()) { msg.textContent = 'Esse já é o e-mail de login.'; return; }
+      btn.disabled = true;
+      req('PUT', 'api/painel/email', { email: v, senha: se.input.value }).then(function (r) {
+        btn.disabled = false;
+        if (r.ok) { EMAIL = (r.j && r.j.email) || v; tela.remove(); aviso('E-mail de login trocado para ' + EMAIL + '.'); redesenharPerfil(); return; }
+        msg.textContent = r.status === 403 ? 'A senha atual não confere.' : r.status === 429 ? 'Muitas tentativas. Espere um pouco.' : r.status === 409 ? 'Esse e-mail já é usado por outra conta.' : r.status === 400 ? 'Confira o e-mail.' : 'Não foi possível trocar agora.';
+      });
+    };
+    fundoCena(tela); document.body.appendChild(tela); em.input.focus();
+  }
   // T24: termo do painel no 1º acesso. O texto vem de painel/termo.html; o aceite vai com a versão que está na tela.
   function sairPainel() { return req('POST', 'api/painel/sair', {}).then(function () { location.reload(); }); }
   function telaTermo(versao) {
@@ -772,6 +796,7 @@
     return '<div class="sec" id="pt-conta"><div class="t">Conta</div>' + (EMAIL ? '<span class="sub">' + attr(EMAIL) + '</span>' : '') +
       '<button class="lin" data-pt="wa"><span class="v">WhatsApp do site<br><span class="sub" id="pt-conta-wa">' + (n ? waBonito(n) : 'Ainda sem número: o botão do site não abre conversa') + '</span></span><span class="ch">›</span></button>' +
       '<div class="dica" id="pt-conta-toques">Toques no botão do WhatsApp do site: ' + ch.length + '</div>' +
+      '<button class="lin" data-pt="email"><span class="v">Trocar e-mail de login</span><span class="ch">›</span></button>' +
       '<button class="lin" data-pt="senha"><span class="v">Trocar senha</span><span class="ch">›</span></button>' +
       '<button class="lin" data-pt="sair"><span class="v">Sair</span></button>' +
       '<div class="dica"><a href="painel/termo.html" target="_blank" rel="noopener">Termo de uso do painel</a> · <a href="privacidade/" target="_blank" rel="noopener">Aviso de privacidade do site</a></div></div>';
@@ -792,6 +817,7 @@
     var a = b.getAttribute('data-pt');
     if (a === 'wa') telaWa();
     else if (a === 'senha') telaTroca(false);
+    else if (a === 'email') telaEmail();
     else if (a === 'sair') { b.disabled = true; flush().then(sairPainel); }
   });
   function barra(email) {
