@@ -356,3 +356,19 @@ html.r86.r86mo .sc12 .bk12{translate:0 calc(-1 * var(--r86up,0px))}
 html.r86.r86mo .sc12 .ls12{padding-top:max(0px,calc(var(--r86d,0px) - var(--r86up,0px)))}
 /* "Li e aceito": mais um pouco para baixo (John 25/11: A, 26 px) */
 .ak12{margin:26px 0 18px}
+
+/* R86l (John 25/11) */
+html.r86 .sc12 .th12 .tb12.on{border-color:#c29a5d!important;box-shadow:0 0 0 2px #c29a5d;cursor:default}
+html.r86.r86pc .sc12 .f512 .th12{max-width:calc(100% - 636*var(--u,1px));overflow-x:auto;scrollbar-width:none;padding:3px}
+html.r86.r86pc .sc12 .f512 .th12::-webkit-scrollbar{display:none}
+html.r86.r86mo .sc12 .bk12 .mw12{max-height:var(--r86mh,none)!important}
+html.r86.r86mo .sc12 .bk12.r86-rola{max-height:var(--r86bh,none)!important;overflow-y:auto!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:none}
+html.r86.r86mo .sc12 .bk12.r86-rola::-webkit-scrollbar{display:none}
+html.r86.r86pc .r86-ft{font-size:calc(15.3*var(--u,1px))}
+html.r86.r86pc .r86-t b{font-size:calc(15.3*var(--u,1px))}
+html.r86.r86pc .r86-t small{font-size:calc(13.2*var(--u,1px))}
+html.r86.r86pc .r86-t em{font-size:calc(11.5*var(--u,1px))}
+
+/* R86m (John 25/11): celular: foto sem a borda arredondada; o dedo desliza na horizontal e a página ainda rola na vertical */
+html.r86.r86mo .sc12 .f512 .fp12{border-radius:0!important;touch-action:pan-y;overflow:hidden}
+html.r86.r86mo .sc12 .f512 .fp12 .fx12{will-change:transform,opacity;-webkit-user-drag:none;user-select:none}

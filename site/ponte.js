@@ -434,13 +434,22 @@
 
   // ficha do imóvel (o site chama P.botaoVisita ao montar a ficha: é a deixa para completar)
   var bv0 = P.botaoVisita;
-  P.botaoVisita = function (a) { if (a && a.id) { setTimeout(function () { ficha86(a); fichaCel86(a); fotos86(); legal86(); }, 0); visto86(a.id); } return ''; };
+  P.botaoVisita = function (a) { if (a && a.id) { guardaRolagem86(a); setTimeout(function () { ficha86(a); fichaCel86(a); fotos86(); legal86(); }, 0); visto86(a.id); } return ''; };
+  /* R86l (John 25/11): ao trocar de foto o site refaz o cartão de informações e a rolagem dele voltava ao topo (o mapa "pulava para cima").
+     Ao clicar em seta/miniatura/tecla guardamos a rolagem; durante 700 ms, a cada quadro, devolvemos se ela caiu. */
+  var SV86 = { n: 0, t: 0 };
+  function nv86() { return document.querySelector('.sc12.f5 .nv12'); }
+  function marca86() { var nv = nv86(); SV86.n = nv ? nv.scrollTop : 0; SV86.t = Date.now() + 700; }
+  function guardaRolagem86() { /* mantido por compatibilidade com o gancho; a guarda roda no laço */ }
+  function volta86() { if (Date.now() > SV86.t || !SV86.n) return; var nv = nv86(); if (nv && nv.scrollTop < SV86.n - 1) nv.scrollTop = SV86.n; }
+  document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.sc12 .th12 .tb12, .sc12 [data-r86-ar], .sc12 .r86-ar')) marca86(); }, true);
+  document.addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') marca86(); }, true);
   // John 23/11 (R86c): a foto vira um card, uma por vez, com setas e "1 / N" (PC = A, celular = C)
   var FI86 = 0;
   function tbs86() { return [].slice.call(document.querySelectorAll('.sc12 .th12 .tb12')); }
   function fotos86() {
     var fp = document.querySelector('.sc12 .fp12'); if (!fp) return;
-    var n = tbs86().length + 1, box = fp.querySelector('.r86-fa');
+    var n = tbs86().length, box = fp.querySelector('.r86-fa');
     if (!box) {
       box = el('div', { class: 'r86-fa' });
       box.innerHTML = '<button type="button" class="r86-ar p" data-r86-ar="-1" aria-label="Foto anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>' +
@@ -449,12 +458,12 @@
     }
     box.hidden = n < 2; cont86();
   }
-  // R86k: as miniaturas não incluem a foto aberta; o total é miniaturas + 1 e a posição é o índice que falta
-  function pos86() { var l = tbs86(), n = l.length + 1, tem = {}; l.forEach(function (t) { tem[+t.dataset.i] = 1; }); for (var i = 0; i < n; i++) if (!tem[i]) return { i: i, n: n, l: l }; return { i: 0, n: n, l: l }; }
+  // R86l (John 25/11): a fila de miniaturas fica parada (todas as fotos, mesma ordem); a aberta tem a classe 'on'
+  function pos86() { var l = tbs86(), i = 0; l.forEach(function (t) { if (t.classList.contains('on')) i = +t.dataset.i; }); return { i: i, n: l.length, l: l }; }
   function cont86() { var p = pos86(), c = document.querySelector('.sc12 .r86-nf'); if (c) c.textContent = (p.i + 1) + ' / ' + p.n; }
   document.addEventListener('click', function (ev) {
     var t = ev.target.closest && ev.target.closest('.sc12 .th12 .tb12');
-    if (t && !t.classList.contains('bl')) { setTimeout(cont86, 0); return; }
+    if (t) { if (!t.classList.contains('bl')) setTimeout(cont86, 0); return; }
     var b = ev.target.closest && ev.target.closest('[data-r86-ar]'); if (!b) return;
     ev.preventDefault(); ev.stopPropagation();
     var p = pos86(); if (p.n < 2) return;
@@ -492,15 +501,47 @@
     box.querySelectorAll('[data-r86-tab]').forEach(function (o) { o.setAttribute('aria-selected', String(o === b)); });
     box.querySelectorAll('[data-r86-pn]').forEach(function (p) { p.hidden = p.getAttribute('data-r86-pn') !== b.getAttribute('data-r86-tab'); });
   });
-  // celular: deslizar a foto para o lado troca de foto (usa as mesmas setas, e a foto bloqueada pede para entrar, como antes)
+  // R86m (John 25/11): celular. (1) deslizar o dedo na foto troca de foto, com a foto acompanhando o dedo (pointer events + touch-action: pan-y);
+  // (2) sem "flic" na troca: a foto anterior fica atrás até a nova estar decodificada; as fotos vizinhas são carregadas antes.
   (function () {
-    var x0 = null, y0 = 0;
-    document.addEventListener('touchstart', function (e) { var f = e.target.closest && e.target.closest('.sc12 .fp12'); if (!f || e.touches.length !== 1) { x0 = null; return; } x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
-    document.addEventListener('touchend', function (e) {
-      if (x0 == null) return; var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
-      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-      var b = document.querySelector('.sc12 .r86-ar.' + (dx < 0 ? 'n' : 'p')); if (b) b.click();
-    }, { passive: true });
+    var d = null, W = 1;
+    function fx() { return document.querySelector('.sc12.f5 .fp12 .fx12'); }
+    document.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' || !e.isPrimary || pc86()) return;
+      var f = e.target.closest && e.target.closest('.sc12.f5 .fp12'); if (!f || e.target.closest('.r86-ar,.r86-x,button')) { d = null; return; }
+      d = { x: e.clientX, y: e.clientY, id: e.pointerId, on: false, dx: 0, f: f }; W = f.clientWidth || 360;
+    }, true);
+    document.addEventListener('pointermove', function (e) {
+      if (!d || e.pointerId !== d.id) return; var dx = e.clientX - d.x, dy = e.clientY - d.y, im = fx(); if (!im) return;
+      if (!d.on) { if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2) { d.on = true; try { d.f.setPointerCapture(e.pointerId); } catch (_) { } im.style.transition = 'none'; } else return; }
+      d.dx = dx; im.style.transform = 'translateX(' + dx + 'px)';
+    }, true);
+    function fim(e) {
+      if (!d || e.pointerId !== d.id) return; var o = d; d = null; if (!o.on) return; var im = fx(); if (!im) return;
+      var ir = Math.abs(o.dx) > Math.min(70, W * 0.18), dir = o.dx < 0 ? 1 : -1;
+      o.f.style.background = '#222';
+      if (!ir) { im.style.transition = 'transform .18s ease-out'; im.style.transform = ''; setTimeout(function () { im.style.transition = ''; }, 200); return; }
+      im.style.transition = 'transform .14s ease-in'; im.style.transform = 'translateX(' + (dir * W) + 'px)';
+      setTimeout(function () {
+        var b = document.querySelector('.sc12 .r86-ar.' + (dir > 0 ? 'n' : 'p'));
+        im.style.transition = 'none'; im.style.transform = ''; if (b) b.click();
+      }, 150);
+    }
+    document.addEventListener('pointerup', fim, true); document.addEventListener('pointercancel', fim, true);
+    // sem flic: a foto de antes fica atrás até a nova decodificar
+    var PRE = {};
+    function pre86() { document.querySelectorAll('.sc12.f5 .th12 .tb12:not(.bl) img').forEach(function (t) { var u = t.getAttribute('src'); if (u && !PRE[u]) { PRE[u] = new Image(); PRE[u].decoding = 'async'; PRE[u].src = u; } }); }
+    window.__r86pre = pre86;
+    new MutationObserver(function (ms) {
+      ms.forEach(function (m) {
+        var t = m.target; if (!t.classList || !t.classList.contains('fx12') || !m.oldValue || m.oldValue === t.getAttribute('src')) return;
+        var f = t.parentNode; if (!f) return;
+        f.style.background = '#222 url("' + m.oldValue + '") center/cover no-repeat'; t.style.transition = 'none'; t.style.opacity = '0';
+        var ok = function () { t.style.opacity = '1'; f.style.background = ''; };
+        (t.decode ? t.decode() : Promise.resolve()).then(ok, ok);
+      });
+    }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['src'], attributeOldValue: true });
+    setInterval(pre86, 900);
   })();
   function ficha86(a0) {
     var a = MAP86[a0.id] || a0, nv = document.querySelector('.sc12 .nv12'); if (!nv || !pc86()) return;
@@ -577,7 +618,27 @@
     var cur = parseFloat(sc.style.getPropertyValue('--r86up')) || 0;
     if (Math.abs(cur - up) > 1) sc.style.setProperty('--r86up', up + 'px');
   }
-  (function m86() { modo86(); sobe86(); requestAnimationFrame(m86); })();
+  /* R86l (John 25/11): em telas mais baixas o bloco de busca passava do fim da tela e o mapa ficava para fora, sem rolar.
+     O mapa encolhe até caber (mínimo 180 px); se mesmo assim não couber, o bloco ganha rolagem por dentro. */
+  var NAT86 = { k: '', h: 0 };
+  function mapa86() {
+    var sc = document.querySelector('.sc12'); if (!sc) return;
+    var bk = sc.querySelector('.bk12'), mw = bk && bk.querySelector('.mw12'), mh = '', bh = '', rola = false;
+    if (bk && mw && !pc86()) {
+      var rm = mw.getBoundingClientRect(), rb = bk.getBoundingClientRect();
+      if (rm.top > 0 && rm.height > 0 && getComputedStyle(bk).visibility !== 'hidden') {
+        var vh = (H86.on && H86.h) ? H86.h : innerHeight, pad = Math.max(0, rb.bottom - rm.bottom), livre = Math.floor(vh - rm.top - pad - 14);
+        var cur = sc.style.getPropertyValue('--r86mh'), chave = innerWidth + 'x' + vh;
+        if (!cur || NAT86.k !== chave) NAT86 = { k: chave, h: rm.height };   /* altura natural do mapa (sem limite), para não ficar oscilando */
+        if (livre < NAT86.h - 1) mh = Math.max(180, livre) + 'px';
+        if (livre < 180) { rola = true; bh = Math.max(160, Math.floor(vh - rb.top - 12)) + 'px'; }
+      }
+    }
+    if ((sc.style.getPropertyValue('--r86mh') || '') !== mh) { mh ? sc.style.setProperty('--r86mh', mh) : sc.style.removeProperty('--r86mh'); }
+    if ((sc.style.getPropertyValue('--r86bh') || '') !== bh) { bh ? sc.style.setProperty('--r86bh', bh) : sc.style.removeProperty('--r86bh'); }
+    if (bk && bk.classList.contains('r86-rola') !== rola) bk.classList.toggle('r86-rola', rola);
+  }
+  (function m86() { volta86(); modo86(); sobe86(); mapa86(); requestAnimationFrame(m86); })();
   function alturaBase86() { var w = innerWidth, h = innerHeight; if (Math.abs(w - H86.w) > 40 || !H86.on && h > H86.h || !H86.h) { if (Math.abs(w - H86.w) > 40) H86.h = 0; H86.w = w; if (!H86.on) H86.h = Math.max(H86.h, h); } }
   function digita86(ev) {
     var t = ev.target; if (!t || !/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || !matchMedia('(pointer:coarse)').matches || H86.on) return;
