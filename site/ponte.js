@@ -440,7 +440,7 @@
   function tbs86() { return [].slice.call(document.querySelectorAll('.sc12 .th12 .tb12')); }
   function fotos86() {
     var fp = document.querySelector('.sc12 .fp12'); if (!fp) return;
-    FI86 = 0; var n = tbs86().length, box = fp.querySelector('.r86-fa');
+    var n = tbs86().length + 1, box = fp.querySelector('.r86-fa');
     if (!box) {
       box = el('div', { class: 'r86-fa' });
       box.innerHTML = '<button type="button" class="r86-ar p" data-r86-ar="-1" aria-label="Foto anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>' +
@@ -449,16 +449,18 @@
     }
     box.hidden = n < 2; cont86();
   }
-  function cont86() { var n = tbs86().length, c = document.querySelector('.sc12 .r86-nf'); if (c) c.textContent = (FI86 + 1) + ' / ' + n; }
+  // R86k: as miniaturas não incluem a foto aberta; o total é miniaturas + 1 e a posição é o índice que falta
+  function pos86() { var l = tbs86(), n = l.length + 1, tem = {}; l.forEach(function (t) { tem[+t.dataset.i] = 1; }); for (var i = 0; i < n; i++) if (!tem[i]) return { i: i, n: n, l: l }; return { i: 0, n: n, l: l }; }
+  function cont86() { var p = pos86(), c = document.querySelector('.sc12 .r86-nf'); if (c) c.textContent = (p.i + 1) + ' / ' + p.n; }
   document.addEventListener('click', function (ev) {
     var t = ev.target.closest && ev.target.closest('.sc12 .th12 .tb12');
-    if (t && !t.classList.contains('bl')) { FI86 = Math.max(0, tbs86().indexOf(t)); setTimeout(cont86, 0); return; }
+    if (t && !t.classList.contains('bl')) { setTimeout(cont86, 0); return; }
     var b = ev.target.closest && ev.target.closest('[data-r86-ar]'); if (!b) return;
     ev.preventDefault(); ev.stopPropagation();
-    var l = tbs86(), n = l.length; if (n < 2) return;
-    var i = (FI86 + (+b.getAttribute('data-r86-ar')) + n) % n, alvo = l[i];
-    if (!alvo.classList.contains('bl')) FI86 = i;
-    alvo.click(); cont86();   // foto bloqueada: o site mostra o mesmo aviso de quando se toca na miniatura
+    var p = pos86(); if (p.n < 2) return;
+    var ii = (p.i + (+b.getAttribute('data-r86-ar')) + p.n) % p.n, alvo = p.l.filter(function (t) { return +t.dataset.i === ii; })[0];
+    if (!alvo) return;   // foto travada: o clique na miniatura mostra o mesmo aviso de entrar
+    alvo.click(); setTimeout(cont86, 0);   // foto bloqueada: o site mostra o mesmo aviso de quando se toca na miniatura
   }, true);   // John 23/11: um botão só na ficha (sem Pedir visita)
   // R86g (John 24/11, D): ficha no celular = foto no topo com cantos arredondados, preço, resumo em 3 números e abas
   // Sobre · Cômodos · Onde fica (o mapa do site vai para a aba "Onde fica"; o botão do WhatsApp continua o do site)
@@ -559,7 +561,23 @@
   /* R86h: modo PC x celular = a mesma conta do site (classe dk do .sc12; antes de existir, a proporção da janela) */
   function pc86() { var s = document.querySelector('.sc12'); if (s) return s.classList.contains('dk'); return innerWidth > Math.max(innerHeight, H86.h || 0) * .75; }
   function modo86() { var pc = pc86(), r = document.documentElement.classList; if (r.contains('r86pc') !== pc) r.toggle('r86pc', pc); if (r.contains('r86mo') === pc) r.toggle('r86mo', !pc); }
-  (function m86() { modo86(); requestAnimationFrame(m86); })();
+  /* R86k (John/Erivelto 25/11, iPhone): no celular o bloco de busca sobe para logo abaixo do topo (nome + Anunciar/Login),
+     e o começo da lista sobe junto (o corte continua no meio do bloco, que agora está mais alto) */
+  function sobe86() {
+    var sc = document.querySelector('.sc12'); if (!sc) return;
+    var up = 0;
+    if (!pc86()) {
+      var bk = sc.querySelector('.bk12'), hd = sc.querySelector('.hd12'), li = sc.querySelector('.li12');
+      if (bk && hd) {
+        var at = parseFloat(sc.style.getPropertyValue('--r86up')) || 0, top0 = bk.getBoundingClientRect().top + at;
+        var base = Math.max(hd.getBoundingClientRect().bottom, li ? li.getBoundingClientRect().bottom : 0);
+        if (base > 0 && top0 > 0) up = Math.max(0, Math.round(top0 - (base + 12)));
+      }
+    }
+    var cur = parseFloat(sc.style.getPropertyValue('--r86up')) || 0;
+    if (Math.abs(cur - up) > 1) sc.style.setProperty('--r86up', up + 'px');
+  }
+  (function m86() { modo86(); sobe86(); requestAnimationFrame(m86); })();
   function alturaBase86() { var w = innerWidth, h = innerHeight; if (Math.abs(w - H86.w) > 40 || !H86.on && h > H86.h || !H86.h) { if (Math.abs(w - H86.w) > 40) H86.h = 0; H86.w = w; if (!H86.on) H86.h = Math.max(H86.h, h); } }
   function digita86(ev) {
     var t = ev.target; if (!t || !/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || !matchMedia('(pointer:coarse)').matches || H86.on) return;
@@ -594,6 +612,31 @@
     var i = el('input', { id: id, type: tipo, autocomplete: auto, class: 'pt-in', required: 'required' });
     return { rotulo: el('label', { for: id, class: 'pt-lb', texto: rotulo }), input: i };
   }
+  /* R86j (John 24/11): o fundo do login/troca de senha do painel é o mesmo cenário em loop do site (vídeo t0; com movimento reduzido, só a foto) */
+  function fundoCena(tela) {
+    var f = el('div', { class: 'pt-fundo', 'aria-hidden': 'true' }), por = false, ret = false;
+    try { por = matchMedia('(prefers-reduced-motion:reduce)').matches; } catch (e) {}
+    try { ret = matchMedia('(orientation:portrait) and (max-width:900px)').matches; } catch (e) {}
+    var t = ret ? 'm' : (innerWidth >= 1600 || (window.devicePixelRatio || 1) >= 2) ? '2560' : '1280', n = t === 'm' ? 't0_m_806' : 't0_' + t;
+    f.style.backgroundImage = 'url(t0/' + (t === 'm' ? 't0_poster_m.jpg' : 't0_poster_2560.jpg') + ')';
+    if (!por && document.createElement('video').canPlayType) {
+      var v = document.createElement('video'); v.muted = true; v.defaultMuted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.disablePictureInPicture = true; v.tabIndex = -1;
+      v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('loop', ''); v.setAttribute('aria-hidden', 'true');
+      [['video/webm; codecs="vp9"', 't0/' + n + '.webm'], ['video/mp4', 't0/' + n + '.mp4']].forEach(function (a) { var s = document.createElement('source'); s.type = a[0]; s.src = a[1]; v.appendChild(s); });
+      f.appendChild(v); var go = function () { var p = v.play(); if (p && p.catch) p.catch(function () {}); }; v.addEventListener('canplay', go); go();
+    }
+    tela.insertBefore(f, tela.firstChild);
+  }
+  /* R86j (John 24/11): clicar no branco do cartão da lista também abre a ficha (como o botão "Sobre a casa"); arrastar para rolar não conta */
+  (function () {
+    var d0 = null;
+    document.addEventListener('pointerdown', function (e) { d0 = { x: e.clientX, y: e.clientY }; }, true);
+    document.addEventListener('click', function (e) {
+      var cd = e.target.closest && e.target.closest('.sc12 .cd12'); if (!cd || e.target.closest('a,button,input,select,textarea,label,[role=button]')) return;
+      if (d0 && Math.abs(e.clientX - d0.x) + Math.abs(e.clientY - d0.y) > 10) return;
+      var b = cd.querySelector('.vm12'); if (b) b.click();
+    });
+  })();
   function telaLogin() {
     return new Promise(function (res) {
       css();
@@ -612,7 +655,7 @@
           if (r.ok) { se.input.value = ''; tela.remove(); res(r.j); } else { msg.textContent = mensagemLogin(r); se.input.value = ''; se.input.focus(); }
         });
       };
-      document.body.appendChild(tela);
+      fundoCena(tela); document.body.appendChild(tela);
       em.input.focus();
     });
   }
@@ -639,7 +682,7 @@
           msg.textContent = r.status === 403 ? 'A senha atual não confere.' : r.status === 429 ? 'Muitas tentativas. Espere um pouco.' : r.j && r.j.erro === 'senha_fraca' ? 'Escolha uma senha diferente da atual.' : 'Não foi possível trocar agora.';
         });
       };
-      document.body.appendChild(tela);
+      fundoCena(tela); document.body.appendChild(tela);
       at.input.focus();
     });
   }

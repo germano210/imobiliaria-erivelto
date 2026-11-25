@@ -336,3 +336,23 @@ html.r86 .sc12 .nv12,html.r86 .sc12 .ls12,html.r86 .sc12 .lsi12,html.r86 .sc12 .
 html.r86 .sc12 .nv12::-webkit-scrollbar,html.r86 .sc12 .ls12::-webkit-scrollbar,html.r86 .sc12 .lsi12::-webkit-scrollbar,html.r86 .sc12 .nv12 *::-webkit-scrollbar{display:none;width:0;height:0}
 html.r86 .pt-tela,html.r86 .an-tela{scrollbar-width:none}
 html.r86 .pt-tela::-webkit-scrollbar,html.r86 .an-tela::-webkit-scrollbar{display:none}
+
+/* R86j (John 24/11) */
+.ak12{margin:18px 0 16px}   /* aviso de privacidade afastado do campo "Seu WhatsApp" */
+.sc12 .cd12{cursor:pointer}
+/* login/troca de senha do painel: cenário em loop, cartão como o Login do site */
+.pt-fundo{position:absolute;inset:0;z-index:0;background:#0b1a1d center/cover no-repeat;overflow:hidden}
+.pt-fundo video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pt-fundo::after{content:"";position:absolute;inset:0;background:rgba(0,20,26,.42)}
+.pt-tela:has(.pt-fundo) .pt-cartao{position:relative;z-index:1;max-width:400px;background:#fff;border:0;border-radius:28px;padding:30px 26px;gap:8px;box-shadow:0 24px 60px rgba(0,0,0,.35);font-family:Poppins,var(--f-b,system-ui,sans-serif)}
+.pt-tela:has(.pt-fundo) .pt-t{font:500 24px/1.2 Poppins,system-ui,sans-serif;color:#003641;margin:0 0 8px}
+.pt-tela:has(.pt-fundo) .pt-in{border:0;border-radius:16px;background:#f0efec;min-height:52px}
+.pt-tela:has(.pt-fundo) .pt-btn{border-radius:99px;min-height:52px}
+.pt-tela:has(.pt-fundo) .pt-btn.pri{background:#003641;border-color:#003641;color:#fff;margin-top:10px}
+.pt-tela:has(.pt-fundo) .pt-in:focus-visible,.pt-tela:has(.pt-fundo) .pt-btn:focus-visible{outline:2px solid #003641;outline-offset:2px}
+
+/* R86k (25/11): celular, bloco de busca e começo da lista mais altos (valor --r86up calculado em ponte.js) */
+html.r86.r86mo .sc12 .bk12{translate:0 calc(-1 * var(--r86up,0px))}
+html.r86.r86mo .sc12 .ls12{padding-top:max(0px,calc(var(--r86d,0px) - var(--r86up,0px)))}
+/* "Li e aceito": mais um pouco para baixo (John 25/11: A, 26 px) */
+.ak12{margin:26px 0 18px}
