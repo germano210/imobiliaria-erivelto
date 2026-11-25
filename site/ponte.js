@@ -501,15 +501,47 @@
     box.querySelectorAll('[data-r86-tab]').forEach(function (o) { o.setAttribute('aria-selected', String(o === b)); });
     box.querySelectorAll('[data-r86-pn]').forEach(function (p) { p.hidden = p.getAttribute('data-r86-pn') !== b.getAttribute('data-r86-tab'); });
   });
-  // celular: deslizar a foto para o lado troca de foto (usa as mesmas setas, e a foto bloqueada pede para entrar, como antes)
+  // R86m (John 25/11): celular. (1) deslizar o dedo na foto troca de foto, com a foto acompanhando o dedo (pointer events + touch-action: pan-y);
+  // (2) sem "flic" na troca: a foto anterior fica atrás até a nova estar decodificada; as fotos vizinhas são carregadas antes.
   (function () {
-    var x0 = null, y0 = 0;
-    document.addEventListener('touchstart', function (e) { var f = e.target.closest && e.target.closest('.sc12 .fp12'); if (!f || e.touches.length !== 1) { x0 = null; return; } x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
-    document.addEventListener('touchend', function (e) {
-      if (x0 == null) return; var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
-      if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-      var b = document.querySelector('.sc12 .r86-ar.' + (dx < 0 ? 'n' : 'p')); if (b) b.click();
-    }, { passive: true });
+    var d = null, W = 1;
+    function fx() { return document.querySelector('.sc12.f5 .fp12 .fx12'); }
+    document.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' || !e.isPrimary || pc86()) return;
+      var f = e.target.closest && e.target.closest('.sc12.f5 .fp12'); if (!f || e.target.closest('.r86-ar,.r86-x,button')) { d = null; return; }
+      d = { x: e.clientX, y: e.clientY, id: e.pointerId, on: false, dx: 0, f: f }; W = f.clientWidth || 360;
+    }, true);
+    document.addEventListener('pointermove', function (e) {
+      if (!d || e.pointerId !== d.id) return; var dx = e.clientX - d.x, dy = e.clientY - d.y, im = fx(); if (!im) return;
+      if (!d.on) { if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2) { d.on = true; try { d.f.setPointerCapture(e.pointerId); } catch (_) { } im.style.transition = 'none'; } else return; }
+      d.dx = dx; im.style.transform = 'translateX(' + dx + 'px)';
+    }, true);
+    function fim(e) {
+      if (!d || e.pointerId !== d.id) return; var o = d; d = null; if (!o.on) return; var im = fx(); if (!im) return;
+      var ir = Math.abs(o.dx) > Math.min(70, W * 0.18), dir = o.dx < 0 ? 1 : -1;
+      o.f.style.background = '#222';
+      if (!ir) { im.style.transition = 'transform .18s ease-out'; im.style.transform = ''; setTimeout(function () { im.style.transition = ''; }, 200); return; }
+      im.style.transition = 'transform .14s ease-in'; im.style.transform = 'translateX(' + (dir * W) + 'px)';
+      setTimeout(function () {
+        var b = document.querySelector('.sc12 .r86-ar.' + (dir > 0 ? 'n' : 'p'));
+        im.style.transition = 'none'; im.style.transform = ''; if (b) b.click();
+      }, 150);
+    }
+    document.addEventListener('pointerup', fim, true); document.addEventListener('pointercancel', fim, true);
+    // sem flic: a foto de antes fica atrás até a nova decodificar
+    var PRE = {};
+    function pre86() { document.querySelectorAll('.sc12.f5 .th12 .tb12:not(.bl) img').forEach(function (t) { var u = t.getAttribute('src'); if (u && !PRE[u]) { PRE[u] = new Image(); PRE[u].decoding = 'async'; PRE[u].src = u; } }); }
+    window.__r86pre = pre86;
+    new MutationObserver(function (ms) {
+      ms.forEach(function (m) {
+        var t = m.target; if (!t.classList || !t.classList.contains('fx12') || !m.oldValue || m.oldValue === t.getAttribute('src')) return;
+        var f = t.parentNode; if (!f) return;
+        f.style.background = '#222 url("' + m.oldValue + '") center/cover no-repeat'; t.style.transition = 'none'; t.style.opacity = '0';
+        var ok = function () { t.style.opacity = '1'; f.style.background = ''; };
+        (t.decode ? t.decode() : Promise.resolve()).then(ok, ok);
+      });
+    }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['src'], attributeOldValue: true });
+    setInterval(pre86, 900);
   })();
   function ficha86(a0) {
     var a = MAP86[a0.id] || a0, nv = document.querySelector('.sc12 .nv12'); if (!nv || !pc86()) return;

@@ -368,3 +368,7 @@ html.r86.r86pc .r86-ft{font-size:calc(15.3*var(--u,1px))}
 html.r86.r86pc .r86-t b{font-size:calc(15.3*var(--u,1px))}
 html.r86.r86pc .r86-t small{font-size:calc(13.2*var(--u,1px))}
 html.r86.r86pc .r86-t em{font-size:calc(11.5*var(--u,1px))}
+
+/* R86m (John 25/11): celular: foto sem a borda arredondada; o dedo desliza na horizontal e a página ainda rola na vertical */
+html.r86.r86mo .sc12 .f512 .fp12{border-radius:0!important;touch-action:pan-y;overflow:hidden}
+html.r86.r86mo .sc12 .f512 .fp12 .fx12{will-change:transform,opacity;-webkit-user-drag:none;user-select:none}
