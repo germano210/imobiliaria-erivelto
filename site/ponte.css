@@ -371,4 +371,11 @@ html.r86.r86pc .r86-t em{font-size:calc(11.5*var(--u,1px))}
 
 /* R86m (John 25/11): celular: foto sem a borda arredondada; o dedo desliza na horizontal e a página ainda rola na vertical */
 html.r86.r86mo .sc12 .f512 .fp12{border-radius:0!important;touch-action:pan-y;overflow:hidden}
-html.r86.r86mo .sc12 .f512 .fp12 .fx12{will-change:transform,opacity;-webkit-user-drag:none;user-select:none}
+html.r86.r86mo .sc12 .f512 .fp12 .fx12{-webkit-user-drag:none;user-select:none}
+
+/* R86n (John 25/11) */
+html.r86 .sc12 .fp12 .r86-vel{pointer-events:none}
+html.r86.r86pc .r86-nf{top:calc(24*var(--u,1px));right:calc(24*var(--u,1px));padding:calc(5*var(--u,1px)) calc(12*var(--u,1px));font-size:calc(13*var(--u,1px))}
+/* celular: a lista de imóveis só aparece (esmaece); não sobe 15 px depois de aparecer */
+html.r86.r86mo .sc12 .lsi12.in.sv .cd12,html.r86.r86mo .sc12 .lsi12.in.sv .mz12,html.r86.r86mo .sc12 .lsi12.in.sv .rb10,html.r86.r86mo .sc12 .lsi12.in.sv .rs12{animation:e12so .5s cubic-bezier(.33,0,.2,1) calc(var(--d,0ms) + 60ms) both!important}
+html.r86.r86mo .sc12 .f412.in.sv{animation:e12so .5s cubic-bezier(.33,0,.2,1) .15s both!important}
