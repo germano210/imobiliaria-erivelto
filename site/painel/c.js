@@ -167,7 +167,22 @@ Object.assign(window.ICO14, {
     return f;
   }
   function itens(im) { if (Array.isArray(im.ot)) return im.ot.map(function (r) { return [ICO[r.k] ? r.k : 'mais', r.n]; }); return (im.x || []).filter(function (k) { return ICO[k]; }).map(function (k) { return [k, ICO[k][0]]; }).concat((im.outros || []).map(function (o) { return ['mais', o]; })); }
-  function htmlFichas(im) { var f = fichas(im); return f.length ? '<div class="fichas">' + f.map(function (a) { return '<span class="ficha">' + ic(a[0]) + esc(a[1]) + '</span>'; }).join('') + '</div>' : ''; }
+  /* R86o (John 25/11): a linha "Cômodos e medidas" mostrava só quartos, banheiros, salas, cozinhas e vagas; os outros cômodos (closet, sacada, lavabo…) sumiam.
+     Agora mostra todos os cômodos da lista (os repetidos viram "2 quartos"), depois as medidas. */
+  var PLU = { cama: ['quarto', 'quartos'], suite: ['suíte', 'suítes'], banho: ['banheiro', 'banheiros'], sofa: ['sala', 'salas'], cozinha: ['cozinha', 'cozinhas'] };
+  function fichasCm(im) {
+    if (!Array.isArray(im.cm) || im.tipo === 'terreno') return fichas(im);
+    var ordem = [], g = {};
+    im.cm.forEach(function (r) {
+      if (!r || !r.n) return;
+      var chave = PLU[r.k] ? r.k : r.k === 'garagem' ? 'garagem' : 'n:' + r.n.replace(/\s+\d+$/, '');
+      if (!g[chave]) { g[chave] = { k: r.k, n: r.n.replace(/\s+\d+$/, ''), q: 0 }; ordem.push(chave); }
+      g[chave].q += r.k === 'garagem' ? Math.max(1, +r.q || 1) : 1;
+    });
+    var f = ordem.map(function (ch) { var o = g[ch]; if (PLU[o.k]) return [o.k, plural(o.q, PLU[o.k][0], PLU[o.k][1])]; if (o.k === 'garagem') return ['garagem', plural(o.q, 'vaga', 'vagas')]; return [ICO[o.k] ? o.k : 'mais', o.q > 1 ? o.q + ' × ' + o.n : o.n]; });
+    return f.concat(fichas({ tipo: 'terreno', m: im.m, c: {} }));
+  }
+  function htmlFichas(im) { var f = fichasCm(im); return f.length ? '<div class="fichas">' + f.map(function (a) { return '<span class="ficha">' + ic(a[0]) + esc(a[1]) + '</span>'; }).join('') + '</div>' : ''; }
   function htmlPills(im) { var p = itens(im); return p.length ? '<div class="pills">' + p.map(function (a) { return '<span class="pill">' + ic(a[0], 'p') + esc(a[1]) + '</span>'; }).join('') + '</div>' : ''; }
   function resumo(im) { var f = fichas(im).slice(0, 2).map(function (a) { return a[1]; }); return [nomeTipo(im.tipo), im.cidade].filter(Boolean).join(' · ') + (f.length ? ' — ' + f.join(' · ') : ''); }
 

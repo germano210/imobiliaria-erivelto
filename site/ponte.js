@@ -434,16 +434,7 @@
 
   // ficha do imóvel (o site chama P.botaoVisita ao montar a ficha: é a deixa para completar)
   var bv0 = P.botaoVisita;
-  P.botaoVisita = function (a) { if (a && a.id) { guardaRolagem86(a); setTimeout(function () { ficha86(a); fichaCel86(a); fotos86(); legal86(); }, 0); visto86(a.id); } return ''; };
-  /* R86l (John 25/11): ao trocar de foto o site refaz o cartão de informações e a rolagem dele voltava ao topo (o mapa "pulava para cima").
-     Ao clicar em seta/miniatura/tecla guardamos a rolagem; durante 700 ms, a cada quadro, devolvemos se ela caiu. */
-  var SV86 = { n: 0, t: 0 };
-  function nv86() { return document.querySelector('.sc12.f5 .nv12'); }
-  function marca86() { var nv = nv86(); SV86.n = nv ? nv.scrollTop : 0; SV86.t = Date.now() + 700; }
-  function guardaRolagem86() { /* mantido por compatibilidade com o gancho; a guarda roda no laço */ }
-  function volta86() { if (Date.now() > SV86.t || !SV86.n) return; var nv = nv86(); if (nv && nv.scrollTop < SV86.n - 1) nv.scrollTop = SV86.n; }
-  document.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.sc12 .th12 .tb12, .sc12 [data-r86-ar], .sc12 .r86-ar')) marca86(); }, true);
-  document.addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') marca86(); }, true);
+  P.botaoVisita = function (a) { if (a && a.id) { setTimeout(function () { ficha86(a); fichaCel86(a); fotos86(); legal86(); }, 0); visto86(a.id); } return ''; };
   // John 23/11 (R86c): a foto vira um card, uma por vez, com setas e "1 / N" (PC = A, celular = C)
   var FI86 = 0;
   function tbs86() { return [].slice.call(document.querySelectorAll('.sc12 .th12 .tb12')); }
@@ -501,43 +492,34 @@
     box.querySelectorAll('[data-r86-tab]').forEach(function (o) { o.setAttribute('aria-selected', String(o === b)); });
     box.querySelectorAll('[data-r86-pn]').forEach(function (p) { p.hidden = p.getAttribute('data-r86-pn') !== b.getAttribute('data-r86-tab'); });
   });
-  // R86m (John 25/11): celular. (1) deslizar o dedo na foto troca de foto, com a foto acompanhando o dedo (pointer events + touch-action: pan-y);
-  // (2) sem "flic" na troca: a foto anterior fica atrás até a nova estar decodificada; as fotos vizinhas são carregadas antes.
+  // R86n (John 25/11): (1) deslizar o dedo na foto troca de foto (a foto não se mexe; só troca, como a seta);
+  // (2) troca sem "flic": a foto anterior fica por baixo e a nova surge por cima (esmaece em 0,22 s) quando já estiver decodificada.
+  // O cartão de informações não é mais refeito a cada foto (remendo R86n), então não treme.
   (function () {
-    var d = null, W = 1;
-    function fx() { return document.querySelector('.sc12.f5 .fp12 .fx12'); }
+    var d = null;
     document.addEventListener('pointerdown', function (e) {
-      if (e.pointerType === 'mouse' || !e.isPrimary || pc86()) return;
-      var f = e.target.closest && e.target.closest('.sc12.f5 .fp12'); if (!f || e.target.closest('.r86-ar,.r86-x,button')) { d = null; return; }
-      d = { x: e.clientX, y: e.clientY, id: e.pointerId, on: false, dx: 0, f: f }; W = f.clientWidth || 360;
+      if (e.pointerType === 'mouse' || !e.isPrimary) { d = null; return; }
+      var f = e.target.closest && e.target.closest('.sc12.f5 .fp12'); if (!f || e.target.closest('button')) { d = null; return; }
+      d = { x: e.clientX, y: e.clientY, id: e.pointerId, t: Date.now() };
     }, true);
-    document.addEventListener('pointermove', function (e) {
-      if (!d || e.pointerId !== d.id) return; var dx = e.clientX - d.x, dy = e.clientY - d.y, im = fx(); if (!im) return;
-      if (!d.on) { if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.2) { d.on = true; try { d.f.setPointerCapture(e.pointerId); } catch (_) { } im.style.transition = 'none'; } else return; }
-      d.dx = dx; im.style.transform = 'translateX(' + dx + 'px)';
+    document.addEventListener('pointerup', function (e) {
+      if (!d || e.pointerId !== d.id) return; var o = d; d = null;
+      var dx = e.clientX - o.x, dy = e.clientY - o.y;
+      if (Date.now() - o.t > 900 || Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
+      var b = document.querySelector('.sc12 .r86-ar.' + (dx < 0 ? 'n' : 'p')); if (b) b.click();
     }, true);
-    function fim(e) {
-      if (!d || e.pointerId !== d.id) return; var o = d; d = null; if (!o.on) return; var im = fx(); if (!im) return;
-      var ir = Math.abs(o.dx) > Math.min(70, W * 0.18), dir = o.dx < 0 ? 1 : -1;
-      o.f.style.background = '#222';
-      if (!ir) { im.style.transition = 'transform .18s ease-out'; im.style.transform = ''; setTimeout(function () { im.style.transition = ''; }, 200); return; }
-      im.style.transition = 'transform .14s ease-in'; im.style.transform = 'translateX(' + (dir * W) + 'px)';
-      setTimeout(function () {
-        var b = document.querySelector('.sc12 .r86-ar.' + (dir > 0 ? 'n' : 'p'));
-        im.style.transition = 'none'; im.style.transform = ''; if (b) b.click();
-      }, 150);
-    }
-    document.addEventListener('pointerup', fim, true); document.addEventListener('pointercancel', fim, true);
-    // sem flic: a foto de antes fica atrás até a nova decodificar
+    document.addEventListener('pointercancel', function () { d = null; }, true);
     var PRE = {};
     function pre86() { document.querySelectorAll('.sc12.f5 .th12 .tb12:not(.bl) img').forEach(function (t) { var u = t.getAttribute('src'); if (u && !PRE[u]) { PRE[u] = new Image(); PRE[u].decoding = 'async'; PRE[u].src = u; } }); }
-    window.__r86pre = pre86;
     new MutationObserver(function (ms) {
       ms.forEach(function (m) {
-        var t = m.target; if (!t.classList || !t.classList.contains('fx12') || !m.oldValue || m.oldValue === t.getAttribute('src')) return;
+        var t = m.target; if (!t.classList || !t.classList.contains('fx12') || t.classList.contains('r86-vel') || !m.oldValue || m.oldValue === t.getAttribute('src')) return;
         var f = t.parentNode; if (!f) return;
-        f.style.background = '#222 url("' + m.oldValue + '") center/cover no-repeat'; t.style.transition = 'none'; t.style.opacity = '0';
-        var ok = function () { t.style.opacity = '1'; f.style.background = ''; };
+        f.querySelectorAll('.r86-vel').forEach(function (x) { x.remove(); });
+        var v = t.cloneNode(false); v.classList.add('r86-vel'); ['srcset', 'sizes', 'alt', 'aria-label', 'style'].forEach(function (k) { v.removeAttribute(k); });
+        v.setAttribute('aria-hidden', 'true'); v.setAttribute('src', m.oldValue); f.insertBefore(v, t);
+        t.style.transition = 'none'; t.style.opacity = '0';
+        var ok = function () { requestAnimationFrame(function () { t.style.transition = 'opacity .22s ease'; t.style.opacity = '1'; setTimeout(function () { v.remove(); t.style.transition = ''; t.style.opacity = ''; }, 280); }); };
         (t.decode ? t.decode() : Promise.resolve()).then(ok, ok);
       });
     }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['src'], attributeOldValue: true });
@@ -638,7 +620,7 @@
     if ((sc.style.getPropertyValue('--r86bh') || '') !== bh) { bh ? sc.style.setProperty('--r86bh', bh) : sc.style.removeProperty('--r86bh'); }
     if (bk && bk.classList.contains('r86-rola') !== rola) bk.classList.toggle('r86-rola', rola);
   }
-  (function m86() { volta86(); modo86(); sobe86(); mapa86(); requestAnimationFrame(m86); })();
+  (function m86() { modo86(); sobe86(); mapa86(); requestAnimationFrame(m86); })();
   function alturaBase86() { var w = innerWidth, h = innerHeight; if (Math.abs(w - H86.w) > 40 || !H86.on && h > H86.h || !H86.h) { if (Math.abs(w - H86.w) > 40) H86.h = 0; H86.w = w; if (!H86.on) H86.h = Math.max(H86.h, h); } }
   function digita86(ev) {
     var t = ev.target; if (!t || !/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || !matchMedia('(pointer:coarse)').matches || H86.on) return;
@@ -747,6 +729,30 @@
       at.input.focus();
     });
   }
+  // R86o (John 25/11): trocar o e-mail de login pelo painel (a rota PUT /api/painel/email já existia, sem tela). Pede a senha atual.
+  function telaEmail() {
+    css();
+    var em = campo('E-mail novo', 'pt-email-novo', 'email', 'username'), se = campo('Senha atual', 'pt-email-senha', 'password', 'current-password');
+    var msg = el('p', { class: 'pt-msg', role: 'alert' }), btn = el('button', { type: 'submit', class: 'pt-btn pri', texto: 'Trocar o e-mail' });
+    var c = el('button', { type: 'button', class: 'pt-btn', texto: 'Cancelar' });
+    var f = el('form', { class: 'pt-cartao', novalidate: 'novalidate' }, [el('h1', { class: 'pt-t', texto: 'Trocar e-mail de login' }),
+      el('p', { class: 'pt-p', texto: (EMAIL ? 'Hoje: ' + EMAIL + '. ' : '') + 'Depois de trocar, entre com o e-mail novo. A senha continua a mesma.' }), em.rotulo, em.input, se.rotulo, se.input, msg, btn, c]);
+    var tela = el('div', { class: 'pt-tela', id: 'pt-email-t' }, [f]);
+    c.onclick = function () { tela.remove(); };
+    f.onsubmit = function (ev) {
+      ev.preventDefault(); msg.textContent = '';
+      var v = em.input.value.trim().toLowerCase();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v)) { msg.textContent = 'Confira o e-mail.'; return; }
+      if (EMAIL && v === EMAIL.toLowerCase()) { msg.textContent = 'Esse já é o e-mail de login.'; return; }
+      btn.disabled = true;
+      req('PUT', 'api/painel/email', { email: v, senha: se.input.value }).then(function (r) {
+        btn.disabled = false;
+        if (r.ok) { EMAIL = (r.j && r.j.email) || v; tela.remove(); aviso('E-mail de login trocado para ' + EMAIL + '.'); redesenharPerfil(); return; }
+        msg.textContent = r.status === 403 ? 'A senha atual não confere.' : r.status === 429 ? 'Muitas tentativas. Espere um pouco.' : r.status === 409 ? 'Esse e-mail já é usado por outra conta.' : r.status === 400 ? 'Confira o e-mail.' : 'Não foi possível trocar agora.';
+      });
+    };
+    fundoCena(tela); document.body.appendChild(tela); em.input.focus();
+  }
   // T24: termo do painel no 1º acesso. O texto vem de painel/termo.html; o aceite vai com a versão que está na tela.
   function sairPainel() { return req('POST', 'api/painel/sair', {}).then(function () { location.reload(); }); }
   function telaTermo(versao) {
@@ -790,6 +796,7 @@
     return '<div class="sec" id="pt-conta"><div class="t">Conta</div>' + (EMAIL ? '<span class="sub">' + attr(EMAIL) + '</span>' : '') +
       '<button class="lin" data-pt="wa"><span class="v">WhatsApp do site<br><span class="sub" id="pt-conta-wa">' + (n ? waBonito(n) : 'Ainda sem número: o botão do site não abre conversa') + '</span></span><span class="ch">›</span></button>' +
       '<div class="dica" id="pt-conta-toques">Toques no botão do WhatsApp do site: ' + ch.length + '</div>' +
+      '<button class="lin" data-pt="email"><span class="v">Trocar e-mail de login</span><span class="ch">›</span></button>' +
       '<button class="lin" data-pt="senha"><span class="v">Trocar senha</span><span class="ch">›</span></button>' +
       '<button class="lin" data-pt="sair"><span class="v">Sair</span></button>' +
       '<div class="dica"><a href="painel/termo.html" target="_blank" rel="noopener">Termo de uso do painel</a> · <a href="privacidade/" target="_blank" rel="noopener">Aviso de privacidade do site</a></div></div>';
@@ -810,6 +817,7 @@
     var a = b.getAttribute('data-pt');
     if (a === 'wa') telaWa();
     else if (a === 'senha') telaTroca(false);
+    else if (a === 'email') telaEmail();
     else if (a === 'sair') { b.disabled = true; flush().then(sairPainel); }
   });
   function barra(email) {
