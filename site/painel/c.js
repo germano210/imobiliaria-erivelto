@@ -527,17 +527,61 @@ Object.assign(window.ICO14, {
   var PX_ORD = ['escola', 'creche', 'mercado', 'padaria', 'farmacia', 'saude', 'hospital', 'praca', 'onibus', 'academia', 'banco', 'restaurante', 'igreja', 'posto', 'praia', 'outro'];
   Object.keys(GL87).forEach(function (k) { ICO['px_' + k] = [GL87[k][0], GL87[k][1], 'site']; });
   function pxNorm(o) { if (o && o.t && !GL87[o.t]) { if (!o.n) o.n = o.t; o.t = 'outro'; } return o; }
+  /* R87 (John 26/11): "No mapa" com o satélite da Esri (todas as cidades, ruas, bairros, zoom) e busca de endereço.
+     Toque no mapa (ou escolha um endereço) marca o imóvel. O mapa fica montado; os botões só mudam o que ele mostra. */
+  var MAPA87_URL = (function () { var sc = document.querySelector('script[src*="painel/c.js"]'); return sc ? sc.src.replace(/painel\/c\.js(\?.*)?$/, '') + 'mapa87.js' : '../mapa87.js'; })(), MAPA87_P = null;
+  function mapa87() {
+    if (window.MAPA87) return Promise.resolve(window.MAPA87);
+    if (MAPA87_P) return MAPA87_P;
+    MAPA87_P = new Promise(function (ok, erro) { var s = document.createElement('script'); s.src = MAPA87_URL; s.onload = function () { ok(window.MAPA87); }; s.onerror = function () { MAPA87_P = null; erro(new Error('mapa')); }; document.head.appendChild(s); });
+    return MAPA87_P;
+  }
   ED.mapa = function (r) {
     var escolhePx = null;   // R87: null = lista; 'novo' = escolhendo o tipo de um lugar novo; j+1 = trocando o tipo do lugar j
+    var px = ATUAL.px = ATUAL.px || [], api = null, M = null, sugT = null;
+    function modo() { return ATUAL.mapa || (ATUAL.loc && ATUAL.loc.ll ? 'area' : 'nada'); }
+    r.innerHTML = '<div class="chips" data-mos></div>' +
+      '<div class="mp-bus"><input data-mpb maxlength="120" placeholder="Procurar o endereço (rua, número, bairro)" aria-label="Procurar o endereço" autocomplete="off"><div class="mp-sug" data-mps hidden></div></div>' +
+      '<div class="mp87" data-mp87><div class="mp87-m" data-mpm></div><span class="mp-d" data-mpd></span></div><div class="dica" data-mpi style="margin:-4px 0 0"></div>' +
+      '<div data-pxs style="display:flex;flex-direction:column;gap:12px"></div>';
+    var chips = r.querySelector('[data-mos]'), dica = r.querySelector('[data-mpd]'), info = r.querySelector('[data-mpi]'), bus = r.querySelector('[data-mpb]'), sug = r.querySelector('[data-mps]'), pxs = r.querySelector('[data-pxs]');
+    function mostra() {
+      var md = modo(), ll = ATUAL.loc && ATUAL.loc.ll;
+      chips.innerHTML = MODOS.map(function (x) { return '<button class="chip" data-mo="' + x[0] + '" aria-pressed="' + (md === x[0]) + '">' + x[1] + '</button>'; }).join('');
+      chips.querySelectorAll('[data-mo]').forEach(function (b) { b.onclick = function () { ATUAL.mapa = b.dataset.mo; mudou(); mostra(); }; });
+      dica.textContent = ll ? 'Toque no mapa para mudar o lugar' : 'Toque no mapa onde fica o imóvel';
+      info.textContent = !ll ? 'Use dois dedos para mover e dar zoom.' : md === 'nada' ? 'Marcado, mas o site não mostra (Sem a casa).' : md === 'pino' ? 'Quem entrou no site vê o ponto exato.' : 'Quem entrou no site vê um círculo de 250 m perto da casa (não centrado nela).';
+      if (api && M) { api.marca(ll || null); api.area(ll && md === 'area' ? M.desloca(ATUAL.id, ll, 250) : null); }
+    }
+    function marca(ll) { ATUAL.loc = { ll: ll }; if (!ATUAL.mapa || ATUAL.mapa === 'nada') ATUAL.mapa = 'area'; mudou(); mostra(); }
+    mostra();
+    mapa87().then(function (MM) {
+      M = MM; var ll = ATUAL.loc && ATUAL.loc.ll;
+      return (ll ? Promise.resolve(ll) : M.cidade(ATUAL.cidade || 'Santo Antônio da Patrulha')).then(function (c) {
+        return M.novo(r.querySelector('[data-mpm]'), { centro: c || [-50.5175, -29.8268], zoom: ll ? 16 : 13, cooperativo: true, toque: marca });
+      }).then(function (a) { api = a; mostra(); });
+    }).catch(function () { r.querySelector('[data-mp87]').classList.add('sem'); dica.textContent = 'O mapa não abriu agora. Tente de novo mais tarde.'; });
+    // busca de endereço (sugestões da Esri, perto da cidade do imóvel)
+    function fechaSug() { sug.hidden = true; sug.innerHTML = ''; }
+    bus.oninput = function () {
+      clearTimeout(sugT); var t = bus.value.trim(); if (t.length < 4 || !M) { fechaSug(); return; }
+      sugT = setTimeout(function () {
+        var perto = api ? [api.mapa.getCenter().lng, api.mapa.getCenter().lat] : null;
+        M.sugerir(t + (ATUAL.cidade && t.toLowerCase().indexOf(ATUAL.cidade.toLowerCase()) < 0 ? ', ' + ATUAL.cidade : '') + (/\b(RS|Rio Grande do Sul)\b/i.test(t) ? '' : ', RS'), perto).then(function (L) {
+          if (bus.value.trim() !== t) return;
+          if (!L.length) { sug.innerHTML = '<div class="mp-s0">Não achei. Tente com o nome da rua e o bairro.</div>'; sug.hidden = false; return; }
+          sug.innerHTML = L.map(function (x, k) { return '<button type="button" data-sg="' + k + '">' + esc(x.text.replace(/, BRA$/, '').replace(/, Rio Grande do Sul/, ', RS')) + '</button>'; }).join('');
+          sug.hidden = false;
+          sug.querySelectorAll('[data-sg]').forEach(function (b) { b.onclick = function () {
+            var x = L[+b.dataset.sg]; bus.value = x.text.replace(/, BRA$/, ''); fechaSug();
+            M.achar(x).then(function (res) { if (!res) { toast('Não consegui achar esse endereço.'); return; } marca(res.ll); if (api) api.mapa.flyTo({ center: res.ll, zoom: 17 }); });
+          }; });
+        });
+      }, 350);
+    };
+    bus.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); var b = sug.querySelector('[data-sg]'); if (b) b.click(); } if (e.key === 'Escape') fechaSug(); };
     function desenha() {
-      var M = mapaDe(ATUAL.cidade), modo = ATUAL.mapa || (ATUAL.loc && ATUAL.loc.ll ? 'area' : 'nada'), px = ATUAL.px = ATUAL.px || [];
-      var h = '<div class="chips">' + MODOS.map(function (x) { return '<button class="chip" data-mo="' + x[0] + '" aria-pressed="' + (modo === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>';
-      if (M) {
-        var p = ATUAL.loc && ATUAL.loc.ll && window.m15xy ? window.m15xy(M, ATUAL.loc.ll) : null;
-        h += '<div class="mp-box" data-mp><img src="' + esc(M.img) + '" alt="Mapa de ' + esc(ATUAL.cidade) + '" draggable="false">' +
-          (p && modo !== 'nada' ? '<span class="mp-p ' + modo + '" style="left:' + (p[0] / M.W * 100).toFixed(2) + '%;top:' + (p[1] / M.H * 100).toFixed(2) + '%"></span>' : '') +
-          '<span class="mp-d">' + (p ? 'Toque no mapa para mover' : 'Toque no mapa onde fica o imóvel') + '</span></div>';
-      } else h += '<div class="dica">' + (ATUAL.cidade ? 'O mapa de perto de ' + esc(ATUAL.cidade) + ' ainda não está no site (hoje só Santo Antônio da Patrulha). O que tem perto aparece mesmo assim.' : 'Escolha a cidade primeiro.') + '</div>';
+      var h = '';
       px.forEach(pxNorm);
       if (escolhePx) {
         h += '<h2>Que lugar fica perto?</h2><div class="cm-g">' + PX_ORD.map(function (k) { return '<button data-pk="' + k + '">' + ic('px_' + k) + '<span>' + GL87[k][0] + '</span></button>'; }).join('') + '</div><button class="lk" data-pkv>‹ Voltar</button>';
@@ -547,22 +591,19 @@ Object.assign(window.ICO14, {
           return '<div class="cm-r" data-px="' + j + '"><button class="cm-i" data-pxi aria-label="Trocar o tipo de lugar">' + ic('px_' + k) + '</button><div class="cm-t"><div class="px-tp">' + esc(GL87[k][0]) + '</div><input class="cm-n" data-pn maxlength="60" value="' + esc(o.n || '') + '" placeholder="' + (k === 'outro' ? 'Nome do lugar' : 'Nome (opcional)') + '" aria-label="Nome do lugar"><div class="cm-l2"><span class="cm-m"><input inputmode="numeric" data-pd maxlength="6" value="' + (o.d || '') + '" placeholder="—" aria-label="Distância em metros"><span>m</span></span><span class="px-dc">distância</span></div></div><button class="cm-x" data-pxx aria-label="Excluir">✕</button></div>';
         }).join('') + '</div><button class="cm-add" data-pxa>+ Lugar perto</button><div class="dica">Escolha o tipo (escola, mercado, praça…) e a distância em metros. Quem não entrou no site vê só a faixa (ex.: "até 5 min a pé"); quem entrou vê o nome e a distância.</div>';
       }
-      r.innerHTML = h;
-      r.querySelectorAll('[data-mo]').forEach(function (b) { b.onclick = function () { ATUAL.mapa = b.dataset.mo; mudou(); desenha(); }; });
-      var box = r.querySelector('[data-mp]');
-      if (box) box.onclick = function (e) { var q = box.getBoundingClientRect(), x = (e.clientX - q.left) / q.width * M.W, y = (e.clientY - q.top) / q.height * M.H; ATUAL.loc = { ll: llDePx(M, x, y) }; if (!ATUAL.mapa || ATUAL.mapa === 'nada') ATUAL.mapa = 'area'; mudou(); desenha(); };
+      pxs.innerHTML = h;
       if (escolhePx) {
-        r.querySelectorAll('[data-pk]').forEach(function (b) { b.onclick = function () {
+        pxs.querySelectorAll('[data-pk]').forEach(function (b) { b.onclick = function () {
           var k = b.dataset.pk, novoPx = escolhePx === 'novo';
           if (novoPx) px.push({ t: k, d: 0, u: 'm' }); else px[escolhePx - 1].t = k;
           var foc = novoPx ? px.length - 1 : escolhePx - 1; escolhePx = null; mudou(); desenha();
-          var row = r.querySelector('[data-px="' + foc + '"]'); if (row) foco(row.querySelector(k === 'outro' ? '[data-pn]' : '[data-pd]'));
+          var row = pxs.querySelector('[data-px="' + foc + '"]'); if (row) foco(row.querySelector(k === 'outro' ? '[data-pn]' : '[data-pd]'));
         }; });
-        r.querySelector('[data-pkv]').onclick = function () { escolhePx = null; desenha(); };
-        setTimeout(function () { var hh = r.querySelector('[data-pk]'); hh = hh && hh.closest('.cm-g').previousElementSibling; if (hh && hh.scrollIntoView) hh.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 30);
+        pxs.querySelector('[data-pkv]').onclick = function () { escolhePx = null; desenha(); };
+        setTimeout(function () { var hh = pxs.querySelector('h2'); if (hh && hh.scrollIntoView) hh.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 30);
         return;
       }
-      r.querySelectorAll('[data-px]').forEach(function (row) {
+      pxs.querySelectorAll('[data-px]').forEach(function (row) {
         var j = +row.dataset.px, o = px[j];
         row.querySelector('[data-pxi]').onclick = function () { escolhePx = j + 1; desenha(); };
         row.querySelector('[data-pn]').oninput = function () { var v = this.value.trim(); if (v) o.n = v; else delete o.n; mudou(); };
@@ -570,7 +611,7 @@ Object.assign(window.ICO14, {
         row.querySelector('[data-pxx]').onclick = function () { px.splice(j, 1); mudou(); desenha(); };
         row.querySelectorAll('input').forEach(function (i) { i.onkeydown = function (e) { if (e.key === 'Enter') { e.preventDefault(); i.blur(); } }; });
       });
-      r.querySelector('[data-pxa]').onclick = function () { escolhePx = 'novo'; desenha(); };
+      pxs.querySelector('[data-pxa]').onclick = function () { escolhePx = 'novo'; desenha(); };
     }
     desenha();
   };

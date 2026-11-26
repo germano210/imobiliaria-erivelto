@@ -379,3 +379,18 @@ html.r86.r86pc .r86-nf{top:calc(24*var(--u,1px));right:calc(24*var(--u,1px));pad
 /* celular: a lista de imóveis só aparece (esmaece); não sobe 15 px depois de aparecer */
 html.r86.r86mo .sc12 .lsi12.in.sv .cd12,html.r86.r86mo .sc12 .lsi12.in.sv .mz12,html.r86.r86mo .sc12 .lsi12.in.sv .rb10,html.r86.r86mo .sc12 .lsi12.in.sv .rs12{animation:e12so .5s cubic-bezier(.33,0,.2,1) calc(var(--d,0ms) + 60ms) both!important}
 html.r86.r86mo .sc12 .f412.in.sv{animation:e12so .5s cubic-bezier(.33,0,.2,1) .15s both!important}
+
+/* R87 (John 26/11): "Onde fica" com satélite da Esri em todas as cidades */
+.sc12 .m15.r87-esc{display:none!important}
+.r87-m{position:relative;border-radius:14px;overflow:hidden;background:#1d2b2f;aspect-ratio:1.6/1;min-height:200px;isolation:isolate}
+html.r86mo .r87-m{aspect-ratio:1.15/1}
+.r87-m .r87-mm{position:absolute!important;inset:0}
+.r87-m.r87-sem .r87-mm{background:linear-gradient(135deg,#2c3d33,#1d2b2f)}
+.r87-mc{position:absolute;left:10px;bottom:10px;right:56px;z-index:2;font:500 11.5px/1.3 Poppins,system-ui,sans-serif;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6);pointer-events:none}
+.r87-mk{position:absolute;inset:auto 12px 12px 12px;z-index:2;display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 14px;border-radius:14px;background:rgba(0,30,36,.55);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:#fff;text-align:center;font-family:Poppins,system-ui,sans-serif}
+.r87-mk b{font-weight:500;font-size:14px}.r87-mk small{font-size:11.5px;opacity:.85}
+.r87-mk .m15b{margin-top:8px;border:0;border-radius:999px;background:#fff;color:#003641;font:500 13px Poppins,system-ui,sans-serif;padding:8px 22px;cursor:pointer}
+.r87-m .maplibregl-ctrl-group{border-radius:10px;overflow:hidden}
+.r87-m .maplibregl-ctrl-attrib{font-size:9.5px}
+.m87-pino{width:30px;height:38px;cursor:default}.m87-pino svg{width:100%;height:100%;filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
+.nv24p.r87-h{display:grid;gap:12px;margin-top:14px}
