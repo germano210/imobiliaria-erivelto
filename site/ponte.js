@@ -494,7 +494,7 @@
     if (su) res.push(['suite', su, su > 1 ? 'suítes' : 'suíte']); else if (bn) res.push(['banho', bn, bn > 1 ? 'banheiros' : 'banheiro']);
     if (vg) res.push(['garagem', vg, vg > 1 ? 'vagas' : 'vaga']);
     var od = onde86(a), oe = a.onde && a.onde.e, cm = linhas86(a), ot = itens86(a), md = med86(a), mapa = nv.querySelector('.nv24p');
-    var abas = [['s', 'Sobre']]; if (cm.length || md.length) abas.push(['c', cm.length ? 'Cômodos' : 'Medidas']); if (mapa || od) abas.push(['o', 'Onde fica']);
+    var abas = [['s', 'Sobre']]; if (cm.length || md.length) abas.push(['c', cm.length ? 'Cômodos' : 'Medidas']); if (mapa || od || a.cidade) abas.push(['o', 'Onde fica']);
     var h = '<div class="r86-d">' + (res.length ? '<div class="r86-res">' + res.slice(0, 3).map(function (r) { return '<div>' + ic86(r[0]) + '<b>' + r[1] + '</b><small>' + r[2] + '</small></div>'; }).join('') + '</div>' : '') +
       (abas.length > 1 ? '<div class="r86-tabs" role="tablist">' + abas.map(function (t, i) { return '<button type="button" role="tab" data-r86-tab="' + t[0] + '" aria-selected="' + (i === 0) + '">' + t[1] + '</button>'; }).join('') + '</div>' : '') +
       '<div class="r86-pn" data-r86-pn="s">' + (ot.length ? '<p class="r86-h">O que tem</p><div class="r86-pls">' + ot.map(function (r) { return '<span class="r86-pl">' + ic86(r.k, 'r86-ic s') + e86(r.n) + '</span>'; }).join('') + '</div>' : '') +
@@ -503,7 +503,8 @@
         (md.length ? (cm.length ? '<p class="r86-h">Medidas e valores</p>' : '') + md.map(function (r) { return '<div class="r86-row">' + ic86(r.k) + '<b>' + e86(r.n) + '</b><small>' + e86(r.v) + '</small></div>'; }).join('') : '') + '</div>' : '') +
       '<div class="r86-pn" data-r86-pn="o" hidden>' + (od ? '<div class="r86-row">' + ic86('ondefica') + '<b>' + e86(od) + (oe ? '<em>' + e86(oe) + '</em>' : '') + '</b></div>' : '') + '</div></div>';
     var nh = nv.querySelector('.nh12'); if (nh) nh.insertAdjacentHTML('afterend', h); else nv.insertAdjacentHTML('afterbegin', h);
-    var box = nv.querySelector('.r86-d'); if (mapa) box.querySelector('[data-r86-pn=o]').appendChild(mapa);
+    var box = nv.querySelector('.r86-d'), pno = box.querySelector('[data-r86-pn=o]'); if (mapa && pno) pno.appendChild(mapa);
+    if (pno) { var hp = pno.querySelector('.nv24p'); if (!hp) { hp = el('div', { class: 'nv24p r87-h' }); pno.appendChild(hp); } onde87(a, hp); }
     nv.classList.add('r86-dd');
   }
   document.addEventListener('click', function (ev) {
@@ -511,6 +512,7 @@
     var box = b.closest('.r86-d'); if (!box) return;
     box.querySelectorAll('[data-r86-tab]').forEach(function (o) { o.setAttribute('aria-selected', String(o === b)); });
     box.querySelectorAll('[data-r86-pn]').forEach(function (p) { p.hidden = p.getAttribute('data-r86-pn') !== b.getAttribute('data-r86-tab'); });
+    if (b.getAttribute('data-r86-tab') === 'o' && M87.vivo) setTimeout(function () { try { M87.vivo.mapa.resize(); } catch (e) { /* segue */ } }, 30);
   });
   // R86n (John 25/11): (1) deslizar o dedo na foto troca de foto (a foto não se mexe; só troca, como a seta);
   // (2) troca sem "flic": a foto anterior fica por baixo e a nova surge por cima (esmaece em 0,22 s) quando já estiver decodificada.
@@ -549,7 +551,7 @@
     var a = MAP86[a0.id] || a0, nv = document.querySelector('.sc12 .nv12'); if (!nv || !pc86()) return;
     var velho = nv.querySelector('.r86-f'); if (velho) velho.remove();
     var od = onde86(a), oe = a.onde && a.onde.e, cm = linhas86(a), ot = itens86(a), md = med86(a);
-    if (!od && !cm.length && !ot.length && !md.length) { nv.classList.remove('r86-fo'); return; }
+    if (!od && !cm.length && !ot.length && !md.length) { nv.classList.remove('r86-fo'); mapaPc87(a, nv); return; }
     var h = '<div class="r86-f">';
     if (od) h += '<div class="r86-fo1">' + ic86('ondefica') + '<span><b>' + e86(od) + '</b>' + (oe ? '<small>' + e86(oe) + '</small>' : '') + '</span></div>';
     if (cm.length) h += '<p class="r86-ft">Cômodos e medidas</p><div class="r86-gr">' + cm.map(function (r) { return '<div class="r86-t">' + ic86(r.k) + '<b>' + e86(r.n) + '</b>' + (r.s ? '<small>' + e86(r.s) + '</small>' : '') + (r.o ? '<em>' + e86(r.o) + '</em>' : '') + '</div>'; }).join('') + '</div>';
@@ -559,7 +561,45 @@
     var nh = nv.querySelector('.nh12'), alvo = nv.querySelector('.nv24s') || nh;
     if (alvo && alvo !== nh) alvo.insertAdjacentHTML('afterbegin', h); else if (nh) nh.insertAdjacentHTML('afterend', h); else nv.insertAdjacentHTML('afterbegin', h);
     nv.classList.toggle('r86-fo', cm.length + ot.length + md.length > 0);
+    mapaPc87(a, nv);
   }
+  function mapaPc87(a, nv) {
+    var host = nv.querySelector('.nv24p');
+    if (!host) { var base = nv.querySelector('.nv24s') || nv.querySelector('.r86-f') || nv; host = base.querySelector('.r87-h') || el('div', { class: 'nv24p r87-h' }); if (!host.parentNode) base.appendChild(host); }
+    onde87(a, host);
+  }
+
+  /* ---------- R87 (John 26/11): "Onde fica" com o satélite da Esri, igual em todas as cidades, com zoom ----------
+     Substitui o mapa de imagem da ficha (só existia para Santo Antônio). Sem entrar: a cidade, sem o ponto do imóvel.
+     Depois de entrar: a área aproximada (círculo de 250 m, deslocado) ou o ponto exato, como o corretor marcou no painel. */
+  var M87 = { url: (function () { var s = document.querySelector('script[src*="ponte.js"]'); return s ? s.src.replace(/ponte\.js(\?.*)?$/, '') + 'mapa87.js' : 'mapa87.js'; })(), p: null, vivo: null };
+  function mapa87js() {
+    if (window.MAPA87) return Promise.resolve(window.MAPA87);
+    if (M87.p) return M87.p;
+    M87.p = new Promise(function (ok, erro) { var s = document.createElement('script'); s.src = M87.url; s.async = true; s.onload = function () { ok(window.MAPA87); }; s.onerror = function () { M87.p = null; erro(new Error('mapa87')); }; document.head.appendChild(s); });
+    return M87.p;
+  }
+  function onde87(a, host) {
+    if (!host || !a || !a.cidade) return;
+    var velho = host.querySelector('.r87-m'); if (velho && velho.dataset.id === String(a.id)) return; if (velho) velho.remove();
+    host.querySelectorAll('.m15').forEach(function (m) { m.classList.add('r87-esc'); });
+    var lib = !!contaVisitante(), ll = a.loc && a.loc.ll, modo = a.mapa || (ll ? 'area' : 'nada'), mostra = lib && ll && modo !== 'nada';
+    var g = g87(a), txt = mostra ? (modo === 'pino' ? 'Ponto exato ' + g.d + ' ' + g.s : 'Área aproximada ' + g.d + ' ' + g.s + ' (o círculo não fica centrado na casa)') : '';
+    var box = el('div', { class: 'r87-m' }); box.dataset.id = String(a.id);
+    box.innerHTML = '<div class="r87-mm" role="region" aria-label="Mapa de satélite de ' + e86(a.cidade) + '"></div>' +
+      (mostra ? '<small class="r87-mc">' + e86(txt) + '</small>' : '<span class="r87-mk">' + (lib ? '<b>' + e86(a.cidade) + '</b><small>O corretor ainda vai marcar ' + g.o + ' ' + g.s + ' no mapa.</small>' :
+        '<b>Onde fica ' + g.o + ' ' + g.s + '</b><small>aparece para quem entrou</small><button type="button" class="m15b" data-m15="entrar">Entrar</button>') + '</span>');
+    host.insertBefore(box, host.firstChild);
+    var alvo = box.querySelector('.r87-mm');
+    mapa87js().then(function (M) {
+      return (mostra ? Promise.resolve(ll) : M.cidade(a.cidade)).then(function (c) {
+        if (!c) { box.classList.add('r87-sem'); return; }
+        var centro = mostra && modo !== 'pino' ? M.desloca(a.id, ll, 250) : c;
+        return M.novo(alvo, { centro: centro, zoom: mostra ? 15.2 : 12.6, cooperativo: true, area: mostra && modo !== 'pino' ? centro : null, pino: mostra && modo === 'pino' ? ll : null }).then(function (api) { M87.vivo = api; });
+      });
+    }).catch(function () { box.classList.add('r87-sem'); });
+  }
+  function g87(a) { var t = { casa: ['da', 'casa', 'a'], apartamento: ['do', 'apartamento', 'o'], terreno: ['do', 'terreno', 'o'], sobrado: ['do', 'sobrado', 'o'], sitio: ['do', 'sítio', 'o'], sala: ['da', 'sala', 'a'], galpao: ['do', 'galpão', 'o'] }[a.tipo] || ['do', 'imóvel', 'o']; return { d: t[0], s: t[1], o: t[2] }; }
 
   // "Anunciar meu imóvel" ao lado do Login (abre o mesmo formulário do "Quero vender")
   // R86f (John 24/11): o "Anunciar" fica fixo como o Login: mesmo lugar, mesmo fade, some e volta junto (lido a cada quadro;

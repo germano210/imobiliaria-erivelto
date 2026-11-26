@@ -319,3 +319,17 @@ body.c-on{overflow:hidden}
 /* R87 (John 26/11): lugar perto com tipo pronto; selo dos contatos */
 #c-app .px-tp{font-size:11.5px;color:#8a8780;line-height:1.2;margin:0 0 1px}
 #c-app .px-dc{font-size:11.5px;color:#8a8780;align-self:center}
+/* R87: "No mapa" com satélite da Esri e busca de endereço */
+#c-app .mp87{position:relative;height:300px;border-radius:14px;overflow:hidden;background:#1d2b2f;isolation:isolate}
+#c-app .sh.alto .mp87{height:min(46vh,440px)}
+#c-app .mp87 .mp87-m{position:absolute!important;inset:0}
+#c-app .mp87.sem .mp87-m{background:linear-gradient(135deg,#2c3d33,#1d2b2f)}
+#c-app .mp87 .mp-d{position:absolute;left:10px;top:10px;bottom:auto;z-index:2;pointer-events:none}
+#c-app .mp-bus{position:relative}
+#c-app .mp-bus input{width:100%;box-sizing:border-box;border:1px solid var(--ln);border-radius:12px;padding:11px 14px;font:inherit;font-size:14px;background:#fff}
+#c-app .mp-sug{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;background:#fff;border:1px solid var(--ln);border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.14);overflow:hidden}
+#c-app .mp-sug button{display:block;width:100%;text-align:left;padding:10px 14px;font-size:13px;line-height:1.3;color:#2e3a3f;border-bottom:1px solid var(--ln)}
+#c-app .mp-sug button:last-child{border-bottom:0}
+#c-app .mp-sug button:hover{background:var(--az2)}
+#c-app .mp-s0{padding:10px 14px;font-size:12.5px;color:#8a8780}
+#c-app .m87-pino{width:30px;height:38px}#c-app .m87-pino svg{width:100%;height:100%;filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
