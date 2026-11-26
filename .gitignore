@@ -22,3 +22,5 @@ desktop.ini
 *.bak
 # contexto do agente (mora em D:\trabalhos)
 /AGENTS.md
+amostras/*/site/
+amostras/*.zip

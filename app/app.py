@@ -24,6 +24,9 @@ SITE = pathlib.Path(E("ERV_SITE", str(BASE.parent / "site"))).resolve()
 DADOS = pathlib.Path(E("ERV_DADOS", str(BASE.parent / "dados"))).resolve()
 MIDIA = DADOS / "midia"
 BANCO = E("ERV_BANCO")                          # postgresql://usuario:senha@host:5432/banco (obrigatória)
+# R87: e-mail provisório do acesso do Erivelto -> e-mail dele (John 26/11)
+TROCA_EMAIL_PARA = "eriveltosantoscorretor@gmail.com"
+TROCA_EMAIL_DE = ["erivelto@gmail.com"]
 CHAVE_DADOS = E("ERV_CHAVE_DADOS")              # 32 bytes em base64 (obrigatória): python app.py chave
 HTTPS = E("ERV_HTTPS", "1") == "1"              # 0 só em teste local sem https (HSTS e cookie Secure)
 NOINDEX = E("ERV_NOINDEX", "1") == "1"          # 1 = pede aos buscadores para não indexar nada
@@ -184,6 +187,11 @@ def migrar():
             c.execute("""update imoveis set rascunho = jsonb_set(rascunho, '{cod}', to_jsonb(%s::text)),
                          publicado = case when publicado is null then null else jsonb_set(publicado, '{cod}', to_jsonb(%s::text)) end
                          where id = %s""", (cod, cod, r["id"]))
+        # R87 (John 26/11): o acesso do Erivelto foi criado com um e-mail provisório. Na subida, passa para o e-mail
+        # dele, só se o novo ainda não existe. A senha e as sessões continuam as mesmas (ele troca a senha no painel › Perfil).
+        for velho in TROCA_EMAIL_DE:
+            if not c.execute("select 1 from usuarios where email = %s", (TROCA_EMAIL_PARA,)).fetchone():
+                c.execute("update usuarios set email = %s where email = %s", (TROCA_EMAIL_PARA, velho))
 
 
 def q(sql, *a):
