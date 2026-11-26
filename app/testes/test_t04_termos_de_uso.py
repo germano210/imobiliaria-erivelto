@@ -33,8 +33,8 @@ def test_t04_e_modelo_com_versao_secoes_e_campos_entre_colchetes():
 def test_t04_pagina_nao_busca_nada_fora_e_nao_tem_script():
     assert "<script" not in TERMOS and "<img" not in TERMOS and "http://" not in TERMOS
     fora = [h for h in re.findall(r'(?:href|src)="([^"]+)"', TERMOS) if not h.startswith("/")]
-    assert fora == ["https://s2maps.eu", "https://www.openstreetmap.org/copyright"]      # só os links de crédito dos mapas (abrem em outra aba)
-    assert TERMOS.count('rel="noopener noreferrer"') == 2
+    assert fora == ["https://www.esri.com", "https://s2maps.eu", "https://www.openstreetmap.org/copyright"]      # só os links de crédito dos mapas (abrem em outra aba)
+    assert TERMOS.count('rel="noopener noreferrer"') == 3
     for href in re.findall(r'(?:href|src)="(/[^"]*)"', TERMOS):
         alvo = RAIZ / "site" / href.strip("/")
         assert alvo.is_file() or (alvo / "index.html").is_file() or href == "/", href
