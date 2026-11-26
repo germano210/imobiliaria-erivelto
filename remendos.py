@@ -97,6 +97,9 @@ REMENDOS = [
     ("botão Pedir visita na ficha", "T44",
      "'\">Pedir mais informações '+t.a+\" \"+t.s+\".</a>\",",
      "'\">Pedir mais informações '+t.a+\" \"+t.s+\".</a>\"+(" + P + ".botaoVisita?PONTE.botaoVisita(L):\"\"),"),
+    ("busca de cidade: o visitante só acha cidades liberadas pelo corretor (Onde atendo ou com imóvel)", "R87d",
+     'A4().forEach(function(d){var f=r3(d[0]);(f.indexOf(L)===0||f.indexOf(" "+L)>0)&&c.push([d[0],d[0]])})',
+     'P3((G1.d.mapa_pub&&G1.d.mapa_pub.atende||[]).concat(t)).forEach(function(n){var f=r3(n);(f.indexOf(L)===0||f.indexOf(" "+L)>0)&&c.push([n,n])})'),
 ]
 
 

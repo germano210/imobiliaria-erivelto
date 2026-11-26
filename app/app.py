@@ -62,7 +62,8 @@ RE_EMAIL = re.compile(r"[^@\s]{1,64}@[^@\s]{1,180}\.[^@\s]{2,}")
 RE_TUNEL = re.compile(r"https://[a-z0-9-]+\.trycloudflare\.com")
 RE_VIA = re.compile(r"[a-z0-9_]{1,24}")
 CSP = ("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; "
-       "img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:; connect-src 'self'; "
+       "img-src 'self' data: blob: https://*.arcgis.com https://*.arcgisonline.com; media-src 'self' blob:; font-src 'self' data:; "
+       "connect-src 'self' https://*.arcgis.com https://*.arcgisonline.com; "
        "worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'")
 # a página inicial pode aparecer dentro do painel (aba "Site", mesmo endereço); em outro site, nunca
 CSP_INICIO = CSP.replace("frame-ancestors 'none'", "frame-ancestors 'self'")
