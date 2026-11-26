@@ -1,0 +1,509 @@
+{
+ "slug": "velleda",
+ "nome1": "Velleda",
+ "nome2": "Imóveis",
+ "nome": "Velleda Imóveis",
+ "artigo": "a",
+ "sub": "Imobiliária",
+ "sub_min": "imobiliária",
+ "creci": "17532",
+ "cidade": "Viamão",
+ "whatsapp": "5551993797900",
+ "dominio": "velledaimoveisrs.com.br",
+ "vizinhas": [
+  "Porto Alegre",
+  "Alvorada",
+  "Gravataí",
+  "Capivari do Sul"
+ ],
+ "tipos": [
+  "casa",
+  "apartamento",
+  "terreno",
+  "sitio"
+ ],
+ "logo": {
+  "logo_full.webp": "logo/logo_full.webp",
+  "logo.webp": "logo/marca.webp",
+  "es.webp": "logo/marca.webp",
+  "ring.webp": "logo/vazio.webp",
+  "q1.webp": "logo/vazio.webp",
+  "q2.webp": "logo/vazio.webp",
+  "q3.webp": "logo/vazio.webp",
+  "q4.webp": "logo/vazio.webp"
+ },
+ "fonte": "http://velledaimoveisrs.com.br/ (imóveis 890, 5525, 5704; lidos em 25/11/2026)",
+ "imoveis": [
+  {
+   "id": "vel890",
+   "tipo": "casa",
+   "cidade": "Viamão",
+   "preco": 130000,
+   "fin": false,
+   "nome": "2 casas perto do asfalto em Águas Claras",
+   "infos": [
+    {
+     "i": "cama",
+     "t": "5"
+    },
+    {
+     "i": "banho",
+     "t": "2"
+    },
+    {
+     "i": "varanda",
+     "t": "varanda"
+    },
+    {
+     "i": "area",
+     "t": "300 m²"
+    }
+   ],
+   "cm": [
+    {
+     "k": "cama",
+     "n": "Quarto 1"
+    },
+    {
+     "k": "cama",
+     "n": "Quarto 2"
+    },
+    {
+     "k": "cama",
+     "n": "Quarto 3"
+    },
+    {
+     "k": "cama",
+     "n": "Quarto 4"
+    },
+    {
+     "k": "cama",
+     "n": "Quarto 5"
+    },
+    {
+     "k": "banho",
+     "n": "Banheiro 1"
+    },
+    {
+     "k": "banho",
+     "n": "Banheiro 2"
+    },
+    {
+     "k": "sofa",
+     "n": "Sala 1"
+    },
+    {
+     "k": "sofa",
+     "n": "Sala 2"
+    },
+    {
+     "k": "cozinha",
+     "n": "Cozinha 1"
+    },
+    {
+     "k": "cozinha",
+     "n": "Cozinha 2"
+    }
+   ],
+   "ot": [
+    {
+     "k": "varanda",
+     "n": "Varanda grande"
+    },
+    {
+     "k": "mais",
+     "n": "2 casas no terreno"
+    }
+   ],
+   "onde": {
+    "t": "bairro",
+    "n": "Águas Claras"
+   },
+   "fotos": [
+    {
+     "s": "casa/v890_07.webp",
+     "a": "2 casas em Águas Claras",
+     "d": false
+    },
+    {
+     "s": "casa/v890_06.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v890_01.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v890_03.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v890_05.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v890_10.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v890_02.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v890_04.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v890_08.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v890_09.webp",
+     "a": "",
+     "d": false
+    }
+   ],
+   "fn": {
+    "ent": 20,
+    "prazos": [
+     240,
+     360
+    ],
+    "tab": "ambas",
+    "bancos": []
+   }
+  },
+  {
+   "id": "vel5525",
+   "tipo": "sitio",
+   "cidade": "Viamão",
+   "preco": 260000,
+   "fin": false,
+   "nome": "Sítio com 2 casas e piscina em condomínio fechado",
+   "infos": [
+    {
+     "i": "cama",
+     "t": "4"
+    },
+    {
+     "i": "banho",
+     "t": "3"
+    },
+    {
+     "i": "piscina",
+     "t": "piscina"
+    },
+    {
+     "i": "churras",
+     "t": "churrasqueira"
+    },
+    {
+     "i": "area",
+     "t": "1.800 m²"
+    }
+   ],
+   "cm": [
+    {
+     "k": "cama",
+     "n": "Quarto 1"
+    },
+    {
+     "k": "cama",
+     "n": "Quarto 2"
+    },
+    {
+     "k": "cama",
+     "n": "Quarto 3"
+    },
+    {
+     "k": "cama",
+     "n": "Quarto 4"
+    },
+    {
+     "k": "banho",
+     "n": "Banheiro 1"
+    },
+    {
+     "k": "banho",
+     "n": "Banheiro 2"
+    },
+    {
+     "k": "banho",
+     "n": "Banheiro 3"
+    },
+    {
+     "k": "sofa",
+     "n": "Sala 1"
+    },
+    {
+     "k": "sofa",
+     "n": "Sala 2"
+    },
+    {
+     "k": "cozinha",
+     "n": "Cozinha 1"
+    },
+    {
+     "k": "cozinha",
+     "n": "Cozinha 2"
+    },
+    {
+     "k": "lavanderia",
+     "n": "Área de serviço"
+    }
+   ],
+   "ot": [
+    {
+     "k": "piscina",
+     "n": "Piscina com deck"
+    },
+    {
+     "k": "churras",
+     "n": "Churrasqueira"
+    },
+    {
+     "k": "jardim",
+     "n": "Horta e frutíferas"
+    },
+    {
+     "k": "patio",
+     "n": "Pátio plano e arborizado"
+    }
+   ],
+   "onde": {
+    "t": "cf",
+    "n": "em Águas Claras"
+   },
+   "fotos": [
+    {
+     "s": "casa/v5525_01.webp",
+     "a": "Sítio com piscina em Águas Claras",
+     "d": false
+    },
+    {
+     "s": "casa/v5525_02.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5525_03.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5525_04.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5525_05.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5525_06.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5525_07.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5525_08.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5525_09.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5525_10.webp",
+     "a": "",
+     "d": false
+    }
+   ],
+   "fn": {
+    "ent": 20,
+    "prazos": [
+     240,
+     360
+    ],
+    "tab": "ambas",
+    "bancos": []
+   }
+  },
+  {
+   "id": "vel5704",
+   "tipo": "sitio",
+   "cidade": "Viamão",
+   "preco": 890000,
+   "fin": true,
+   "nome": "Sítio com açude na beira da RS-040",
+   "infos": [
+    {
+     "i": "cama",
+     "t": "2"
+    },
+    {
+     "i": "banho",
+     "t": "2"
+    },
+    {
+     "i": "garagem",
+     "t": "2 vagas"
+    },
+    {
+     "i": "churras",
+     "t": "churrasqueira"
+    },
+    {
+     "i": "area",
+     "t": "4.000 m²"
+    }
+   ],
+   "cm": [
+    {
+     "k": "cama",
+     "n": "Quarto 1"
+    },
+    {
+     "k": "cama",
+     "n": "Quarto 2"
+    },
+    {
+     "k": "banho",
+     "n": "Banheiro com hidromassagem"
+    },
+    {
+     "k": "banho",
+     "n": "Banheiro"
+    },
+    {
+     "k": "sofa",
+     "n": "Sala de estar com lareira"
+    },
+    {
+     "k": "sofa",
+     "n": "Sala de estar"
+    },
+    {
+     "k": "sofa",
+     "n": "Sala de jantar"
+    },
+    {
+     "k": "cozinha",
+     "n": "Cozinha"
+    },
+    {
+     "k": "lavanderia",
+     "n": "Lavanderia"
+    },
+    {
+     "k": "garagem",
+     "n": "Garagem coberta",
+     "q": 2
+    }
+   ],
+   "ot": [
+    {
+     "k": "agua",
+     "n": "Açude de pedra e laguinho"
+    },
+    {
+     "k": "churras",
+     "n": "Churrasqueira na garagem"
+    },
+    {
+     "k": "agua",
+     "n": "Água quente"
+    },
+    {
+     "k": "mais",
+     "n": "Depósito em alvenaria"
+    },
+    {
+     "k": "jardim",
+     "n": "Terreno plano e cuidado"
+    }
+   ],
+   "onde": {
+    "t": "bairro",
+    "n": "Capão da Porteira"
+   },
+   "fotos": [
+    {
+     "s": "casa/v5704_02.webp",
+     "a": "Sítio com açude na RS-040",
+     "d": false
+    },
+    {
+     "s": "casa/v5704_01.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5704_03.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5704_04.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5704_05.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5704_06.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5704_08.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5704_09.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5704_10.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/v5704_07.webp",
+     "a": "",
+     "d": false
+    }
+   ],
+   "fn": {
+    "ent": 20,
+    "prazos": [
+     240,
+     360
+    ],
+    "tab": "ambas",
+    "bancos": []
+   }
+  }
+ ],
+ "cod": "VI"
+}

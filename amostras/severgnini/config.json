@@ -1,0 +1,497 @@
+{
+ "slug": "severgnini",
+ "nome1": "Severgnini",
+ "nome2": "Consultoria",
+ "nome": "Severgnini",
+ "artigo": "a",
+ "cod": "SV",
+ "sub": "Consultoria imobiliária",
+ "sub_min": "consultoria imobiliária",
+ "creci": "25101J",
+ "cidade": "Cachoeirinha",
+ "whatsapp": "5551982786184",
+ "dominio": "severgniniconsultoria.com.br",
+ "vizinhas": [
+  "Gravataí",
+  "Canoas",
+  "Esteio",
+  "Porto Alegre"
+ ],
+ "tipos": [
+  "casa",
+  "apartamento",
+  "terreno",
+  "sobrado"
+ ],
+ "logo": {
+  "logo_full.webp": "logo/logo_full.webp",
+  "logo.webp": "logo/marca.webp",
+  "es.webp": "logo/marca.webp",
+  "ring.webp": "logo/vazio.webp",
+  "q1.webp": "logo/vazio.webp",
+  "q2.webp": "logo/vazio.webp",
+  "q3.webp": "logo/vazio.webp",
+  "q4.webp": "logo/vazio.webp"
+ },
+ "fonte": "https://www.severgniniconsultoria.com.br/ (SO1350, SO0447, SO1421; lidos em 25/11/2026)",
+ "imoveis": [
+  {
+   "id": "sev1350",
+   "tipo": "sobrado",
+   "cidade": "Cachoeirinha",
+   "preco": 620000,
+   "fin": true,
+   "nome": "Sobrado mobiliado no Condomínio Villa di Ravenna",
+   "infos": [
+    {
+     "i": "cama",
+     "t": "3 (1 suíte)"
+    },
+    {
+     "i": "banho",
+     "t": "2"
+    },
+    {
+     "i": "garagem",
+     "t": "2 vagas"
+    },
+    {
+     "i": "churras",
+     "t": "churrasqueira"
+    },
+    {
+     "i": "area",
+     "t": "85 m²"
+    }
+   ],
+   "cm": [
+    {
+     "k": "suite",
+     "n": "Suíte"
+    },
+    {
+     "k": "cama",
+     "n": "Quarto 1"
+    },
+    {
+     "k": "cama",
+     "n": "Quarto 2"
+    },
+    {
+     "k": "banho",
+     "n": "Banheiro social"
+    },
+    {
+     "k": "sofa",
+     "n": "Sala de estar e jantar"
+    },
+    {
+     "k": "cozinha",
+     "n": "Cozinha integrada"
+    },
+    {
+     "k": "lavanderia",
+     "n": "Lavanderia"
+    },
+    {
+     "k": "garagem",
+     "n": "Garagem descoberta",
+     "q": 2
+    }
+   ],
+   "ot": [
+    {
+     "k": "churras",
+     "n": "Varanda gourmet com churrasqueira"
+    },
+    {
+     "k": "armario",
+     "n": "Móveis planejados"
+    },
+    {
+     "k": "patio",
+     "n": "Pátio amplo nos fundos"
+    },
+    {
+     "k": "portaria",
+     "n": "Segurança 24 h"
+    }
+   ],
+   "onde": {
+    "t": "cf",
+    "n": "Villa di Ravenna"
+   },
+   "m": {
+    "cond": 480
+   },
+   "fotos": [
+    {
+     "s": "casa/s1350_08.webp",
+     "a": "Varanda gourmet",
+     "d": false
+    },
+    {
+     "s": "casa/s1350_10.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1350_09.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1350_01.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1350_02.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1350_03.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1350_04.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1350_06.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1350_07.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1350_05.webp",
+     "a": "",
+     "d": false
+    }
+   ],
+   "fn": {
+    "ent": 20,
+    "prazos": [
+     240,
+     360
+    ],
+    "tab": "ambas",
+    "bancos": []
+   }
+  },
+  {
+   "id": "sev0447",
+   "tipo": "sobrado",
+   "cidade": "Gravataí",
+   "preco": 1150000,
+   "fin": true,
+   "nome": "Sobrado com 2 suítes e piscina no Vale dos Lírios",
+   "infos": [
+    {
+     "i": "cama",
+     "t": "2 (2 suítes)"
+    },
+    {
+     "i": "banho",
+     "t": "3"
+    },
+    {
+     "i": "garagem",
+     "t": "2 vagas"
+    },
+    {
+     "i": "piscina",
+     "t": "piscina"
+    },
+    {
+     "i": "area",
+     "t": "120 m²"
+    }
+   ],
+   "cm": [
+    {
+     "k": "suite",
+     "n": "Suíte com closet e sacada"
+    },
+    {
+     "k": "suite",
+     "n": "Suíte"
+    },
+    {
+     "k": "banho",
+     "n": "Lavabo"
+    },
+    {
+     "k": "sofa",
+     "n": "Sala de estar com lareira"
+    },
+    {
+     "k": "sofa",
+     "n": "Sala de jantar (pé-direito duplo)"
+    },
+    {
+     "k": "cozinha",
+     "n": "Cozinha com ilha"
+    },
+    {
+     "k": "garagem",
+     "n": "Garagem",
+     "q": 2
+    }
+   ],
+   "ot": [
+    {
+     "k": "piscina",
+     "n": "Piscina com aquecimento solar"
+    },
+    {
+     "k": "churras",
+     "n": "Espaço gourmet com churrasqueira"
+    },
+    {
+     "k": "varanda",
+     "n": "Varanda"
+    },
+    {
+     "k": "armario",
+     "n": "Móveis planejados"
+    },
+    {
+     "k": "portaria",
+     "n": "Portaria 24 h"
+    }
+   ],
+   "onde": {
+    "t": "cf",
+    "n": "Vale dos Lírios (Vale Ville)"
+   },
+   "m": {
+    "cond": 400
+   },
+   "fotos": [
+    {
+     "s": "casa/s0447_01.webp",
+     "a": "Sala com lareira",
+     "d": false
+    },
+    {
+     "s": "casa/s0447_02.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s0447_04.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s0447_05.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s0447_03.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s0447_06.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s0447_07.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s0447_08.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s0447_10.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s0447_09.webp",
+     "a": "",
+     "d": false
+    }
+   ],
+   "fn": {
+    "ent": 20,
+    "prazos": [
+     240,
+     360
+    ],
+    "tab": "ambas",
+    "bancos": []
+   }
+  },
+  {
+   "id": "sev1421",
+   "tipo": "sobrado",
+   "cidade": "Cachoeirinha",
+   "preco": 1590000,
+   "fin": true,
+   "nome": "Sobrado alto padrão no Central Park",
+   "infos": [
+    {
+     "i": "cama",
+     "t": "3 (1 suíte)"
+    },
+    {
+     "i": "banho",
+     "t": "3"
+    },
+    {
+     "i": "garagem",
+     "t": "2 vagas"
+    },
+    {
+     "i": "churras",
+     "t": "churrasqueira"
+    },
+    {
+     "i": "area",
+     "t": "186 m²"
+    }
+   ],
+   "cm": [
+    {
+     "k": "suite",
+     "n": "Suíte"
+    },
+    {
+     "k": "cama",
+     "n": "Quarto 1"
+    },
+    {
+     "k": "cama",
+     "n": "Quarto 2"
+    },
+    {
+     "k": "banho",
+     "n": "Banheiro 1"
+    },
+    {
+     "k": "banho",
+     "n": "Banheiro 2"
+    },
+    {
+     "k": "sofa",
+     "n": "Sala de estar"
+    },
+    {
+     "k": "sofa",
+     "n": "Sala de jantar"
+    },
+    {
+     "k": "cozinha",
+     "n": "Cozinha integrada"
+    },
+    {
+     "k": "lavanderia",
+     "n": "Área de serviço"
+    },
+    {
+     "k": "garagem",
+     "n": "Garagem coberta",
+     "q": 2
+    }
+   ],
+   "ot": [
+    {
+     "k": "churras",
+     "n": "Espaço gourmet com churrasqueira"
+    },
+    {
+     "k": "armario",
+     "n": "Móveis planejados"
+    },
+    {
+     "k": "sacada",
+     "n": "Sacada"
+    },
+    {
+     "k": "piscina",
+     "n": "Piscina no condomínio"
+    }
+   ],
+   "onde": {
+    "t": "cf",
+    "n": "Bella Vita (Central Park)"
+   },
+   "fotos": [
+    {
+     "s": "casa/s1421_02.webp",
+     "a": "Sala integrada",
+     "d": false
+    },
+    {
+     "s": "casa/s1421_05.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1421_07.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1421_01.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1421_04.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1421_06.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1421_10.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1421_08.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1421_03.webp",
+     "a": "",
+     "d": false
+    },
+    {
+     "s": "casa/s1421_09.webp",
+     "a": "",
+     "d": false
+    }
+   ],
+   "fn": {
+    "ent": 20,
+    "prazos": [
+     240,
+     360
+    ],
+    "tab": "ambas",
+    "bancos": []
+   }
+  }
+ ]
+}
