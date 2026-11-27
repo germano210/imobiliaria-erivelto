@@ -4,7 +4,7 @@
    (Referrers) e só com acesso a Basemaps e Geocoding. Trocar a chave: mudar CHAVE abaixo. */
 (function () {
   'use strict';
-  var CHAVE = 'AAPTaCO2Bk8oEHQAgcRWbPA0CCg..I4araUQkVxy-rCIhMYt_IDToWgLZmszrmfd0pJ2RRYaxqXTnrAgSZfGo6-u0Dnj6yda48tI0TPvTi55s1bp76JdUHho19KZDBb-UEpNvEojorO6ADKA1LmPD0UAYl0m1urXatfqil8GqURM0vX4eayghxkt9zOrOv7BQ0gGvq0a_wWnt2NFyGOE9-MnZAPDJY96fVHUtbvQ00gwCF23jl1jfUn9ctx34Q1XEp6q59eb7tkSkKF4XI_0qy2A5shc.AT1_YpGZlLjU';
+  var CHAVE = 'AAPTayLqX37B4P1KzX45PtCOpew..0WNxJXY4eqN9DHt3HDpetQCXu409dRbS_0sTtgqEFNj7N9MH1YhwEdf7UEspC1eGCnpZIAH1utysD9SPyMOx2FDUHEkwlFHRvWnX7fCI8QniAFelub2_lba63yJQeo-xHBCRKJILZZIHCVrLP4reJxqWsCfQQXYCmopYAW9IisduOnfNKQcK56AZc-9EiqYgEsmxE5jHZmmzA66nAi4q146ZaVThchymxSGvloqRt8T_1ARfUV64ta8Uiw-xmwQ.AT1_YpGZlLjU';
   var ESTILO = 'https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/arcgis/imagery?language=pt-BR&token=' + encodeURIComponent(CHAVE);
   var GEO = 'https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/';
   var me = document.currentScript, BASE = me && me.src ? me.src.replace(/[^/]*(\?.*)?$/, '') : '';
