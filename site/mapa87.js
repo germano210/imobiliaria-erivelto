@@ -65,10 +65,43 @@
     return [ll[0] + d * Math.cos(ang) / (111320 * Math.cos(lat)), ll[1] + d * Math.sin(ang) / 110540];
   }
   /* novo mapa num elemento. o = { centro:[lon,lat], zoom, area:[lon,lat] (raio 250 m), pino:[lon,lat], toque:fn(ll), cooperativo } */
+  // sem WebGL (aceleração gráfica desligada, aparelho antigo): imagem fixa do mesmo satélite, com o ponto/área e o toque
+  function semWebgl() { try { var c = document.createElement('canvas'); return !(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return true; } }
+  function imagem(el, o) {
+    var w = Math.max(200, Math.round(el.clientWidth || 360)), h = Math.max(150, Math.round(el.clientHeight || 240)), z = Math.min(o.zoom || 13, 17);
+    var c = o.centro, mpp = 156543.03 * Math.cos(c[1] * Math.PI / 180) / Math.pow(2, z);
+    var dx = w / 2 * mpp / (111320 * Math.cos(c[1] * Math.PI / 180)), dy = h / 2 * mpp / 110540;
+    var box = [c[0] - dx, c[1] - dy, c[0] + dx, c[1] + dy];
+    el.innerHTML = ''; el.style.position = el.style.position || 'relative'; el.style.overflow = 'hidden';
+    var img = document.createElement('img'); img.alt = 'Satélite'; img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover';
+    img.src = 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/export?f=image&format=jpg&bboxSR=4326&imageSR=3857&size=' + w + ',' + h + '&bbox=' + box.join(',') + '&token=' + encodeURIComponent(CHAVE);
+    el.appendChild(img);
+    var cr = document.createElement('div'); cr.style.cssText = 'position:absolute;right:6px;bottom:4px;font:10px sans-serif;color:#fff;text-shadow:0 0 3px #000'; cr.textContent = 'Esri, Maxar, Earthstar Geographics'; el.appendChild(cr);
+    function pos(ll) { return [(ll[0] - box[0]) / (box[2] - box[0]) * 100, (1 - (ll[1] - box[1]) / (box[3] - box[1])) * 100]; }
+    var marca = null, area = null, atual = c;
+    var api = { mapa: { resize: function () {}, getCenter: function () { return { lng: atual[0], lat: atual[1] }; } }, pino: null, semWebgl: true };
+    api.area = function (ll) {
+      if (area) { area.remove(); area = null; } if (!ll) return;
+      var p = pos(ll), r = 250 / mpp; area = document.createElement('div');
+      area.style.cssText = 'position:absolute;left:' + p[0] + '%;top:' + p[1] + '%;width:' + 2 * r + 'px;height:' + 2 * r + 'px;margin:' + -r + 'px 0 0 ' + -r + 'px;border:2px dashed #fff;border-radius:50%;background:rgba(194,154,93,.28);pointer-events:none';
+      el.appendChild(area); atual = ll;
+    };
+    api.marca = function (ll) {
+      if (marca) { marca.remove(); marca = null; } if (!ll) return;
+      var p = pos(ll); marca = document.createElement('div'); marca.className = 'm87-pino'; marca.style.cssText = 'position:absolute;left:' + p[0] + '%;top:' + p[1] + '%;transform:translate(-50%,-100%)';
+      marca.innerHTML = '<svg viewBox="0 0 32 40" width="28" height="35" aria-hidden="true"><path d="M16 39s13-12.5 13-23A13 13 0 0 0 3 16c0 10.5 13 23 13 23z" fill="#003641" stroke="#fff" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#fff"/></svg>';
+      el.appendChild(marca); atual = ll;
+    };
+    if (o.area) api.area(o.area); if (o.pino) api.marca(o.pino);
+    if (o.toque) { el.style.cursor = 'crosshair'; el.addEventListener('click', function (e) { var r = el.getBoundingClientRect(); o.toque([+(box[0] + (e.clientX - r.left) / r.width * (box[2] - box[0])).toFixed(6), +(box[3] - (e.clientY - r.top) / r.height * (box[3] - box[1])).toFixed(6)]); }); }
+    return api;
+  }
   function novo(el, o) {
     return carregar().then(function (ml) {
-      var m = new ml.Map({ container: el, style: ESTILO, center: o.centro, zoom: o.zoom || 13, minZoom: 9, maxZoom: 19, attributionControl: false,
-        cooperativeGestures: !!o.cooperativo, dragRotate: false, pitchWithRotate: false, touchPitch: false, locale: { 'CooperativeGesturesHandler.WindowsHelpText': 'Use Ctrl + rolagem para dar zoom', 'CooperativeGesturesHandler.MacHelpText': 'Use ⌘ + rolagem para dar zoom', 'CooperativeGesturesHandler.MobileHelpText': 'Use dois dedos para mover o mapa', 'NavigationControl.ZoomIn': 'Aproximar', 'NavigationControl.ZoomOut': 'Afastar' } });
+      if (semWebgl()) return imagem(el, o);
+      var m;
+      try { m = new ml.Map({ container: el, style: ESTILO, center: o.centro, zoom: o.zoom || 13, minZoom: 9, maxZoom: 19, attributionControl: false,
+        cooperativeGestures: !!o.cooperativo, dragRotate: false, pitchWithRotate: false, touchPitch: false, locale: { 'CooperativeGesturesHandler.WindowsHelpText': 'Use Ctrl + rolagem para dar zoom', 'CooperativeGesturesHandler.MacHelpText': 'Use ⌘ + rolagem para dar zoom', 'CooperativeGesturesHandler.MobileHelpText': 'Use dois dedos para mover o mapa', 'NavigationControl.ZoomIn': 'Aproximar', 'NavigationControl.ZoomOut': 'Afastar' } }); } catch (e) { return imagem(el, o); }
       try { m.touchZoomRotate.disableRotation(); } catch (e) { /* segue */ }
       m.addControl(new ml.NavigationControl({ showCompass: false }), 'top-right');
       m.addControl(new ml.AttributionControl({ compact: true }), 'bottom-right');
