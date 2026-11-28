@@ -100,6 +100,18 @@ REMENDOS = [
     ("busca de cidade: o visitante só acha cidades liberadas pelo corretor (Onde atendo ou com imóvel)", "R87d",
      'A4().forEach(function(d){var f=r3(d[0]);(f.indexOf(L)===0||f.indexOf(" "+L)>0)&&c.push([d[0],d[0]])})',
      'P3((G1.d.mapa_pub&&G1.d.mapa_pub.atende||[]).concat(t)).forEach(function(n){var f=r3(n);(f.indexOf(L)===0||f.indexOf(" "+L)>0)&&c.push([n,n])})'),
+    ("carregamento: aquece o satélite das cidades do painel (ponte.js PONTE.pre87); até 9 s e segue", "R87h",
+     'N2("fonte",.04);',
+     'N2("fonte",.04);N2("m87",1.5);(function(){var d=!1,f=function(){d||(d=!0,w2("m87",1))};try{window.PONTE&&PONTE.pre87?PONTE.pre87(f):f()}catch{f()}setTimeout(f,9e3)})();'),
+    ("carregamento: não baixa mais a imagem antiga de Santo Antônio (o mapa antigo não aparece mais)", "R87h",
+     'N2("mapa",.3),(function(){var k=new Image;k.onload=k.onerror=function(){w2("mapa",1)},k.src=f.r20})()',
+     'N2("mapa",.3),w2("mapa",1)'),
+    ("pré-carga das imagens antigas de Santo Antônio desligada", "R87h",
+     'function v6(){M2.on=1;var L=j2["Santo Antônio da Patrulha"];',
+     'function v6(){M2.on=1;var L=null;'),
+    ("mapa antigo de Santo Antônio removido: sem imagens, sem tabela de cidades (o satélite da Esri é o único mapa)", "R87h",
+     'var j2={"Santo Antônio da Patrulha":{img:"m15/sap.webp",blur:"m15/sap_borrado.webp",Z:16,X0:6032993,Y0:9844708,W:2658,H:2687,mpp:2.0722,cc:[-50.5175,-29.8268],det:{img:"m16/sap_det.webp",x:750,y:753,w:1158,h:1158},r20:"v1222/sap_w.webp",bl20:"v1222/sap_wbl.webp",km20:5.508,x20:0,y20:0,w20:2658}}',
+     'var j2={}'),
 ]
 
 

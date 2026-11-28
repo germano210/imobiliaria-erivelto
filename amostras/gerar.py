@@ -70,6 +70,7 @@ def main(cfg_path):
     if out.exists():
         shutil.rmtree(out)
     shutil.copytree(SITE, out, ignore=shutil.ignore_patterns("casa"))
+    shutil.copy2(pathlib.Path(__file__).resolve().parent / "_worker.js", out / "_worker.js")
     (out / "casa").mkdir()
     for f in (base / "fotos").iterdir():
         shutil.copy2(f, out / "casa" / f.name)
