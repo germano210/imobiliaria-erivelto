@@ -394,3 +394,8 @@ html.r86mo .r87-m{aspect-ratio:1.15/1}
 .r87-m .maplibregl-ctrl-attrib{font-size:9.5px}
 .m87-pino{width:30px;height:38px;cursor:default}.m87-pino svg{width:100%;height:100%;filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
 .nv24p.r87-h{display:grid;gap:12px;margin-top:14px}
+
+/* R87f: mapa grande da página inicial = satélite da Esri (ponte.js home87) */
+.mw12 .h87m{position:absolute;inset:0;z-index:6;border-radius:inherit;overflow:hidden;background:#1d2a22}
+.mw12.h87-on .mp12,.mw12.h87-on .zm12{visibility:hidden!important}
+.mw12 .h87m .maplibregl-ctrl-top-right{margin:12px}

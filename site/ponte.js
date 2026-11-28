@@ -601,6 +601,69 @@
   }
   function g87(a) { var t = { casa: ['da', 'casa', 'a'], apartamento: ['do', 'apartamento', 'o'], terreno: ['do', 'terreno', 'o'], sobrado: ['do', 'sobrado', 'o'], sitio: ['do', 'sítio', 'o'], sala: ['da', 'sala', 'a'], galpao: ['do', 'galpão', 'o'] }[a.tipo] || ['do', 'imóvel', 'o']; return { d: t[0], s: t[1], o: t[2] }; }
 
+  // R87f (John 27/11): o mapa grande da página inicial (ao escolher a cidade) passa a ser o satélite da Esri, igual em todas as
+  // cidades, com zoom e arrastar. Só abre para a cidade escolhida (não carrega as outras). Áreas aproximadas (250 m) só para quem entrou.
+  var H87 = { chave: '', box: null, api: null, cr: null };
+  function h87abrir(id) {
+    var ach = function () { return document.querySelector('button.vm12[data-open="' + String(id).replace(/"/g, '') + '"]'); }, b = ach();
+    if (b) { b.click(); return; }
+    var go = document.querySelector('button.go12'); if (go) { go.click(); setTimeout(function () { var x = ach(); if (x) x.click(); }, 900); }
+  }
+  function h87fecha() {
+    var w = document.querySelector('.mw12');
+    if (H87.api) { try { H87.api.mapa.remove && H87.api.mapa.remove(); } catch (e) { /* segue */ } }
+    if (H87.box && H87.box.parentNode) H87.box.parentNode.removeChild(H87.box);
+    if (w) w.classList.remove('h87-on');
+    if (H87.cr && H87.cr.el && H87.cr.txt != null) H87.cr.el.textContent = H87.cr.txt;
+    H87.box = null; H87.api = null; H87.chave = ''; H87.cr = null;
+  }
+  function h87areas(M, api, nome) {
+    var lista = (ESTADO && ESTADO.imoveis) || [], fs = [];
+    if (contaVisitante()) lista.forEach(function (a) {
+      var ll = a.loc && a.loc.ll; if (!ll || a.cidade !== nome || a.mapa === 'nada') return;
+      var f = M.circulo(M.desloca(a.id, ll, 250), 250); f.properties = { id: String(a.id) }; fs.push(f);
+    });
+    var m = api.mapa; if (!m.addSource) return fs.length;
+    var poe = function () {
+      var d = { type: 'FeatureCollection', features: fs };
+      if (m.getSource('h87a')) { m.getSource('h87a').setData(d); return; }
+      m.addSource('h87a', { type: 'geojson', data: d });
+      m.addLayer({ id: 'h87f', type: 'fill', source: 'h87a', paint: { 'fill-color': '#C29A5D', 'fill-opacity': 0.32 } });
+      m.addLayer({ id: 'h87l', type: 'line', source: 'h87a', paint: { 'line-color': '#ffffff', 'line-width': 2, 'line-dasharray': [2, 1.5] } });
+      m.on('click', 'h87f', function (e) { var f = e.features && e.features[0]; if (f) h87abrir(f.properties.id); });
+      m.on('mouseenter', 'h87f', function () { m.getCanvas().style.cursor = 'pointer'; });
+      m.on('mouseleave', 'h87f', function () { m.getCanvas().style.cursor = ''; });
+    };
+    if (m.isStyleLoaded()) poe(); else m.once('load', poe);
+    return fs.length;
+  }
+  var H87N = 0;
+  function home87() {
+    var w = document.querySelector('.mw12'), inp = document.querySelector('.ci12in');
+    var nome = inp ? String(inp.value || '').trim() : '', vis = !!(w && w.offsetWidth > 0 && nome && !/^todas/i.test(nome));
+    if (!vis) { if (H87.box) h87fecha(); return; }
+    var lib = !!contaVisitante(), n = ((ESTADO && ESTADO.imoveis) || []).filter(function (a) { return a.cidade === nome && a.loc && a.loc.ll; }).length;
+    var chave = nome + '|' + (lib ? 1 : 0) + '|' + n;
+    if (H87.chave === chave && H87.box && w.contains(H87.box)) return;
+    if (H87.box && H87.chave.split('|')[0] === nome && w.contains(H87.box)) { H87.chave = chave; if (H87.api) h87areas(window.MAPA87, H87.api, nome); return; }
+    h87fecha(); H87.chave = chave; var meu = ++H87N;
+    var box = el('div', { class: 'h87m', role: 'region', 'aria-label': 'Mapa de satélite de ' + e86(nome) });
+    ['pointerdown', 'mousedown', 'touchstart', 'wheel', 'click', 'dblclick'].forEach(function (ev) { box.addEventListener(ev, function (x) { x.stopPropagation(); }, { passive: true }); });
+    w.appendChild(box); w.classList.add('h87-on'); H87.box = box;
+    var cr = document.querySelector('.cr12'); if (cr) { H87.cr = { el: cr, txt: cr.textContent }; cr.textContent = 'Satélite: Esri e fornecedores das imagens (créditos no canto do mapa)'; }
+    mapa87js().then(function (M) {
+      return M.cidade(nome).then(function (c) {
+        if (meu !== H87N || !H87.box) return; if (!c) { h87fecha(); return; }
+        var toque = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+        return M.novo(box, { centro: c, zoom: 12.2, cooperativo: toque }).then(function (api) {
+          if (meu !== H87N || !H87.box) { try { api.mapa.remove && api.mapa.remove(); } catch (e) { /* segue */ } return; }
+          H87.api = api; h87areas(M, api, nome);
+        });
+      });
+    }).catch(function () { if (meu === H87N) h87fecha(); });
+  }
+  setInterval(home87, 500);
+
   // "Anunciar meu imóvel" ao lado do Login (abre o mesmo formulário do "Quero vender")
   // R86f (John 24/11): o "Anunciar" fica fixo como o Login: mesmo lugar, mesmo fade, some e volta junto (lido a cada quadro;
   // só escreve quando algo do Login mudou, então parado não custa nada)
