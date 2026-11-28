@@ -64,6 +64,27 @@
     var ang = (h % 360) * Math.PI / 180, d = r * (0.25 + ((h >>> 9) % 21) / 100), lat = ll[1] * Math.PI / 180;
     return [ll[0] + d * Math.cos(ang) / (111320 * Math.cos(lat)), ll[1] + d * Math.sin(ang) / 110540];
   }
+  // R87h (John 27/11): aquece o satélite das cidades do painel durante o carregamento do site (os blocos do mapa ficam no cache do
+  // navegador; ao escolher a cidade ou abrir a ficha o mapa já está pronto). Um mapa invisível por cidade, removido quando termina.
+  function aquece(lista, zoom) {
+    return carregar().then(function (ml) {
+      if (semWebgl()) return;
+      var nomes = []; (lista || []).forEach(function (n) { n = String(n || '').trim(); if (n && nomes.indexOf(n) < 0) nomes.push(n); });
+      return Promise.all(nomes.slice(0, 5).map(function (nome) {
+        return cidade(nome).then(function (c) {
+          if (!c) return;
+          return new Promise(function (ok) {
+            var box = document.createElement('div'), m = null, fim = false;
+            box.style.cssText = 'position:fixed;left:0;top:0;width:' + Math.min(window.innerWidth || 800, 1200) + 'px;height:460px;visibility:hidden;pointer-events:none;z-index:-1';
+            document.body.appendChild(box);
+            function sai() { if (fim) return; fim = true; try { m && m.remove(); } catch (e) { /* segue */ } if (box.parentNode) box.parentNode.removeChild(box); ok(); }
+            try { m = new ml.Map({ container: box, style: ESTILO, center: c, zoom: zoom || 12.2, interactive: false, attributionControl: false, fadeDuration: 0 }); m.once('idle', sai); m.on('error', function () { setTimeout(sai, 800); }); } catch (e) { sai(); return; }
+            setTimeout(sai, 8000);
+          });
+        });
+      }));
+    }).catch(function () { /* sem mapa antecipado: o mapa abre normalmente depois */ });
+  }
   /* novo mapa num elemento. o = { centro:[lon,lat], zoom, area:[lon,lat] (raio 250 m), pino:[lon,lat], toque:fn(ll), cooperativo } */
   // sem WebGL (aceleração gráfica desligada, aparelho antigo): imagem fixa do mesmo satélite, com o ponto/área e o toque
   function semWebgl() { try { var c = document.createElement('canvas'); return !(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return true; } }
@@ -128,5 +149,5 @@
       return api;
     });
   }
-  window.MAPA87 = { carregar: carregar, cidade: cidade, sugerir: sugerir, achar: achar, novo: novo, desloca: desloca, circulo: circulo, CIDADES: CIDADES };
+  window.MAPA87 = { aquece: aquece, carregar: carregar, cidade: cidade, sugerir: sugerir, achar: achar, novo: novo, desloca: desloca, circulo: circulo, CIDADES: CIDADES };
 })();

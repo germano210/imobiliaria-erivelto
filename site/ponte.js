@@ -638,6 +638,13 @@
     return fs.length;
   }
   var H87N = 0;
+  // R87h: chamado pela tela de carregamento (remendo em index.html): aquece o satélite das cidades do painel (Onde atendo + cidades dos imóveis)
+  P.pre87 = function (fim) {
+    var est = ESTADO || {}, l = ((est.mapa && est.mapa.atende) || []).concat((est.imoveis || []).map(function (a) { return a.cidade; }));
+    l = l.filter(function (n, i) { return n && l.indexOf(n) === i; });
+    if (!l.length) { fim(); return; }
+    mapa87js().then(function (M) { return M.aquece(l, 12.2); }).then(fim, fim);
+  };
   function home87() {
     var w = document.querySelector('.mw12'), inp = document.querySelector('.ci12in');
     var nome = inp ? String(inp.value || '').trim() : '', vis = !!(w && w.offsetWidth > 0 && nome && !/^todas/i.test(nome));
@@ -662,7 +669,8 @@
       });
     }).catch(function () { if (meu === H87N) h87fecha(); });
   }
-  setInterval(home87, 500);
+  setInterval(home87, 250);
+  ['input', 'change', 'click'].forEach(function (ev) { document.addEventListener(ev, function () { setTimeout(home87, 40); }, true); });
 
   // "Anunciar meu imóvel" ao lado do Login (abre o mesmo formulário do "Quero vender")
   // R86f (John 24/11): o "Anunciar" fica fixo como o Login: mesmo lugar, mesmo fade, some e volta junto (lido a cada quadro;

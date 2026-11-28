@@ -381,7 +381,10 @@ html.r86.r86mo .sc12 .lsi12.in.sv .cd12,html.r86.r86mo .sc12 .lsi12.in.sv .mz12,
 html.r86.r86mo .sc12 .f412.in.sv{animation:e12so .5s cubic-bezier(.33,0,.2,1) .15s both!important}
 
 /* R87 (John 26/11): "Onde fica" com satélite da Esri em todas as cidades */
-.sc12 .m15.r87-esc{display:none!important}
+.sc12 .m15{display:none!important}
+/* R87h (John 27/11): nunca mostrar os mapas antigos (imagem de Santo Antônio): o satélite da Esri é o único mapa; o fundo escuro cobre o instante até ele entrar */
+.mw12 .mp12{background:#1d2a22!important}
+.mw12 .mp12 img.zb,.mw12 .mp12 img.zr,.mw12 .mp12 img.zs,.mw12 .zm12{display:none!important}
 .r87-m{position:relative;border-radius:14px;overflow:hidden;background:#1d2b2f;aspect-ratio:1.6/1;min-height:200px;isolation:isolate}
 html.r86mo .r87-m{aspect-ratio:1.15/1}
 .r87-m .r87-mm{position:absolute!important;inset:0}
